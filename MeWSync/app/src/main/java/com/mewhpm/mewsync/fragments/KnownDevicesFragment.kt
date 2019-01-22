@@ -6,18 +6,21 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
+import androidx.transition.Visibility
 import com.mewhpm.mewsync.R
-import com.mewhpm.mewsync.adapters.RecyclerViewItemActionListener
 import com.mewhpm.mewsync.adapters.PairRecyclerViewAdapter
+import com.mewhpm.mewsync.adapters.RecyclerViewItemActionListener
 import com.mewhpm.mewsync.dao.KnownDevicesDao
 import com.mewhpm.mewsync.data.BleDevice
 import com.mewhpm.mewsync.services.database
 import com.mikepenz.google_material_typeface_library.GoogleMaterial
 import kotlinx.android.synthetic.main.device_disovery_fragment_item_list.*
+import kotlinx.android.synthetic.main.device_disovery_fragment_item_list.view.*
 import org.jetbrains.anko.cancelButton
 import org.jetbrains.anko.okButton
 import org.jetbrains.anko.support.v4.alert
 import org.jetbrains.anko.support.v4.toast
+import org.jetbrains.anko.themedAdapterViewFlipper
 
 class KnownDevicesFragment : Fragment(), RecyclerViewItemActionListener<BleDevice> {
     private val _dao = KnownDevicesDao()
@@ -53,14 +56,17 @@ class KnownDevicesFragment : Fragment(), RecyclerViewItemActionListener<BleDevic
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val view = inflater.inflate(R.layout.device_disovery_fragment_item_list, container, false)
-        if (view is androidx.recyclerview.widget.RecyclerView) {
-            with(view) {
-                refresh()
-                layoutManager = androidx.recyclerview.widget.LinearLayoutManager(context)
-                adapter = BleKnownDevicesPairRecyclerViewAdapter()
-            }
-        }
+        val adapter = BleKnownDevicesPairRecyclerViewAdapter()
+
+        refresh()
         _context = this.requireContext()
+
+        adapter.mIconColor = resources.getColor(R.color.colorBrandDark1, _context?.theme)
+
+        view.searchBar.visibility = View.GONE
+        view.list.layoutManager = androidx.recyclerview.widget.LinearLayoutManager(context)
+        view.list.adapter = adapter
+
         return view
     }
 

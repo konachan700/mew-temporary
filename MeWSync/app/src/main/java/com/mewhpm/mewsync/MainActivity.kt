@@ -1,9 +1,12 @@
 package com.mewhpm.mewsync
 
+import android.Manifest
 import android.bluetooth.BluetoothAdapter
 import android.content.Context
 import android.graphics.Color
 import android.graphics.drawable.Icon
+import android.os.Build
+import android.os.Build.*
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
@@ -16,11 +19,40 @@ import org.jetbrains.anko.alert
 import org.jetbrains.anko.okButton
 import ru.ztrap.iconics.kt.setIconicsFactory
 import ru.ztrap.iconics.kt.wrapByIconics
+import android.content.pm.PackageManager
+import androidx.annotation.NonNull
+
+
 
 class MainActivity : AppCompatActivity(), FragmentCloseRequest {
+    private val ACCESS_COARSE_LOCATION = 43
+
     private val _bleSearchFragment: DeviceDiscoveryFragment = DeviceDiscoveryFragment()
     private val _knownDevicesFragment: KnownDevicesFragment = KnownDevicesFragment()
     private val _bluetoothAdapter = BluetoothAdapter.getDefaultAdapter()
+
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
+        if (!_bluetoothAdapter.isEnabled) {
+            alert("Bluetooth", "Bluetooth is disabled!") {
+                okButton {  }
+            }.show()
+        } else {
+            when (requestCode) {
+                ACCESS_COARSE_LOCATION -> {
+                    if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                        val transaction = supportFragmentManager.beginTransaction()
+                        transaction.replace(R.id.fragment_holder, _bleSearchFragment)
+                        transaction.commit()
+                        fab.hide()
+                    } else {
+                        alert("Bluetooth", "No permissions to BLE") {
+                            okButton {  }
+                        }
+                    }
+                }
+            }
+        }
+    }
 
     override fun attachBaseContext(newBase: Context) {
         super.attachBaseContext(newBase.wrapByIconics())
@@ -37,23 +69,18 @@ class MainActivity : AppCompatActivity(), FragmentCloseRequest {
 
         fab.setImageIcon(Icon.createWithBitmap(
             IconicsDrawable(this)
-                .icon(GoogleMaterial.Icon.gmd_refresh)
+                .icon(GoogleMaterial.Icon.gmd_bluetooth_searching)
                 .sizeDp(24)
                 .color(Color.WHITE)
                 .toBitmap()
         ))
 
         fab.setOnClickListener { view ->
-            if (!_bluetoothAdapter.isEnabled) {
-                alert("Bluetooth", "Bluetooth is disabled!") {
-                    okButton {  }
-                }.show()
-            } else {
-                val transaction = supportFragmentManager.beginTransaction()
-                transaction.replace(R.id.fragment_holder, _bleSearchFragment)
-                transaction.commit()
-                fab.hide()
-            }
+            requestPermissions(arrayOf(
+                Manifest.permission.ACCESS_COARSE_LOCATION,
+                Manifest.permission.BLUETOOTH,
+                Manifest.permission.BLUETOOTH_ADMIN
+            ), ACCESS_COARSE_LOCATION)
         }
     }
 

@@ -1,63 +1,68 @@
 package com.mewhpm.mewsync.services
 
-import android.bluetooth.BluetoothAdapter
-import android.bluetooth.BluetoothDevice
-import android.bluetooth.BluetoothGatt
+import android.bluetooth.BluetoothManager
+import android.bluetooth.le.BluetoothLeScanner
+import android.bluetooth.le.ScanCallback
+import android.bluetooth.le.ScanResult
 import android.content.Context
 import android.util.Log
-import androidx.recyclerview.widget.RecyclerView
-import com.github.douglasjunior.bluetoothclassiclibrary.BluetoothClassicService
-import com.github.douglasjunior.bluetoothclassiclibrary.BluetoothConfiguration
-import com.github.douglasjunior.bluetoothclassiclibrary.BluetoothService
-import com.github.douglasjunior.bluetoothlowenergylibrary.BluetoothLeService
 import com.mewhpm.mewsync.data.BleDevice
-import java.util.*
 import java.util.concurrent.CopyOnWriteArrayList
 
-class BleDeviceSearchImpl: BleDeviceSearch {
-    private var conf: BluetoothConfiguration? = null
-    private var service: BluetoothService? = null
+class BleDeviceSearchImpl(
+    private val context: Context
+): BleDeviceSearch {
+    private var _list: CopyOnWriteArrayList<BleDevice>? = null
+    private var _listener: BleDiscoveryEvents? = null
+
+    private val bleScanner = object : ScanCallback() {
+        override fun onScanResult(callbackType: Int, result: ScanResult?) {
+            super.onScanResult(callbackType, result)
+            _listener?.onSearching()
+            //Log.e("DeviceListActivity","onScanResult: ${result?.device?.address} - ${result?.device?.name}")
+
+            if (result != null) {
+                if (_list?.any { e -> e.mac.toUpperCase().contentEquals(result.device.address.toUpperCase()) } == false) {
+                    val bleDevice = BleDevice(id = 0, mac = result.device.address.toUpperCase(), name = result.device.name)
+                    _list?.add(bleDevice)
+                    _listener?.onDeviceFound()
+                }
+            }
+        }
+
+//        override fun onBatchScanResults(results: MutableList<ScanResult>?) {
+//            super.onBatchScanResults(results)
+//            Log.d("DeviceListActivity","onBatchScanResults:${results.toString()}")
+//            results?.forEach { it ->
+//                if (_list?.any { e -> e.mac.toUpperCase().contentEquals(it.device.address.toUpperCase()) } == false) {
+//                    val bleDevice = BleDevice(id = 0, mac = it.device.address.toUpperCase(), name = it.device.name)
+//                    _list?.add(bleDevice)
+//                    _listener?.onDeviceFound()
+//                }
+//            }
+//        }
+
+//        override fun onScanFailed(errorCode: Int) {
+//            super.onScanFailed(errorCode)
+//            //Log.e("DeviceListActivity", "onScanFailed: $errorCode")
+//        }
+    }
+
+    private val bluetoothLeScanner: BluetoothLeScanner
+        get() {
+            val bluetoothManager = context.getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
+            return bluetoothManager.adapter.bluetoothLeScanner
+        }
 
     override fun bleDiscoverStop() {
-        service?.stopScan()
-        service?.stopService()
-        service = null
+        bluetoothLeScanner.stopScan(bleScanner)
     }
 
     override fun bleDiscoverStart(context: Context, list: CopyOnWriteArrayList<BleDevice>, listener: BleDiscoveryEvents) {
         list.clear()
-        conf = BluetoothConfiguration()
-
-        conf?.context = context
-        conf?.bluetoothServiceClass = BluetoothLeService::class.java
-        conf?.bufferSize = 1024
-        conf?.characterDelimiter = '\n'
-        conf?.callListenersInMainThread = true
-        conf?.deviceName = "MeW Pro"
-
-        conf?.uuidService = UUID.fromString("e7810a71-73ae-499d-8c15-faa9aef0c3f2")
-        conf?.uuidCharacteristic = UUID.fromString("bef8d6c9-9c21-4c9e-b632-bd58c1009f9f")
-        //conf?.transport = BluetoothDevice.TRANSPORT_AUTO
-        conf?.uuid = null // UUID.fromString("00001101-0000-1000-8000-00805f9b34fb")
-
-        BluetoothService.init(conf)
-        service = BluetoothService.getDefaultInstance()
-        service?.setOnScanCallback(object : BluetoothService.OnBluetoothScanCallback {
-            override fun onDeviceDiscovered(device: BluetoothDevice, rssi: Int) {
-                Log.e("###", "Found: ${device.address}")
-
-                if (!list.any { e -> e.mac.toUpperCase().contentEquals(device.address.toUpperCase()) }) {
-                    val bleDevice = BleDevice(id = 0, mac = device.address.toUpperCase(), name = device.name)
-                    list.add(bleDevice)
-                    listener.onDeviceFound()
-                    //Log.e("###", "Found: ${device.address}")
-                }
-            }
-
-            override fun onStartScan() { Log.e("###", "onStartScan") }
-            override fun onStopScan() { Log.e("###", "onStopScan") }
-        })
-        service?.startScan()
+        _list = list
+        _listener = listener
+        bluetoothLeScanner.startScan(bleScanner)
     }
 
     override fun connect(dev: BleDevice): Boolean {

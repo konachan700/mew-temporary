@@ -15,10 +15,10 @@ import com.mikepenz.iconics.IconicsDrawable
 import kotlinx.android.synthetic.main.device_disovery_fragment_item.view.*
 
 abstract class PairRecyclerViewAdapter<T>(
-    private val mListener: RecyclerViewItemActionListener<T>?,
-    private val mType: Fragments,
-    private var mIconSize: Int = 32,
-    private var mIconColor: String = "#7777FF"
+    val mListener: RecyclerViewItemActionListener<T>?,
+    val mType: Fragments,
+    var mIconSize: Int = 32,
+    var mIconColor: Int = 0
 ) : androidx.recyclerview.widget.RecyclerView.Adapter<PairRecyclerViewAdapter<T>.ViewHolder>() {
 
     abstract fun requestItem(index: Int): Triple<String, String, GoogleMaterial.Icon>
@@ -43,7 +43,7 @@ abstract class PairRecyclerViewAdapter<T>(
                     IconicsDrawable(context)
                         .icon(triple.third)
                         .sizeDp(mIconSize)
-                        .color(Color.parseColor(mIconColor))
+                        .color(mIconColor)
                         .toBitmap()
                 ))
             tag = obj
