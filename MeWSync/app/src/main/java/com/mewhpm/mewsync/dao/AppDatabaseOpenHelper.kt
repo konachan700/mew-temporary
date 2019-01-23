@@ -1,4 +1,4 @@
-package com.mewhpm.mewsync.services
+package com.mewhpm.mewsync.dao
 
 import android.content.Context
 import android.database.sqlite.SQLiteDatabase
@@ -11,7 +11,8 @@ class AppDatabaseOpenHelper (ctx: Context) : ManagedSQLiteOpenHelper(ctx, "MeWSy
         @Synchronized
         fun getInstance(ctx: Context): AppDatabaseOpenHelper {
             if (instance == null) {
-                instance = AppDatabaseOpenHelper(ctx.applicationContext)
+                instance =
+                        AppDatabaseOpenHelper(ctx.applicationContext)
             }
             return instance!!
         }

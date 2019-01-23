@@ -6,13 +6,12 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
-import androidx.transition.Visibility
 import com.mewhpm.mewsync.R
 import com.mewhpm.mewsync.adapters.PairRecyclerViewAdapter
 import com.mewhpm.mewsync.adapters.RecyclerViewItemActionListener
 import com.mewhpm.mewsync.dao.KnownDevicesDao
 import com.mewhpm.mewsync.data.BleDevice
-import com.mewhpm.mewsync.services.database
+import com.mewhpm.mewsync.dao.database
 import com.mikepenz.google_material_typeface_library.GoogleMaterial
 import kotlinx.android.synthetic.main.device_disovery_fragment_item_list.*
 import kotlinx.android.synthetic.main.device_disovery_fragment_item_list.view.*
@@ -20,7 +19,6 @@ import org.jetbrains.anko.cancelButton
 import org.jetbrains.anko.okButton
 import org.jetbrains.anko.support.v4.alert
 import org.jetbrains.anko.support.v4.toast
-import org.jetbrains.anko.themedAdapterViewFlipper
 
 class KnownDevicesFragment : Fragment(), RecyclerViewItemActionListener<BleDevice> {
     private val _dao = KnownDevicesDao()
@@ -45,6 +43,10 @@ class KnownDevicesFragment : Fragment(), RecyclerViewItemActionListener<BleDevic
         if (context is FragmentCloseRequest) {
             _listener = context
         }
+    }
+
+    override fun onDetach() {
+        super.onDetach()
     }
 
     private fun refresh(isNotify: Boolean = false) {

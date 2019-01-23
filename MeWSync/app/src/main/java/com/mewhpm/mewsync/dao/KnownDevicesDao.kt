@@ -1,7 +1,6 @@
 package com.mewhpm.mewsync.dao
 
 import com.mewhpm.mewsync.data.BleDevice
-import com.mewhpm.mewsync.services.AppDatabaseOpenHelper
 import org.jetbrains.anko.db.classParser
 import org.jetbrains.anko.db.delete
 import org.jetbrains.anko.db.insert

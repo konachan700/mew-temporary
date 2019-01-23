@@ -1,7 +1,9 @@
 package com.mewhpm.mewsync.fragments
 
+import android.content.BroadcastReceiver
 import android.content.Context
-import android.content.res.Resources
+import android.content.Intent
+import android.content.IntentFilter
 import android.graphics.Color
 import android.graphics.drawable.Icon
 import android.os.Bundle
@@ -14,6 +16,7 @@ import com.mewhpm.mewsync.R
 import com.mewhpm.mewsync.adapters.RecyclerViewItemActionListener
 import com.mewhpm.mewsync.adapters.PairRecyclerViewAdapter
 import com.mewhpm.mewsync.dao.KnownDevicesDao
+import com.mewhpm.mewsync.dao.database
 import com.mewhpm.mewsync.data.BleDevice
 import com.mewhpm.mewsync.services.*
 import com.mikepenz.google_material_typeface_library.GoogleMaterial
@@ -25,33 +28,51 @@ import org.jetbrains.anko.support.v4.alert
 import org.jetbrains.anko.support.v4.toast
 import java.util.concurrent.CopyOnWriteArrayList
 
-class DeviceDiscoveryFragment : Fragment(), RecyclerViewItemActionListener<BleDevice>, BleDiscoveryEvents {
-    private var _searcher: BleDeviceSearch? = null
-    private val _dao = KnownDevicesDao()
+class DeviceDiscoveryFragment : Fragment(), RecyclerViewItemActionListener<BleDevice> {
+    inner class DeviceDiscoveryFragmentBroadcastReceiver: BroadcastReceiver() {
+        override fun onReceive(context: Context?, intent: Intent?) {
+            if (intent == null) return
+            if (!intent.hasExtra(BleService.EXTRA_RESULT_CODE)) return
+
+            when (intent.getIntExtra(BleService.EXTRA_RESULT_CODE, 0)) {
+                BleService.EXTRA_RESULT_CODE_OK -> {
+                    if ((intent.hasExtra(BleService.EXTRA_DATA_MAC)) && (intent.hasExtra(BleService.EXTRA_DATA_NAME))) {
+                        _list.add(BleDevice(0,
+                            intent.getStringExtra(BleService.EXTRA_DATA_MAC),
+                            intent.getStringExtra(BleService.EXTRA_DATA_NAME)))
+                        _adapter.notifyDataSetChanged()
+                    }
+                }
+                BleService.EXTRA_RESULT_CODE_ERROR -> {
+
+                }
+                BleService.EXTRA_RESULT_CODE_IN_PROGRESS -> {
+                    _colorCounter++
+                    if (_colorCounter >= _colorArray.size) _colorCounter = 0
+
+                    view?.waitIcon1?.setImageIcon(
+                        Icon.createWithBitmap(
+                            IconicsDrawable(context)
+                                .icon(GoogleMaterial.Icon.gmd_bluetooth)
+                                .sizeDp(40)
+                                .color(Color.parseColor(_colorArray[_colorCounter]))
+                                .toBitmap()))
+                }
+            }
+        }
+    }
+
+    private val _receiver = DeviceDiscoveryFragmentBroadcastReceiver()
     private var _context: Context? = null
+
+    private val _dao = KnownDevicesDao()
+
     private var _listener: FragmentCloseRequest? = null
     private val _list = CopyOnWriteArrayList<BleDevice>()
     private val _adapter = BleDeviceDiscoveryPairRecyclerViewAdapter()
 
     private var _colorCounter = 0
     private val _colorArray = arrayOf("#f07070", "#70f070", "#7070f0", "#f070f0", "#70f0f0")
-
-    override fun onSearching() {
-        _colorCounter++
-        if (_colorCounter >= _colorArray.size) _colorCounter = 0
-
-        view?.waitIcon1?.setImageIcon(
-            Icon.createWithBitmap(
-                IconicsDrawable(context)
-                    .icon(GoogleMaterial.Icon.gmd_bluetooth)
-                    .sizeDp(40)
-                    .color(Color.parseColor(_colorArray[_colorCounter]))
-                    .toBitmap()))
-    }
-
-    override fun onDeviceFound() {
-        _adapter.notifyDataSetChanged()
-    }
 
     inner class BleDeviceDiscoveryPairRecyclerViewAdapter: PairRecyclerViewAdapter<BleDevice>(
         mListener = this,
@@ -70,18 +91,31 @@ class DeviceDiscoveryFragment : Fragment(), RecyclerViewItemActionListener<BleDe
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
-        if (_searcher == null) {
-            _searcher = BleDeviceSearchImpl(context)
-        }
-        _searcher?.bleDiscoverStart(context, _list, this)
+        _list.clear()
+
         if (context is FragmentCloseRequest) {
             _listener = context
         }
+
+        val intentFilter = IntentFilter(BleDiscoveryService::class.java.simpleName)
+        intentFilter.addCategory(Intent.CATEGORY_DEFAULT)
+        context.registerReceiver(_receiver, intentFilter)
+
+        _context = context
+        val intent = Intent(_context, BleDiscoveryService::class.java)
+        intent.putExtra(BleService.EXTRA_ACTION, BleDiscoveryService.BLE_DISCOVERY_START)
+        _context?.startService(intent)
     }
 
     override fun onDetach() {
         super.onDetach()
-        _searcher?.bleDiscoverStop()
+
+        if (_context != null) {
+            val intent = Intent(_context, BleDiscoveryService::class.java)
+            intent.putExtra(BleService.EXTRA_ACTION, BleDiscoveryService.BLE_DISCOVERY_STOP)
+            _context?.startService(intent)
+            _context?.unregisterReceiver(_receiver)
+        }
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
