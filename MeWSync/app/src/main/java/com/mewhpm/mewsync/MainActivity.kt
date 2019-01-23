@@ -29,6 +29,7 @@ class MainActivity : AppCompatActivity(), FragmentCloseRequest {
 
     private val _bleSearchFragment: DeviceDiscoveryFragment = DeviceDiscoveryFragment()
     private val _knownDevicesFragment: KnownDevicesFragment = KnownDevicesFragment()
+    private val _deviceMainFragment: DeviceMainFragment = DeviceMainFragment()
     private val _bluetoothAdapter = BluetoothAdapter.getDefaultAdapter()
 
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
@@ -42,7 +43,7 @@ class MainActivity : AppCompatActivity(), FragmentCloseRequest {
                     if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                         val transaction = supportFragmentManager.beginTransaction()
                         transaction.replace(R.id.fragment_holder, _bleSearchFragment)
-                        transaction.commit()
+                        transaction.commitAllowingStateLoss()
                         fab.hide()
                     } else {
                         alert("Bluetooth", "No permissions to BLE") {
@@ -109,7 +110,10 @@ class MainActivity : AppCompatActivity(), FragmentCloseRequest {
                 fab.show()
             }
             Fragments.KNOWN_DEVICES -> {
-
+                val transaction = supportFragmentManager.beginTransaction()
+                transaction.replace(R.id.fragment_holder, _deviceMainFragment)
+                transaction.commitAllowingStateLoss()
+                fab.hide()
             }
         }
     }

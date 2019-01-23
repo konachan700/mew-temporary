@@ -17,7 +17,7 @@ import com.mewhpm.mewsync.services.BleService.Companion.EXTRA_RESULT_CODE
 import com.mewhpm.mewsync.services.BleService.Companion.EXTRA_RESULT_CODE_IN_PROGRESS
 import com.mewhpm.mewsync.services.BleService.Companion.EXTRA_RESULT_CODE_OK
 import java.util.*
-import java.util.concurrent.CopyOnWriteArrayList
+import java.util.concurrent.CopyOnWriteArraySet
 
 class BleDiscoveryService: Service() {
     companion object {
@@ -25,6 +25,7 @@ class BleDiscoveryService: Service() {
         const val BLE_DISCOVERY_STOP = 2
     }
 
+    private val _foundDevices: CopyOnWriteArraySet<String> = CopyOnWriteArraySet()
     private val bleScanner = object : ScanCallback() {
         override fun onScanResult(callbackType: Int, result: ScanResult?) {
             super.onScanResult(callbackType, result)
@@ -35,8 +36,8 @@ class BleDiscoveryService: Service() {
                 result.device.type == BluetoothDevice.DEVICE_TYPE_LE
             ) {
                 val addr = result.device.address.toUpperCase()
-                if (!_list.any { e -> e.first.toUpperCase().contentEquals(addr) }) {
-                    _list.add(result.device.address.toUpperCase() to result.device.name)
+                if (!_foundDevices.contains(addr)) {
+                    _foundDevices.add(addr)
                     sendOkIntent(result.device.address.toUpperCase() to result.device.name)
                 }
             }
@@ -55,8 +56,6 @@ class BleDiscoveryService: Service() {
             return bluetoothManager.adapter.bluetoothLeScanner
         }
 
-    private val _list: CopyOnWriteArrayList<Pair<String, String>> = CopyOnWriteArrayList()
-
     private fun bleDiscoverStop() {
         bluetoothLeScanner.stopScan(bleScanner)
     }
@@ -71,7 +70,7 @@ class BleDiscoveryService: Service() {
 
         when (intent.getIntExtra(EXTRA_ACTION, 0)) {
             BLE_DISCOVERY_START -> {
-                _list.clear()
+                _foundDevices.clear()
                 bluetoothLeScanner.startScan(bleScanner)
             }
             BLE_DISCOVERY_STOP -> {

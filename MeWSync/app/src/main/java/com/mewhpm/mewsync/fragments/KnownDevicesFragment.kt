@@ -73,7 +73,7 @@ class KnownDevicesFragment : Fragment(), RecyclerViewItemActionListener<BleDevic
     }
 
     override fun OnClick(dev: BleDevice, source: Fragments) {
-
+        _listener?.close(Fragments.KNOWN_DEVICES)
     }
 
     override fun OnLongClick(dev: BleDevice, source: Fragments) {
@@ -82,7 +82,7 @@ class KnownDevicesFragment : Fragment(), RecyclerViewItemActionListener<BleDevic
                 _dao.remove(_context?.database, dev)
                 refresh(true)
                 toast("Device removed!")
-                _listener?.close(Fragments.KNOWN_DEVICES)
+                //_listener?.close(Fragments.KNOWN_DEVICES)
             }
             cancelButton {  }
         }.show()
