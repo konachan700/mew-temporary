@@ -1,7 +1,5 @@
 package com.mewhpm.mewsync
 
-import android.Manifest
-import android.bluetooth.BluetoothAdapter
 import android.content.Context
 import android.graphics.Color
 import android.graphics.drawable.Icon
@@ -9,22 +7,20 @@ import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
-import com.mewhpm.mewsync.fragments.*
+import com.mewhpm.mewsync.fragments.DeviceMainFragment
+import com.mewhpm.mewsync.fragments.DevicesFragment
 import com.mikepenz.google_material_typeface_library.GoogleMaterial
 import com.mikepenz.iconics.IconicsDrawable
-import org.jetbrains.anko.alert
-import org.jetbrains.anko.okButton
+import kotlinx.android.synthetic.main.activity_main.*
 import ru.ztrap.iconics.kt.setIconicsFactory
 import ru.ztrap.iconics.kt.wrapByIconics
-import android.content.pm.PackageManager
-import kotlinx.android.synthetic.main.activity_main.*
 
 
 class MainActivity : AppCompatActivity() {
 
 
     private val _knownDevicesFragment: DevicesFragment = DevicesFragment()
-    private val _deviceMainFragment: DeviceMainFragment = DeviceMainFragment()
+    //private val _deviceMainFragment: DeviceMainFragment = DeviceMainFragment()
 
 
     override fun attachBaseContext(newBase: Context) {

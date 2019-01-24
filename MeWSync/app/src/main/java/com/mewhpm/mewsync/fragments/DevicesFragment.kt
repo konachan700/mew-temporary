@@ -1,17 +1,12 @@
 package com.mewhpm.mewsync.fragments
 
 import android.Manifest
-import android.Manifest.permission.ACCESS_COARSE_LOCATION
 import android.bluetooth.BluetoothAdapter
-import android.content.BroadcastReceiver
 import android.content.Context
-import android.content.Intent
-import android.content.IntentFilter
 import android.content.pm.PackageManager
 import android.graphics.Color
 import android.graphics.drawable.Icon
 import android.os.Bundle
-import android.view.KeyEvent
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -20,15 +15,12 @@ import com.mewhpm.mewsync.R
 import com.mewhpm.mewsync.adapters.PairRecyclerViewAdapter
 import com.mewhpm.mewsync.adapters.RecyclerViewItemActionListener
 import com.mewhpm.mewsync.dao.KnownDevicesDao
-import com.mewhpm.mewsync.data.BleDevice
 import com.mewhpm.mewsync.dao.database
-import com.mewhpm.mewsync.services.BleDiscoveryService
-import com.mewhpm.mewsync.services.BleService
+import com.mewhpm.mewsync.data.BleDevice
 import com.mikepenz.google_material_typeface_library.GoogleMaterial
 import com.mikepenz.iconics.IconicsDrawable
 import kotlinx.android.synthetic.main.device_disovery_fragment_item_list.*
 import kotlinx.android.synthetic.main.device_disovery_fragment_item_list.view.*
-import org.jetbrains.anko.alert
 import org.jetbrains.anko.cancelButton
 import org.jetbrains.anko.okButton
 import org.jetbrains.anko.support.v4.alert
@@ -47,7 +39,7 @@ class DevicesFragment : Fragment(), RecyclerViewItemActionListener<BleDevice> {
         } else {
             when (requestCode) {
                 ACCESS_COARSE_LOCATION -> {
-                    if (grantResults.all { it -> it == PackageManager.PERMISSION_GRANTED }) {
+                    if (grantResults.all { it == PackageManager.PERMISSION_GRANTED }) {
                         _searchDialog.show(fragmentManager!!, "_searchDialog")
                     } else {
                         alert("No permissions to BLE", "Bluetooth") {
@@ -105,6 +97,9 @@ class DevicesFragment : Fragment(), RecyclerViewItemActionListener<BleDevice> {
         }
 
         refresh()
+        _searchDialog.closeListener = {
+            refresh(true)
+        }
 
         _adapter.mIconColor = resources.getColor(R.color.colorBrandDark1, _context?.theme)
         view.list.layoutManager = androidx.recyclerview.widget.LinearLayoutManager(_context)

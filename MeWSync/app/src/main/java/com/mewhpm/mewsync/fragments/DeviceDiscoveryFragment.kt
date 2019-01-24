@@ -3,32 +3,34 @@ package com.mewhpm.mewsync.fragments
 import android.app.Dialog
 import android.content.*
 import android.graphics.Color
-import android.graphics.drawable.Icon
 import android.os.Bundle
-import android.view.KeyEvent
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.DialogFragment
 import com.mewhpm.mewsync.R
-import com.mewhpm.mewsync.adapters.RecyclerViewItemActionListener
 import com.mewhpm.mewsync.adapters.PairRecyclerViewAdapter
+import com.mewhpm.mewsync.adapters.RecyclerViewItemActionListener
 import com.mewhpm.mewsync.dao.KnownDevicesDao
 import com.mewhpm.mewsync.dao.database
 import com.mewhpm.mewsync.data.BleDevice
-import com.mewhpm.mewsync.services.*
+import com.mewhpm.mewsync.services.BleDiscoveryService
+import com.mewhpm.mewsync.services.BleService
 import com.mikepenz.google_material_typeface_library.GoogleMaterial
 import com.mikepenz.iconics.IconicsDrawable
-import kotlinx.android.synthetic.main.device_disovery_fragment_item_list.view.*
-import kotlinx.android.synthetic.main.mew_disovery_fragment_popup.*
+import kotlinx.android.synthetic.main.mew_disovery_fragment_popup.view.*
 import org.jetbrains.anko.cancelButton
 import org.jetbrains.anko.okButton
 import org.jetbrains.anko.support.v4.alert
 import org.jetbrains.anko.support.v4.toast
 import java.util.concurrent.CopyOnWriteArrayList
 
+
 class DeviceDiscoveryFragment : DialogFragment() , RecyclerViewItemActionListener<BleDevice> {
+    var closeListener: () -> Unit = {}
+
+    private var colorCounter = 0
+    private var colorArray = arrayOf("#FF9999", "#99FF99", "#FFFF99")
     inner class DeviceDiscoveryFragmentBroadcastReceiver: BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
             if (intent == null) return
@@ -46,7 +48,14 @@ class DeviceDiscoveryFragment : DialogFragment() , RecyclerViewItemActionListene
                 BleService.EXTRA_RESULT_CODE_ERROR -> {
                     this@DeviceDiscoveryFragment.dismiss()
                 }
-                BleService.EXTRA_RESULT_CODE_IN_PROGRESS -> {}
+                BleService.EXTRA_RESULT_CODE_IN_PROGRESS -> {
+                    if (context == null) return
+                    colorCounter++
+                    if (colorCounter >= colorArray.size) colorCounter = 0
+                    view?.button?.setCompoundDrawables(
+                        IconicsDrawable(context).icon(GoogleMaterial.Icon.gmd_bluetooth).sizeDp(32)
+                            .color(Color.parseColor(colorArray[colorCounter])), null, null, null)
+                }
             }
         }
     }
@@ -77,9 +86,12 @@ class DeviceDiscoveryFragment : DialogFragment() , RecyclerViewItemActionListene
         intent.putExtra(BleService.EXTRA_ACTION, BleDiscoveryService.BLE_DISCOVERY_STOP)
         context?.startService(intent)
         context?.unregisterReceiver(_receiver)
+        closeListener.invoke()
     }
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
+        _list.clear()
+
         val dialog = super.onCreateDialog(savedInstanceState)
         dialog.setTitle("Searching...")
 
@@ -98,8 +110,13 @@ class DeviceDiscoveryFragment : DialogFragment() , RecyclerViewItemActionListene
         val view = inflater.inflate(R.layout.mew_disovery_fragment_popup, container, false)
 
         _adapter.mIconColor = resources.getColor(R.color.colorBrandDark1, context?.theme)
-        discoveryList.layoutManager = androidx.recyclerview.widget.LinearLayoutManager(context)
-        discoveryList.adapter = _adapter
+        view.discoveryList.layoutManager = androidx.recyclerview.widget.LinearLayoutManager(context)
+        view.discoveryList.adapter = _adapter
+        view.button.setCompoundDrawables(IconicsDrawable(context)
+            .icon(GoogleMaterial.Icon.gmd_bluetooth).sizeDp(32).color(Color.WHITE),null,null,null)
+        view.button.setOnClickListener {
+            this@DeviceDiscoveryFragment.dismiss()
+        }
 
         return view
     }
