@@ -1,66 +1,56 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.coordinatorlayout.widget.CoordinatorLayout
+<LinearLayout
         xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:app="http://schemas.android.com/apk/res-auto"
-        xmlns:tools="http://schemas.android.com/tools"
+        android:orientation="vertical"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        tools:context=".MainActivity">
+        android:layout_height="match_parent">
 
     <LinearLayout
-            android:orientation="vertical"
+            android:orientation="horizontal"
+            android:layout_weight="1"
             android:layout_width="match_parent"
-            android:layout_height="match_parent">
-
+            android:layout_height="wrap_content" android:gravity="center_vertical" android:padding="7dp"
+            android:background="@color/colorBrandDark1">
+        <ImageView
+                android:src="@drawable/mewlogo"
+                android:layout_height="76dp" android:id="@+id/imageView2"
+                android:adjustViewBounds="true" android:layout_width="wrap_content"/>
         <LinearLayout
                 android:orientation="vertical"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent">
-            <LinearLayout
-                    android:orientation="horizontal"
+                android:layout_height="wrap_content">
+            <TextView
+                    android:text="MeW HPM"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content" android:gravity="center_vertical" android:padding="7dp"
-                    android:background="@color/colorBrand">
-                <ImageView
-                        android:src="@drawable/mewlogo"
-                        android:layout_height="76dp" android:id="@+id/imageView2" android:layout_weight="0"
-                        android:adjustViewBounds="true" android:layout_width="wrap_content"/>
-                <LinearLayout
-                        android:orientation="vertical"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content" android:layout_weight="1">
-                    <TextView
-                            android:text="MeW HPM"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:id="@+id/textView"
-                            android:textSize="36dp" android:textStyle="bold" android:fontFamily="sans-serif"
-                            android:paddingLeft="16dp" android:gravity="center|start"
-                            android:textColor="@android:color/black"/>
-                    <TextView
-                            android:text="Hardware Password Manager"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:id="@+id/textView2"
-                            android:paddingLeft="20dp"
-                            android:textSize="14dp"/>
-                </LinearLayout>
-            </LinearLayout>
-            <FrameLayout
+                    android:layout_height="wrap_content"
+                    android:id="@+id/textView"
+                    android:textSize="36dp" android:textStyle="bold" android:fontFamily="sans-serif"
+                    android:paddingLeft="16dp" android:gravity="center|start"
+                    android:textColor="@color/colorWhite"/>
+            <TextView
+                    android:text="Hardware Password Manager"
                     android:layout_width="match_parent"
-                    android:layout_height="match_parent" android:id="@+id/fragment_holder">
-
-            </FrameLayout>
+                    android:layout_height="wrap_content"
+                    android:id="@+id/textView2"
+                    android:textColor="@color/colorWhite"
+                    android:paddingLeft="20dp"
+                    android:textSize="14dp"/>
         </LinearLayout>
     </LinearLayout>
+    <FrameLayout
+            android:layout_weight="99"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" android:id="@+id/fragment_holder">
 
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
-            android:id="@+id/fab"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="bottom|end"
-            android:layout_margin="@dimen/fab_margin"
-            app:ico_icon="gmd-plus-circle"
-            app:backgroundTint="@color/colorBrand"/>
-
-</androidx.coordinatorlayout.widget.CoordinatorLayout>
+    </FrameLayout>
+    <com.google.android.material.bottomnavigation.BottomNavigationView
+            android:layout_weight="0"
+            app:menu="@menu/bottom_nav_block"
+            app:itemBackground="@color/colorBrandDark1"
+            app:itemIconTint="@color/colorWhite"
+            app:itemTextColor="@color/colorWhite"
+            android:layout_width="match_parent"
+            android:layout_height="64dp"
+            android:id="@+id/bottomView" android:background="@color/colorBrandDark1" />
+</LinearLayout>

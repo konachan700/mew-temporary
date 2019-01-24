@@ -17,39 +17,26 @@ class DeviceMainFragment : Fragment(), BottomNavigationView.OnNavigationItemSele
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val view = inflater.inflate(R.layout.device_fragment, container, false)
-        view.bottomView.setOnNavigationItemSelectedListener(this)
+        //view.bottomView.setOnNavigationItemSelectedListener(this)
 
-        view.bottomView.menu.getItem(0).icon = Icon.createWithBitmap(
-            IconicsDrawable(context)
-                .icon(GoogleMaterial.Icon.gmd_vpn_key).sizeDp(40).color(Color.WHITE)
-                .toBitmap()).loadDrawable(requireContext())
 
-        view.bottomView.menu.getItem(1).icon = Icon.createWithBitmap(
-            IconicsDrawable(context)
-                .icon(GoogleMaterial.Icon.gmd_contacts).sizeDp(40).color(Color.WHITE)
-                .toBitmap()).loadDrawable(requireContext())
-
-        view.bottomView.menu.getItem(2).icon = Icon.createWithBitmap(
-            IconicsDrawable(context)
-                .icon(GoogleMaterial.Icon.gmd_settings).sizeDp(40).color(Color.WHITE)
-                .toBitmap()).loadDrawable(requireContext())
 
         return view
     }
 
     override fun onNavigationItemSelected(item: MenuItem): Boolean {
-        when (item.itemId) {
-            R.id.mContacts -> {
+//        when (item.itemId) {
+//            R.id.mContacts -> {
+//
+//            }
+//            R.id.mPasswords -> {
+//
+//            }
+//            R.id.mSettings -> {
+//
+//            }
+//        }
 
-            }
-            R.id.mPasswords -> {
-
-            }
-            R.id.mSettings -> {
-
-            }
-        }
-
-        return false
+        return true
     }
 }

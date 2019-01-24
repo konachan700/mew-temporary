@@ -1,32 +1,30 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-              xmlns:app="http://schemas.android.com/apk/res-auto" xmlns:tools="http://schemas.android.com/tools"
-              android:orientation="vertical"
-              android:layout_width="match_parent"
-              android:layout_height="match_parent">
-    <LinearLayout
-            android:layout_weight="1"
-            android:orientation="vertical"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent">
-        <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/list"
-                android:name="com.mewhpm.mewsync.fragments.DeviceMainFragment"
+<androidx.coordinatorlayout.widget.CoordinatorLayout
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                  xmlns:app="http://schemas.android.com/apk/res-auto" xmlns:tools="http://schemas.android.com/tools"
+                  android:orientation="vertical"
+                  android:layout_width="match_parent"
+                  android:layout_height="match_parent">
+        <LinearLayout
+                android:layout_weight="1"
+                android:orientation="vertical"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_marginLeft="0dp"
-                android:layout_marginRight="0dp"
-                tools:context=".fragments.DeviceMainFragment"
-                tools:listitem="@layout/device_disovery_fragment_item"/>
+                android:layout_height="match_parent">
+            <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/list"
+                    android:name="com.mewhpm.mewsync.fragments.DeviceMainFragment"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_marginLeft="0dp"
+                    android:layout_marginRight="0dp"
+                    tools:context=".fragments.DeviceMainFragment"
+                    tools:listitem="@layout/device_disovery_fragment_item"/>
+        </LinearLayout>
     </LinearLayout>
-    <com.google.android.material.bottomnavigation.BottomNavigationView
-            android:layout_weight="0"
-            app:menu="@menu/bottom_nav_block"
-            app:itemBackground="@color/colorBrandDark1"
-            app:itemIconTint="@color/colorWhite"
-            app:itemTextColor="@color/colorWhite"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:id="@+id/bottomView" android:background="@color/colorBrandDark1">
-    </com.google.android.material.bottomnavigation.BottomNavigationView>
-</LinearLayout>
+
+</androidx.coordinatorlayout.widget.CoordinatorLayout>
