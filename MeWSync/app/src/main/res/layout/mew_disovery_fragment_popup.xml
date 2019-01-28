@@ -14,7 +14,7 @@
             android:name="com.mewhpm.mewsync.fragments.DeviceDiscoveryFragment"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            tools:context=".fragments.DeviceDiscoveryFragment"
+            tools:context=".fragments.DeviceDiscoveryDialogFragment"
             tools:listitem="@layout/device_disovery_fragment_item">
     </androidx.recyclerview.widget.RecyclerView>
     <Button

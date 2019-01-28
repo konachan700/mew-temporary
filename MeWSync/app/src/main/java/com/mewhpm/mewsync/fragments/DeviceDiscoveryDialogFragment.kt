@@ -26,7 +26,7 @@ import org.jetbrains.anko.support.v4.toast
 import java.util.concurrent.CopyOnWriteArrayList
 
 
-class DeviceDiscoveryFragment : DialogFragment() , RecyclerViewItemActionListener<BleDevice> {
+class DeviceDiscoveryDialogFragment : DialogFragment() , RecyclerViewItemActionListener<BleDevice> {
     var closeListener: () -> Unit = {}
 
     private var colorCounter = 0
@@ -46,7 +46,7 @@ class DeviceDiscoveryFragment : DialogFragment() , RecyclerViewItemActionListene
                     }
                 }
                 BleService.EXTRA_RESULT_CODE_ERROR -> {
-                    this@DeviceDiscoveryFragment.dismiss()
+                    this@DeviceDiscoveryDialogFragment.dismiss()
                 }
                 BleService.EXTRA_RESULT_CODE_IN_PROGRESS -> {
                     if (context == null) return
@@ -115,7 +115,7 @@ class DeviceDiscoveryFragment : DialogFragment() , RecyclerViewItemActionListene
         view.button.setCompoundDrawables(IconicsDrawable(context)
             .icon(GoogleMaterial.Icon.gmd_bluetooth).sizeDp(32).color(Color.WHITE),null,null,null)
         view.button.setOnClickListener {
-            this@DeviceDiscoveryFragment.dismiss()
+            this@DeviceDiscoveryDialogFragment.dismiss()
         }
 
         return view
@@ -131,7 +131,7 @@ class DeviceDiscoveryFragment : DialogFragment() , RecyclerViewItemActionListene
                 okButton {
                     _dao.addNew(context?.database, dev)
                     toast("Device added!")
-                    this@DeviceDiscoveryFragment.dismiss()
+                    this@DeviceDiscoveryDialogFragment.dismiss()
                 }
                 cancelButton {  }
             }.show()

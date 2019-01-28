@@ -21,7 +21,7 @@
                 android:layout_marginRight="0dp"
                 android:layout_weight="1"
                 app:layoutManager="LinearLayoutManager"
-                tools:context=".fragments.DeviceDiscoveryFragment"
+                tools:context=".fragments.DeviceDiscoveryDialogFragment"
                 tools:listitem="@layout/device_disovery_fragment_item"/>
     </LinearLayout>
     <com.google.android.material.floatingactionbutton.FloatingActionButton

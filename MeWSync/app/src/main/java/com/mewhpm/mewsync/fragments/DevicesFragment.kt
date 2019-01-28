@@ -20,7 +20,6 @@ import com.mewhpm.mewsync.data.BleDevice
 import com.mikepenz.google_material_typeface_library.GoogleMaterial
 import com.mikepenz.iconics.IconicsDrawable
 import kotlinx.android.synthetic.main.device_disovery_fragment_item_list.*
-import kotlinx.android.synthetic.main.device_disovery_fragment_item_list.view.*
 import org.jetbrains.anko.cancelButton
 import org.jetbrains.anko.okButton
 import org.jetbrains.anko.support.v4.alert
@@ -29,7 +28,7 @@ import org.jetbrains.anko.support.v4.toast
 class DevicesFragment : Fragment(), RecyclerViewItemActionListener<BleDevice> {
     private val ACCESS_COARSE_LOCATION = 43
     private val _bluetoothAdapter = BluetoothAdapter.getDefaultAdapter()
-    private val _searchDialog = DeviceDiscoveryFragment()
+    private val _searchDialog = DeviceDiscoveryDialogFragment()
 
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
         if (!_bluetoothAdapter.isEnabled) {
