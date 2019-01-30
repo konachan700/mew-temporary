@@ -24,6 +24,7 @@ import org.jetbrains.anko.okButton
 import org.jetbrains.anko.support.v4.alert
 import org.jetbrains.anko.support.v4.toast
 import java.util.concurrent.CopyOnWriteArrayList
+import kotlin.random.Random
 
 
 class DeviceDiscoveryDialogFragment : DialogFragment() , RecyclerViewItemActionListener<BleDevice> {
@@ -41,7 +42,7 @@ class DeviceDiscoveryDialogFragment : DialogFragment() , RecyclerViewItemActionL
                     if ((intent.hasExtra(BleService.EXTRA_DATA_MAC)) && (intent.hasExtra(BleService.EXTRA_DATA_NAME))) {
                         _list.add(BleDevice(0,
                             intent.getStringExtra(BleService.EXTRA_DATA_MAC),
-                            intent.getStringExtra(BleService.EXTRA_DATA_NAME)))
+                            intent.getStringExtra(BleService.EXTRA_DATA_NAME), Random.nextLong().toString()))
                         _adapter.notifyDataSetChanged()
                     }
                 }

@@ -9,6 +9,7 @@ import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
 import com.mewhpm.mewsync.fragments.DeviceMainFragment
 import com.mewhpm.mewsync.fragments.DevicesFragment
+import com.mewhpm.mewsync.fragments.PinCodeDialogFragment
 import com.mikepenz.google_material_typeface_library.GoogleMaterial
 import com.mikepenz.iconics.IconicsDrawable
 import kotlinx.android.synthetic.main.activity_main.*
@@ -17,10 +18,8 @@ import ru.ztrap.iconics.kt.wrapByIconics
 
 
 class MainActivity : AppCompatActivity() {
-
-
-    private val _knownDevicesFragment: DevicesFragment = DevicesFragment()
-    //private val _deviceMainFragment: DeviceMainFragment = DeviceMainFragment()
+    private val _knownDevicesFragment = DevicesFragment()
+    private val _pincodeFragment = PinCodeDialogFragment()
 
 
     override fun attachBaseContext(newBase: Context) {
