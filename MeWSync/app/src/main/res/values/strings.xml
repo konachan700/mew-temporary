@@ -1,4 +1,9 @@
 <resources>
     <string name="app_name">MeWSync</string>
     <string name="action_settings">Settings</string>
+    <string name="please_create_new_pincode">Please, create new pincode</string>
+    <string name="please_confirm_your_pincode">Please, confirm your pincode</string>
+    <string name="pincode_cannot_be_empty">Pincode cannot be empty!</string>
+    <string name="entered_pincodes_does_not_match">Entered pincodes does not match!</string>
+    <string name="incorrect_pincode">Incorrect pincode. Please, try again</string>
 </resources>

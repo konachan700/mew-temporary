@@ -4,11 +4,13 @@ import android.app.Dialog
 import android.content.*
 import android.graphics.Color
 import android.os.Bundle
+import android.preference.PreferenceManager
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.DialogFragment
 import com.mewhpm.mewsync.R
+import com.mewhpm.mewsync.Utils.CryptoUtils
 import com.mewhpm.mewsync.adapters.PairRecyclerViewAdapter
 import com.mewhpm.mewsync.adapters.RecyclerViewItemActionListener
 import com.mewhpm.mewsync.dao.KnownDevicesDao
@@ -24,11 +26,10 @@ import org.jetbrains.anko.okButton
 import org.jetbrains.anko.support.v4.alert
 import org.jetbrains.anko.support.v4.toast
 import java.util.concurrent.CopyOnWriteArrayList
-import kotlin.random.Random
-
 
 class DeviceDiscoveryDialogFragment : DialogFragment() , RecyclerViewItemActionListener<BleDevice> {
     var closeListener: () -> Unit = {}
+    private val _pincodeFragment = PinCodeCreateDialogFragment()
 
     private var colorCounter = 0
     private var colorArray = arrayOf("#FF9999", "#99FF99", "#FFFF99")
@@ -42,7 +43,7 @@ class DeviceDiscoveryDialogFragment : DialogFragment() , RecyclerViewItemActionL
                     if ((intent.hasExtra(BleService.EXTRA_DATA_MAC)) && (intent.hasExtra(BleService.EXTRA_DATA_NAME))) {
                         _list.add(BleDevice(0,
                             intent.getStringExtra(BleService.EXTRA_DATA_MAC),
-                            intent.getStringExtra(BleService.EXTRA_DATA_NAME), Random.nextLong().toString()))
+                            intent.getStringExtra(BleService.EXTRA_DATA_NAME)))
                         _adapter.notifyDataSetChanged()
                     }
                 }
@@ -65,10 +66,9 @@ class DeviceDiscoveryDialogFragment : DialogFragment() , RecyclerViewItemActionL
     private val _dao = KnownDevicesDao()
     private val _list = CopyOnWriteArrayList<BleDevice>()
     private val _adapter = BleDeviceDiscoveryPairRecyclerViewAdapter()
+    private var _currentDevice: BleDevice? = null
 
-    inner class BleDeviceDiscoveryPairRecyclerViewAdapter: PairRecyclerViewAdapter<BleDevice>(
-        mListener = this, mType = Fragments.DEVICE_DISCOVERY
-    ) {
+    inner class BleDeviceDiscoveryPairRecyclerViewAdapter: PairRecyclerViewAdapter<BleDevice>(mListener = this) {
         override fun requestItem(index: Int): Triple<String, String, GoogleMaterial.Icon> = Triple(
             _list[index].name,
             _list[index].mac,
@@ -119,10 +119,18 @@ class DeviceDiscoveryDialogFragment : DialogFragment() , RecyclerViewItemActionL
             this@DeviceDiscoveryDialogFragment.dismiss()
         }
 
+        _pincodeFragment.onPinCodeCreated = {pin ->
+            CryptoUtils.createPinCode(PreferenceManager.getDefaultSharedPreferences(context), pin, _currentDevice!!)
+            _dao.addNew(context?.database, _currentDevice!!)
+            toast("Device added!")
+            this@DeviceDiscoveryDialogFragment.dismiss()
+        }
+
         return view
     }
 
-    override fun OnClick(dev: BleDevice, source: Fragments) {
+    override fun onClick(dev: BleDevice) {
+        _currentDevice = dev
         if (_dao.isExist(context?.database, dev)) {
             alert (title = "Add new device", message = "Device with mac: \"${dev.mac}\" and name \"${dev.name}\" already added.") {
                 okButton {  }
@@ -130,14 +138,12 @@ class DeviceDiscoveryDialogFragment : DialogFragment() , RecyclerViewItemActionL
         } else {
             alert (title = "Add new device", message = "Device with mac: \"${dev.mac}\" and name \"${dev.name}\" will be added now.") {
                 okButton {
-                    _dao.addNew(context?.database, dev)
-                    toast("Device added!")
-                    this@DeviceDiscoveryDialogFragment.dismiss()
+                    _pincodeFragment.show(fragmentManager!!, "_pincodeCreatorDialog")
                 }
                 cancelButton {  }
             }.show()
         }
     }
 
-    override fun OnLongClick(dev: BleDevice, source: Fragments) { }
+    override fun onLongClick(dev: BleDevice) { }
 }

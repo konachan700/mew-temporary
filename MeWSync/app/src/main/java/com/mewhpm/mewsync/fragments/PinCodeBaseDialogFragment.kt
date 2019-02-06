@@ -4,64 +4,64 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.fragment.app.DialogFragment
 import com.mewhpm.mewsync.R
 import com.mewhpm.mewsync.Utils.CryptoUtils
+import com.mewhpm.mewsync.Utils.VibroUtils
 import kotlinx.android.synthetic.main.pincode_fragment.view.*
 import org.jetbrains.anko.sdk27.coroutines.onClick
 
-class PinCodeDialogFragment : DialogFragment() {
+abstract class PinCodeBaseDialogFragment: androidx.fragment.app.DialogFragment() {
     companion object {
         private val SALT = CryptoUtils.getUniqueSalt()
         const val EMPTY = ""
     }
 
-    var pinHash = EMPTY
-    var closeListener: (hash: String) -> Boolean = { false }
+    abstract fun onOkClick(pincode : String)
+    private var _pinHash = EMPTY
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val view = inflater.inflate(R.layout.pincode_fragment, container, false)
         view.pincodeBox1.text.clear()
-        view.incorrectPinWarning.visibility = View.GONE
 
         view.button11.onClick { addNumber("1") }
         view.button12.onClick { addNumber("2") }
         view.button13.onClick { addNumber("3") }
         view.button21.onClick { addNumber("4") }
-        view.button21.onClick { addNumber("5") }
+        view.button22.onClick { addNumber("5") }
         view.button23.onClick { addNumber("6") }
         view.button31.onClick { addNumber("7") }
         view.button32.onClick { addNumber("8") }
         view.button33.onClick { addNumber("9") }
         view.button42.onClick { addNumber("0") }
 
-        view.button11.onClick {
-            view!!.pincodeBox1.text.clear()
-            pinHash = EMPTY
+        view.button41.onClick {
+            VibroUtils.vibrate(context!!, 100)
+            view.pincodeBox1.text.clear()
+            _pinHash = EMPTY
         }
 
-        view.button11.onClick {
-            val hash = CryptoUtils.sha256(view.pincodeBox1.text.toString() + SALT)
-            if (closeListener.invoke(hash)) {
-                view.incorrectPinWarning.visibility = View.GONE
-                this@PinCodeDialogFragment.dismiss()
-            } else {
+        view.button43.onClick {
+            VibroUtils.vibrate(context!!, 100)
+            if (_pinHash.contentEquals(EMPTY)) {
                 view.incorrectPinWarning.visibility = View.VISIBLE
-                view.pincodeBox1.text.clear()
+                view.incorrectPinWarning.text = getString(R.string.pincode_cannot_be_empty)
+                return@onClick
             }
+            onOkClick(_pinHash)
+            _pinHash = EMPTY
         }
-
         return view
     }
 
     private fun addNumber(number: String) {
+        VibroUtils.vibrate(context!!, 100)
         val pin = StringBuilder()
-            .append(pinHash)
+            .append(_pinHash)
             .append(number)
             .append(SALT)
             .append(number)
             .toString()
-        pinHash = CryptoUtils.sha256(pin)
+        _pinHash = CryptoUtils.sha256(pin)
         view!!.pincodeBox1.append("X ")
     }
 }

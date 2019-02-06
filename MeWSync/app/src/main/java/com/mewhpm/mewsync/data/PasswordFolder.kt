@@ -1,7 +1,7 @@
 package com.mewhpm.mewsync.data
 
 data class PasswordFolder (
-    val id: Int,
+    val id: Long,
     var name: String,
     val device: BleDevice,
     var parent: PasswordFolder?,

@@ -3,15 +3,18 @@ package com.mewhpm.mewsync.fragments
 import android.Manifest
 import android.bluetooth.BluetoothAdapter
 import android.content.Context
+import android.content.SharedPreferences
 import android.content.pm.PackageManager
 import android.graphics.Color
 import android.graphics.drawable.Icon
 import android.os.Bundle
+import android.preference.PreferenceManager
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import com.mewhpm.mewsync.R
+import com.mewhpm.mewsync.Utils.CryptoUtils
 import com.mewhpm.mewsync.adapters.PairRecyclerViewAdapter
 import com.mewhpm.mewsync.adapters.RecyclerViewItemActionListener
 import com.mewhpm.mewsync.dao.KnownDevicesDao
@@ -27,9 +30,16 @@ import org.jetbrains.anko.support.v4.alert
 import org.jetbrains.anko.support.v4.toast
 
 class DevicesFragment : Fragment(), RecyclerViewItemActionListener<BleDevice> {
-    private val ACCESS_COARSE_LOCATION = 43
+    companion object {
+        private const val ACCESS_COARSE_LOCATION = 43
+    }
+
     private val _bluetoothAdapter = BluetoothAdapter.getDefaultAdapter()
     private val _searchDialog = DeviceDiscoveryDialogFragment()
+    private val _pincodeFragment = PinCodeVerifyDialogFragment()
+
+    private var pref: SharedPreferences? = null
+    private var _selectedDevice: BleDevice? = null
 
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
         if (!_bluetoothAdapter.isEnabled) {
@@ -51,9 +61,7 @@ class DevicesFragment : Fragment(), RecyclerViewItemActionListener<BleDevice> {
         }
     }
 
-    inner class BleKnownDevicesPairRecyclerViewAdapter: PairRecyclerViewAdapter<BleDevice>(
-        mListener = this, mType = Fragments.DEVICE_DISCOVERY
-    ) {
+    inner class BleKnownDevicesPairRecyclerViewAdapter: PairRecyclerViewAdapter<BleDevice>(mListener = this) {
         override fun requestItem(index: Int): Triple<String, String, GoogleMaterial.Icon> = Triple(
             _list[index].name,
             _list[index].mac,
@@ -69,7 +77,16 @@ class DevicesFragment : Fragment(), RecyclerViewItemActionListener<BleDevice> {
     private fun refresh(isNotify: Boolean = false) {
         _list.clear()
         _list.addAll(_dao.getAll(_context?.database))
-        if (isNotify) list.adapter?.notifyDataSetChanged()
+        if (isNotify) {
+            if (_list.size <= 0) {
+                view!!.list.visibility = View.GONE
+                view!!.noItems.visibility = View.VISIBLE
+            } else {
+                view!!.list.visibility = View.VISIBLE
+                view!!.noItems.visibility = View.GONE
+            }
+            list.adapter?.notifyDataSetChanged()
+        }
     }
 
     private val _list: ArrayList<BleDevice> = ArrayList()
@@ -77,11 +94,13 @@ class DevicesFragment : Fragment(), RecyclerViewItemActionListener<BleDevice> {
     override fun onAttach(context: Context) {
         _context = context
         super.onAttach(context)
+        pref = PreferenceManager.getDefaultSharedPreferences(context)
     }
 
     override fun onDetach() {
         _context = null
         super.onDetach()
+        pref = null
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
@@ -101,6 +120,14 @@ class DevicesFragment : Fragment(), RecyclerViewItemActionListener<BleDevice> {
             refresh(true)
         }
 
+        _pincodeFragment.onPincodeEntered = {pincode ->
+            val result = CryptoUtils.verifyPinCode(pref!!, pincode, _selectedDevice)
+            if (result) {
+
+            }
+            result
+        }
+
         _adapter.mIconColor = resources.getColor(R.color.colorBrandDark1, _context?.theme)
         view.list.layoutManager = androidx.recyclerview.widget.LinearLayoutManager(_context)
         view.list.adapter = _adapter
@@ -108,11 +135,12 @@ class DevicesFragment : Fragment(), RecyclerViewItemActionListener<BleDevice> {
         return view
     }
 
-    override fun OnClick(dev: BleDevice, source: Fragments) {
-
+    override fun onClick(dev: BleDevice) {
+        _selectedDevice = dev
+        _pincodeFragment.show(fragmentManager!!, "pincode_dialog")
     }
 
-    override fun OnLongClick(dev: BleDevice, source: Fragments) {
+    override fun onLongClick(dev: BleDevice) {
         deleteDevice(dev)
     }
 

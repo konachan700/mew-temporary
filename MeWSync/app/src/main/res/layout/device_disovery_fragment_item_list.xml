@@ -10,19 +10,18 @@
                   android:orientation="vertical" android:gravity="center" android:padding="8dp"
                   android:background="@drawable/list_item_bg">
         <androidx.recyclerview.widget.RecyclerView
-                xmlns:android="http://schemas.android.com/apk/res/android"
-                xmlns:tools="http://schemas.android.com/tools"
-                xmlns:app="http://schemas.android.com/apk/res-auto"
                 android:id="@+id/list"
                 android:name="com.mewhpm.mewsync.fragments.DeviceDiscoveryFragment"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:layout_marginLeft="0dp"
                 android:layout_marginRight="0dp"
-                android:layout_weight="1"
+                android:layout_weight="0"
                 app:layoutManager="LinearLayoutManager"
                 tools:context=".fragments.DeviceDiscoveryDialogFragment"
-                tools:listitem="@layout/device_disovery_fragment_item"/>
+                tools:listitem="@layout/device_disovery_fragment_item" android:visibility="gone"/>
+        <include layout="@layout/no_items_in_list" android:id="@+id/noItems" android:layout_width="match_parent"
+                 android:layout_height="match_parent" android:layout_weight="1" android:visibility="visible"/>
     </LinearLayout>
     <com.google.android.material.floatingactionbutton.FloatingActionButton
             android:id="@+id/fab"

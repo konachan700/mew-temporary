@@ -1,14 +1,11 @@
 package com.mewhpm.mewsync.adapters
 
-import android.graphics.Color
 import android.graphics.drawable.Icon
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import com.mewhpm.mewsync.R
-import com.mewhpm.mewsync.data.BleDevice
-import com.mewhpm.mewsync.fragments.Fragments
 import com.mikepenz.google_material_typeface_library.GoogleMaterial
 import com.mikepenz.iconics.IconicsDrawable
 
@@ -16,7 +13,6 @@ import kotlinx.android.synthetic.main.device_disovery_fragment_item.view.*
 
 abstract class PairRecyclerViewAdapter<T>(
     val mListener: RecyclerViewItemActionListener<T>?,
-    val mType: Fragments,
     var mIconSize: Int = 32,
     var mIconColor: Int = 0
 ) : androidx.recyclerview.widget.RecyclerView.Adapter<PairRecyclerViewAdapter<T>.ViewHolder>() {
@@ -48,10 +44,10 @@ abstract class PairRecyclerViewAdapter<T>(
                 ))
             tag = obj
             setOnClickListener { v ->
-                mListener?.OnClick(v.tag as T, mType)
+                mListener?.onClick(v.tag as T)
             }
             setOnLongClickListener { v ->
-                mListener?.OnLongClick(v.tag as T, mType)
+                mListener?.onLongClick(v.tag as T)
                 true
             }
         }

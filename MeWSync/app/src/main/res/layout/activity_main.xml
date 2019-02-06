@@ -44,7 +44,7 @@
             android:layout_height="match_parent" android:id="@+id/fragment_holder">
 
     </FrameLayout>
-    <com.google.android.material.bottomnavigation.BottomNavigationView
+    <com.mewhpm.mewsync.ui.BottomView
             android:layout_weight="0"
             app:menu="@menu/bottom_nav_block"
             app:itemBackground="@color/colorBrandDark1"
