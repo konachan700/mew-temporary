@@ -38,10 +38,12 @@
                     android:textSize="14dp"/>
         </LinearLayout>
     </LinearLayout>
+    <include android:layout_width="match_parent" android:layout_height="match_parent" layout="@layout/wait_fragment"
+             android:layout_weight="99" android:id="@+id/waitDummy1"/>
     <FrameLayout
             android:layout_weight="99"
             android:layout_width="match_parent"
-            android:layout_height="match_parent" android:id="@+id/fragment_holder">
+            android:layout_height="match_parent" android:id="@+id/fragment_holder" android:visibility="gone">
 
     </FrameLayout>
     <com.mewhpm.mewsync.ui.BottomView
@@ -52,5 +54,5 @@
             app:itemTextColor="@color/colorWhite"
             android:layout_width="match_parent"
             android:layout_height="64dp"
-            android:id="@+id/bottomView" android:background="@color/colorBrandDark1" />
+            android:id="@+id/bottomView" android:background="@color/colorBrandDark1" android:visibility="gone"/>
 </LinearLayout>

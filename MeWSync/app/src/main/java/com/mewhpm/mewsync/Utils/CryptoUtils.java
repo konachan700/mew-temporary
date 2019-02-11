@@ -13,7 +13,6 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.math.BigInteger;
-import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.security.*;
 import java.security.cert.CertificateEncodingException;
@@ -22,11 +21,77 @@ import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Random;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import static android.security.keystore.KeyProperties.*;
 import static java.util.Calendar.YEAR;
 
 public class CryptoUtils {
+    public interface KeygenEvent {
+        void onGenerated();
+    }
+
+    private static class AsyncKeyGenerator implements Runnable {
+        private final KeyStore keyStore;
+        {
+            try {
+                keyStore = KeyStore.getInstance(ANDROID_KEYSTORE);
+                keyStore.load(null);
+            } catch (KeyStoreException | CertificateException | NoSuchAlgorithmException | IOException e) {
+                throw new IllegalStateException("Can't load android keystore!");
+            }
+        }
+
+        private final AtomicBoolean keyGenerated = new AtomicBoolean(false);
+        private KeygenEvent keygenEvent = null;
+
+        public void checkGenerated(KeygenEvent ke) {
+            synchronized (keyGenerated) {
+                if (keyGenerated.get()) {
+                    ke.onGenerated();
+                    return;
+                }
+                keygenEvent = ke;
+            }
+        }
+
+        public KeyStore getKeyStore() {
+            if (!keyGenerated.get()) throw new IllegalStateException("getKeyStore NOT GENERATED");
+            return keyStore;
+        }
+
+        @Override
+        public void run() {
+            try {
+                if (!keyStore.containsAlias(KEYSTORE_ALIAS)) {
+                    final KeyPairGenerator keyGenerator = KeyPairGenerator.getInstance(KEY_ALGORITHM_RSA, ANDROID_KEYSTORE);
+                    final Calendar endDate = Calendar.getInstance();
+                    endDate.add(YEAR, 8);
+
+                    keyGenerator.initialize(
+                            new KeyGenParameterSpec.Builder(KEYSTORE_ALIAS, PURPOSES)
+                                    .setKeyValidityStart(new Date())
+                                    .setKeyValidityEnd(endDate.getTime())
+                                    .setCertificateSubject(new X500Principal("CN=Android, O=Android Authority"))
+                                    .setCertificateSerialNumber(BigInteger.valueOf(new Random().nextLong()))
+                                    .setDigests(DIGEST_SHA256, DIGEST_SHA512)
+                                    .setKeySize(2048)
+                                    .setEncryptionPaddings(ENCRYPTION_PADDING_RSA_PKCS1)
+                                    .setSignaturePaddings(SIGNATURE_PADDING_RSA_PKCS1)
+                                    .build());
+                    keyGenerator.genKeyPair();
+                }
+            } catch (KeyStoreException | NoSuchProviderException | NoSuchAlgorithmException | InvalidAlgorithmParameterException e) {
+                throw new RuntimeException(e.getMessage());
+            }
+
+            synchronized (keyGenerated) {
+                keyGenerated.set(true);
+                if (keygenEvent != null) keygenEvent.onGenerated();
+            }
+        }
+    }
+
     private final static String SALT = "qvh87349fv78b87vv8243f1873402vb87f6V^RDS^#$S@^#$A$@A%$DF&^Vob789b^^%*V^Rx5ex45X&%_HJfe";
 
     private static final String KEYSTORE_ALIAS = "localhost-mew";
@@ -35,34 +100,17 @@ public class CryptoUtils {
     private static final String CIPHER_PROVIDER = "AndroidKeyStoreBCWorkaround";
     private static final int PURPOSES = PURPOSE_DECRYPT | PURPOSE_ENCRYPT | PURPOSE_SIGN | PURPOSE_VERIFY;
 
-    private static final KeyStore keyStore;
-    static {
-        try {
-            keyStore = KeyStore.getInstance(ANDROID_KEYSTORE);
-            keyStore.load(null);
-            //keyStore.deleteEntry(KEYSTORE_ALIAS); // COMMENT THIS LINE AFTER DEBUG
-            if (!keyStore.containsAlias(KEYSTORE_ALIAS)) {
-                final KeyPairGenerator keyGenerator = KeyPairGenerator.getInstance(KEY_ALGORITHM_RSA, ANDROID_KEYSTORE);
-                final Calendar endDate = Calendar.getInstance();
-                endDate.add(YEAR, 8);
+    private static final AsyncKeyGenerator generator = new AsyncKeyGenerator();
+    private static final Thread generatorThread = new Thread(generator);
+    private static String salt = null;
 
-                keyGenerator.initialize(
-                        new KeyGenParameterSpec.Builder(KEYSTORE_ALIAS, PURPOSES)
-                                .setKeyValidityStart(new Date())
-                                .setKeyValidityEnd(endDate.getTime())
-                                .setCertificateSubject(new X500Principal("CN=Android, O=Android Authority"))
-                                .setCertificateSerialNumber(BigInteger.valueOf(new Random().nextLong()))
-                                .setDigests(DIGEST_SHA256, DIGEST_SHA512)
-                                .setKeySize(4096)
-                                .setEncryptionPaddings(ENCRYPTION_PADDING_RSA_PKCS1)
-                                .setSignaturePaddings(SIGNATURE_PADDING_RSA_PKCS1)
-                                .build());
-                keyGenerator.genKeyPair();
-            }
-        } catch (KeyStoreException | CertificateException | NoSuchProviderException |
-                NoSuchAlgorithmException | IOException | InvalidAlgorithmParameterException e) {
-            throw new RuntimeException(e.getMessage());
-        }
+    static {
+        generatorThread.start();
+    }
+
+    public static void checkGenerated(KeygenEvent ke) {
+        if (ke == null) throw new NullPointerException("KeygenEvent cannot be null");
+        generator.checkGenerated(ke);
     }
 
     private static byte[] streamToByteArray(Cipher cipher, byte[] data) throws IOException {
@@ -99,38 +147,38 @@ public class CryptoUtils {
         return sb.toString();
     }
 
-    public static String encryptRSA4k(String openData) throws KeyStoreException, UnrecoverableEntryException,
+    public static String encryptRSA(String openData) throws KeyStoreException, UnrecoverableEntryException,
             NoSuchAlgorithmException, NoSuchProviderException, NoSuchPaddingException, InvalidKeyException, IOException {
         final byte[] openDataBytes = openData.getBytes(StandardCharsets.UTF_8);
-        final byte[] encrypted = encryptRSA4k(openDataBytes);
+        final byte[] encrypted = encryptRSA(openDataBytes);
         return Base64.encodeToString(encrypted, Base64.DEFAULT);
     }
 
-    public static byte[] encryptRSA4k(byte[] openData) throws KeyStoreException, UnrecoverableEntryException,
+    public static byte[] encryptRSA(byte[] openData) throws KeyStoreException, UnrecoverableEntryException,
             NoSuchAlgorithmException, NoSuchProviderException, NoSuchPaddingException, InvalidKeyException, IOException {
-        if (!keyStore.containsAlias(KEYSTORE_ALIAS))
+        if (!generator.getKeyStore().containsAlias(KEYSTORE_ALIAS))
             throw new IllegalStateException("Keystore not contain a keypair with alias " + KEYSTORE_ALIAS);
 
-        final KeyStore.PrivateKeyEntry privateKeyEntry = (KeyStore.PrivateKeyEntry) keyStore.getEntry(KEYSTORE_ALIAS, null);
+        final KeyStore.PrivateKeyEntry privateKeyEntry = (KeyStore.PrivateKeyEntry) generator.getKeyStore().getEntry(KEYSTORE_ALIAS, null);
         final Cipher cipher = Cipher.getInstance(RSA_MODE, CIPHER_PROVIDER);
         cipher.init(Cipher.ENCRYPT_MODE, privateKeyEntry.getCertificate().getPublicKey());
 
         return streamToByteArray(cipher, openData);
     }
 
-    public static String decryptRSA4k(String encryptedData) throws KeyStoreException, UnrecoverableEntryException,
+    public static String decryptRSA(String encryptedData) throws KeyStoreException, UnrecoverableEntryException,
             NoSuchAlgorithmException, NoSuchProviderException, NoSuchPaddingException, InvalidKeyException, IOException {
         final byte[] encrypted = Base64.decode(encryptedData, Base64.DEFAULT);
-        final byte[] decrypted = decryptRSA4k(encrypted);
+        final byte[] decrypted = decryptRSA(encrypted);
         return new String(decrypted, StandardCharsets.UTF_8);
     }
 
-    public static byte[] decryptRSA4k(byte[] encryptedData) throws KeyStoreException, UnrecoverableEntryException,
+    public static byte[] decryptRSA(byte[] encryptedData) throws KeyStoreException, UnrecoverableEntryException,
             NoSuchAlgorithmException, NoSuchProviderException, NoSuchPaddingException, InvalidKeyException, IOException {
-        if (!keyStore.containsAlias(KEYSTORE_ALIAS))
+        if (!generator.getKeyStore().containsAlias(KEYSTORE_ALIAS))
             throw new IllegalStateException("Keystore not contain a keypair with alias $KEYSTORE_ALIAS");
 
-        final KeyStore.PrivateKeyEntry privateKeyEntry = (KeyStore.PrivateKeyEntry) keyStore.getEntry(KEYSTORE_ALIAS, null);
+        final KeyStore.PrivateKeyEntry privateKeyEntry = (KeyStore.PrivateKeyEntry) generator.getKeyStore().getEntry(KEYSTORE_ALIAS, null);
         final Cipher cipher = Cipher.getInstance(RSA_MODE, CIPHER_PROVIDER);
         cipher.init(Cipher.DECRYPT_MODE, privateKeyEntry.getPrivateKey());
 
@@ -144,14 +192,16 @@ public class CryptoUtils {
         return buffer.toByteArray();
     }
 
-    public static String getUniqueSalt() throws NoSuchAlgorithmException,
-            KeyStoreException, UnrecoverableEntryException, CertificateEncodingException {
-        if (!keyStore.containsAlias(KEYSTORE_ALIAS))
-            throw new IllegalStateException("Keystore not contain a keypair with alias $KEYSTORE_ALIAS");
-        final KeyStore.PrivateKeyEntry privateKeyEntry = (KeyStore.PrivateKeyEntry) keyStore.getEntry(KEYSTORE_ALIAS, null);
-        final String certHash = sha256(privateKeyEntry.getCertificate().getEncoded());
-        final String keyHash = sha256(privateKeyEntry.getCertificate().getPublicKey().getEncoded());
-        return sha256(certHash + keyHash);
+    public static String getUniqueSalt() throws NoSuchAlgorithmException, KeyStoreException, UnrecoverableEntryException, CertificateEncodingException {
+        if (salt == null) {
+            if (!generator.getKeyStore().containsAlias(KEYSTORE_ALIAS))
+                throw new IllegalStateException("Keystore not contain a keypair with alias $KEYSTORE_ALIAS");
+            final KeyStore.PrivateKeyEntry privateKeyEntry = (KeyStore.PrivateKeyEntry) generator.getKeyStore().getEntry(KEYSTORE_ALIAS, null);
+            final String certHash = sha256(privateKeyEntry.getCertificate().getEncoded());
+            final String keyHash = sha256(privateKeyEntry.getCertificate().getPublicKey().getEncoded());
+            salt = sha256(certHash + keyHash);
+        }
+        return salt;
     }
 
     @SuppressWarnings("unused")
@@ -171,13 +221,13 @@ public class CryptoUtils {
     public static boolean verifyPinCode(SharedPreferences pref, String enteredPincode, BleDevice device) throws NoSuchPaddingException,
             InvalidKeyException, NoSuchAlgorithmException, KeyStoreException, NoSuchProviderException, UnrecoverableEntryException, IOException {
         final String stored = pref.getString(generatePrefName(device), "NO-PIN");
-        final String decoded = decryptRSA4k(stored);
+        final String decoded = decryptRSA(stored);
         return decoded.contentEquals(enteredPincode);
     }
 
     public static void createPinCode(SharedPreferences pref, String enteredPincode, BleDevice device) throws NoSuchPaddingException,
             InvalidKeyException, NoSuchAlgorithmException, KeyStoreException, NoSuchProviderException, UnrecoverableEntryException, IOException {
-        final String base64EncryptedPin = encryptRSA4k(enteredPincode);
+        final String base64EncryptedPin = encryptRSA(enteredPincode);
         final SharedPreferences.Editor editor = pref.edit();
         editor.putString(generatePrefName(device), base64EncryptedPin);
         editor.apply();

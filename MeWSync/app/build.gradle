@@ -32,6 +32,10 @@ dependencies {
     implementation 'androidx.recyclerview:recyclerview:1.1.0-alpha01'
 
     implementation "org.jetbrains.anko:anko:0.10.8"
+    implementation "org.jetbrains.anko:anko-commons:0.10.8"
+    implementation "org.jetbrains.anko:anko-design:0.10.8"
+
+    implementation 'com.github.ybq:Android-SpinKit:1.2.0'
 
     implementation 'ru.ztrap.iconics:core-ktx:1.0.3'
     implementation 'ru.ztrap.iconics:views-ktx:1.0.3'

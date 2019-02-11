@@ -12,8 +12,8 @@ class CryptoInstrumentedTest {
     @Test
     fun rsa4k_test() {
         val testString = "Test 12345 Test 12345 Test 12345 Test 12345 Test 12345 Test 12345 Test 12345 Test 12345"
-        val encrypted = CryptoUtils.encryptRSA4k(testString.toByteArray())
-        val decrypted = CryptoUtils.decryptRSA4k(encrypted)
+        val encrypted = CryptoUtils.encryptRSA(testString.toByteArray())
+        val decrypted = CryptoUtils.decryptRSA(encrypted)
 
         assertEquals(testString, decrypted.toString(StandardCharsets.UTF_8))
     }

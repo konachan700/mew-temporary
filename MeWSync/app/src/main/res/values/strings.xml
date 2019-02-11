@@ -6,4 +6,5 @@
     <string name="pincode_cannot_be_empty">Pincode cannot be empty!</string>
     <string name="entered_pincodes_does_not_match">Entered pincodes does not match!</string>
     <string name="incorrect_pincode">Incorrect pincode. Please, try again</string>
+    <string name="wait_for_keys_generating">Generate keypair...</string>
 </resources>

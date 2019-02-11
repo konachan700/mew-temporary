@@ -20,6 +20,7 @@ import com.mewhpm.mewsync.adapters.RecyclerViewItemActionListener
 import com.mewhpm.mewsync.dao.KnownDevicesDao
 import com.mewhpm.mewsync.dao.database
 import com.mewhpm.mewsync.data.BleDevice
+import com.mewhpm.mewsync.ui.recyclerview.impl.RecyclerViewDevicesImpl
 import com.mikepenz.google_material_typeface_library.GoogleMaterial
 import com.mikepenz.iconics.IconicsDrawable
 import kotlinx.android.synthetic.main.device_disovery_fragment_item_list.*
@@ -36,6 +37,9 @@ class DevicesFragment : Fragment(), RecyclerViewItemActionListener<BleDevice> {
 
     private val _bluetoothAdapter = BluetoothAdapter.getDefaultAdapter()
     private val _searchDialog = DeviceDiscoveryDialogFragment()
+
+
+
     private val _pincodeFragment = PinCodeVerifyDialogFragment()
 
     private var pref: SharedPreferences? = null
@@ -74,20 +78,22 @@ class DevicesFragment : Fragment(), RecyclerViewItemActionListener<BleDevice> {
     private val _adapter = BleKnownDevicesPairRecyclerViewAdapter()
     private val _dao = KnownDevicesDao()
 
-    private fun refresh(isNotify: Boolean = false) {
+    private fun refresh(_view: View? = null) {
         _list.clear()
         _list.addAll(_dao.getAll(_context?.database))
-        if (isNotify) {
+        if (_view != null) {
             if (_list.size <= 0) {
-                view!!.list.visibility = View.GONE
-                view!!.noItems.visibility = View.VISIBLE
+                _view.list.visibility = View.GONE
+                _view.noItems.visibility = View.VISIBLE
             } else {
-                view!!.list.visibility = View.VISIBLE
-                view!!.noItems.visibility = View.GONE
+                _view.list.visibility = View.VISIBLE
+                _view.noItems.visibility = View.GONE
             }
-            list.adapter?.notifyDataSetChanged()
+            _view.list.adapter?.notifyDataSetChanged()
         }
     }
+
+
 
     private val _list: ArrayList<BleDevice> = ArrayList()
 
@@ -95,6 +101,7 @@ class DevicesFragment : Fragment(), RecyclerViewItemActionListener<BleDevice> {
         _context = context
         super.onAttach(context)
         pref = PreferenceManager.getDefaultSharedPreferences(context)
+        refresh()
     }
 
     override fun onDetach() {
@@ -104,7 +111,7 @@ class DevicesFragment : Fragment(), RecyclerViewItemActionListener<BleDevice> {
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        val view = inflater.inflate(R.layout.device_disovery_fragment_item_list, container, false)
+        val view = inflater.inflate(R.layout.known_devices_list, container, false)
         view.fab.setImageIcon(Icon.createWithBitmap(
             IconicsDrawable(_context).icon(GoogleMaterial.Icon.gmd_bluetooth_searching).sizeDp(32).color(Color.WHITE).toBitmap()
         ))
@@ -115,9 +122,11 @@ class DevicesFragment : Fragment(), RecyclerViewItemActionListener<BleDevice> {
                 Manifest.permission.BLUETOOTH_ADMIN), ACCESS_COARSE_LOCATION)
         }
 
-        refresh()
+
+
+        refresh(view)
         _searchDialog.closeListener = {
-            refresh(true)
+            refresh(view)
         }
 
         _pincodeFragment.onPincodeEntered = {pincode ->
@@ -148,7 +157,7 @@ class DevicesFragment : Fragment(), RecyclerViewItemActionListener<BleDevice> {
         alert (title = "Remove device", message = "Do you want delete the device with mac: \"${dev.mac}\" and name \"${dev.name}\"?") {
             okButton {
                 _dao.remove(_context?.database, dev)
-                refresh(true)
+                refresh(view)
                 toast("Device removed!")
             }
             cancelButton {  }

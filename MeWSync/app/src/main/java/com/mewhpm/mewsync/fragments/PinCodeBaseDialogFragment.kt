@@ -12,7 +12,6 @@ import org.jetbrains.anko.sdk27.coroutines.onClick
 
 abstract class PinCodeBaseDialogFragment: androidx.fragment.app.DialogFragment() {
     companion object {
-        private val SALT = CryptoUtils.getUniqueSalt()
         const val EMPTY = ""
     }
 
@@ -58,7 +57,7 @@ abstract class PinCodeBaseDialogFragment: androidx.fragment.app.DialogFragment()
         val pin = StringBuilder()
             .append(_pinHash)
             .append(number)
-            .append(SALT)
+            .append(CryptoUtils.getUniqueSalt())
             .append(number)
             .toString()
         _pinHash = CryptoUtils.sha256(pin)
