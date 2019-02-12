@@ -5,7 +5,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import com.mewhpm.mewsync.R
-import kotlinx.android.synthetic.main.pincode_fragment.view.*
+import kotlinx.android.synthetic.main.x01_pincode_fragment.view.*
 
 class PinCodeVerifyDialogFragment : PinCodeBaseDialogFragment() {
     var onPincodeEntered: (pincode: String) -> Boolean = { true }

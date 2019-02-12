@@ -10,26 +10,20 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.DialogFragment
 import com.mewhpm.mewsync.R
-import com.mewhpm.mewsync.Utils.CryptoUtils
-import com.mewhpm.mewsync.adapters.PairRecyclerViewAdapter
-import com.mewhpm.mewsync.adapters.RecyclerViewItemActionListener
+import com.mewhpm.mewsync.utils.CryptoUtils
 import com.mewhpm.mewsync.dao.KnownDevicesDao
 import com.mewhpm.mewsync.dao.database
 import com.mewhpm.mewsync.data.BleDevice
 import com.mewhpm.mewsync.services.BleDiscoveryService
 import com.mewhpm.mewsync.services.BleService
+import com.mewhpm.mewsync.ui.recyclerview.impl.RecyclerViewBleDiscoveryImpl
 import com.mikepenz.google_material_typeface_library.GoogleMaterial
 import com.mikepenz.iconics.IconicsDrawable
-import kotlinx.android.synthetic.main.mew_disovery_fragment_popup.view.*
-import org.jetbrains.anko.cancelButton
-import org.jetbrains.anko.okButton
-import org.jetbrains.anko.support.v4.alert
+import kotlinx.android.synthetic.main.x01_ble_disovery_fragment_dialog.view.*
 import org.jetbrains.anko.support.v4.toast
-import java.util.concurrent.CopyOnWriteArrayList
 
-class DeviceDiscoveryDialogFragment : DialogFragment() , RecyclerViewItemActionListener<BleDevice> {
+class DeviceDiscoveryDialogFragment : DialogFragment() {
     var closeListener: () -> Unit = {}
-    private val _pincodeFragment = PinCodeCreateDialogFragment()
 
     private var colorCounter = 0
     private var colorArray = arrayOf("#FF9999", "#99FF99", "#FFFF99")
@@ -41,10 +35,9 @@ class DeviceDiscoveryDialogFragment : DialogFragment() , RecyclerViewItemActionL
             when (intent.getIntExtra(BleService.EXTRA_RESULT_CODE, 0)) {
                 BleService.EXTRA_RESULT_CODE_OK -> {
                     if ((intent.hasExtra(BleService.EXTRA_DATA_MAC)) && (intent.hasExtra(BleService.EXTRA_DATA_NAME))) {
-                        _list.add(BleDevice(0,
+                        _rvList?.add(BleDevice(0,
                             intent.getStringExtra(BleService.EXTRA_DATA_MAC),
                             intent.getStringExtra(BleService.EXTRA_DATA_NAME)))
-                        _adapter.notifyDataSetChanged()
                     }
                 }
                 BleService.EXTRA_RESULT_CODE_ERROR -> {
@@ -64,21 +57,9 @@ class DeviceDiscoveryDialogFragment : DialogFragment() , RecyclerViewItemActionL
 
     private val _receiver = DeviceDiscoveryFragmentBroadcastReceiver()
     private val _dao = KnownDevicesDao()
-    private val _list = CopyOnWriteArrayList<BleDevice>()
-    private val _adapter = BleDeviceDiscoveryPairRecyclerViewAdapter()
-    private var _currentDevice: BleDevice? = null
 
-    inner class BleDeviceDiscoveryPairRecyclerViewAdapter: PairRecyclerViewAdapter<BleDevice>(mListener = this) {
-        override fun requestItem(index: Int): Triple<String, String, GoogleMaterial.Icon> = Triple(
-            _list[index].name,
-            _list[index].mac,
-            if (_dao.isExist(context?.database, _list[index]))
-                GoogleMaterial.Icon.gmd_bluetooth_disabled
-            else
-                GoogleMaterial.Icon.gmd_bluetooth)
-        override fun requestCount(): Int = _list.count()
-        override fun requestObject(index: Int): BleDevice = _list[index]
-    }
+    private var _rvList: RecyclerViewBleDiscoveryImpl? = null
+    private var _view: View? = null
 
     override fun onDismiss(dialog: DialogInterface) {
         super.onDismiss(dialog)
@@ -91,7 +72,7 @@ class DeviceDiscoveryDialogFragment : DialogFragment() , RecyclerViewItemActionL
     }
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
-        _list.clear()
+        _rvList?.clear()
 
         val dialog = super.onCreateDialog(savedInstanceState)
         dialog.setTitle("Searching...")
@@ -108,42 +89,29 @@ class DeviceDiscoveryDialogFragment : DialogFragment() , RecyclerViewItemActionL
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        val view = inflater.inflate(R.layout.mew_disovery_fragment_popup, container, false)
+        _view = inflater.inflate(R.layout.x01_ble_disovery_fragment_dialog, container, false)
 
-        _adapter.mIconColor = resources.getColor(R.color.colorBrandDark1, context?.theme)
-        view.discoveryList.layoutManager = androidx.recyclerview.widget.LinearLayoutManager(context)
-        view.discoveryList.adapter = _adapter
-        view.button.setCompoundDrawables(IconicsDrawable(context)
-            .icon(GoogleMaterial.Icon.gmd_bluetooth).sizeDp(32).color(Color.WHITE),null,null,null)
-        view.button.setOnClickListener {
-            this@DeviceDiscoveryDialogFragment.dismiss()
+        _rvList = _view!!.discoveryList
+        with (_rvList!!) {
+            create()
+            fragmentManagerRequestEvent = { this@DeviceDiscoveryDialogFragment.fragmentManager!! }
+            deviceExistRequestEvent = { dev -> _dao.isExist(context?.database, dev) }
+            pincodeCreatedEvent = {dev, pin ->
+                CryptoUtils.createPinCode(PreferenceManager.getDefaultSharedPreferences(context), pin, dev)
+                _dao.addNew(context?.database, dev)
+                toast("Device added!")
+                this@DeviceDiscoveryDialogFragment.dismiss()
+            }
         }
 
-        _pincodeFragment.onPinCodeCreated = {pin ->
-            CryptoUtils.createPinCode(PreferenceManager.getDefaultSharedPreferences(context), pin, _currentDevice!!)
-            _dao.addNew(context?.database, _currentDevice!!)
-            toast("Device added!")
-            this@DeviceDiscoveryDialogFragment.dismiss()
+        with (_view!!) {
+            button.setCompoundDrawables(IconicsDrawable(context)
+                .icon(GoogleMaterial.Icon.gmd_bluetooth).sizeDp(32).color(Color.WHITE),null,null,null)
+            button.setOnClickListener {
+                this@DeviceDiscoveryDialogFragment.dismiss()
+            }
         }
 
-        return view
+        return _view
     }
-
-    override fun onClick(dev: BleDevice) {
-        _currentDevice = dev
-        if (_dao.isExist(context?.database, dev)) {
-            alert (title = "Add new device", message = "Device with mac: \"${dev.mac}\" and name \"${dev.name}\" already added.") {
-                okButton {  }
-            }.show()
-        } else {
-            alert (title = "Add new device", message = "Device with mac: \"${dev.mac}\" and name \"${dev.name}\" will be added now.") {
-                okButton {
-                    _pincodeFragment.show(fragmentManager!!, "_pincodeCreatorDialog")
-                }
-                cancelButton {  }
-            }.show()
-        }
-    }
-
-    override fun onLongClick(dev: BleDevice) { }
 }

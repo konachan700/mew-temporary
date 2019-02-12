@@ -6,7 +6,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import com.mewhpm.mewsync.R
-import kotlinx.android.synthetic.main.pincode_fragment.view.*
+import kotlinx.android.synthetic.main.x01_pincode_fragment.view.*
 
 class PinCodeCreateDialogFragment : PinCodeBaseDialogFragment() {
     var onPinCodeCreated: (pinHash: String) -> Unit = {}

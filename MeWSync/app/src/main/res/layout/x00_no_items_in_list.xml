@@ -4,10 +4,9 @@
               android:orientation="vertical"
               android:layout_width="match_parent"
               android:layout_height="match_parent" android:id="@+id/noItemsHere1">
-
     <TextView
             android:layout_weight="0"
-            android:text="No items here"
+            android:text="@string/no_items_here"
             android:layout_width="match_parent"
             android:layout_height="wrap_content" android:id="@+id/textView4"
             android:paddingLeft="14dp" android:paddingRight="14dp" android:textStyle="bold|italic"

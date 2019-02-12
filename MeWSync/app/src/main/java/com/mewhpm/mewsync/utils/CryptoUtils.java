@@ -1,4 +1,4 @@
-package com.mewhpm.mewsync.Utils;
+package com.mewhpm.mewsync.utils;
 
 import android.content.SharedPreferences;
 import android.security.keystore.KeyGenParameterSpec;

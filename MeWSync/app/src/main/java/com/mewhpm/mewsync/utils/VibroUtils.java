@@ -1,4 +1,4 @@
-package com.mewhpm.mewsync.Utils;
+package com.mewhpm.mewsync.utils;
 
 import android.content.Context;
 import android.os.Build;

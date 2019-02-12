@@ -1,4 +1,4 @@
-package com.mewhpm.mewsync.ui.recyclerview
+package com.mewhpm.mewsync.ui.recyclerview.adapters
 
 import android.content.Context
 import android.graphics.drawable.Icon
@@ -8,18 +8,19 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
 import com.mewhpm.mewsync.R
-import com.mewhpm.mewsync.ui.recyclerview.AdapterTextPairWithIcon.ViewHolder
+import com.mewhpm.mewsync.ui.recyclerview.adapters.TextPairWithIconAdapter.ViewHolder
+import com.mewhpm.mewsync.ui.recyclerview.data.TextPairWithIcon
 import com.mikepenz.iconics.IconicsDrawable
-import kotlinx.android.synthetic.main.recyclerview_pair_element.view.*
+import kotlinx.android.synthetic.main.x01_recyclerview_pair_element.view.*
 
-abstract class AdapterTextPairWithIcon: androidx.recyclerview.widget.RecyclerView.Adapter<ViewHolder>() {
+abstract class TextPairWithIconAdapter: androidx.recyclerview.widget.RecyclerView.Adapter<ViewHolder>() {
     inner class ViewHolder(val mView: View) : androidx.recyclerview.widget.RecyclerView.ViewHolder(mView) {
         val elementIcon: ImageView = mView.element_icon
         val elementText: TextView = mView.element_text
         val elementTitle: TextView = mView.element_title
     }
 
-    abstract fun requestDataTextPairWithIcon(position: Int) : DataTextPairWithIcon
+    abstract fun requestDataTextPairWithIcon(position: Int) : TextPairWithIcon
     abstract fun requestListSize() : Int
     abstract fun requestContext() : Context
 
@@ -27,7 +28,7 @@ abstract class AdapterTextPairWithIcon: androidx.recyclerview.widget.RecyclerVie
     abstract fun onElementLongClick(position: Int)
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-        val view = LayoutInflater.from(parent.context).inflate(R.layout.recyclerview_pair_element, parent, false)
+        val view = LayoutInflater.from(parent.context).inflate(R.layout.x01_recyclerview_pair_element, parent, false)
         return ViewHolder(view)
     }
 

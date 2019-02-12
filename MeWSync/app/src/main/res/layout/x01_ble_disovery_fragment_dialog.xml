@@ -1,29 +1,28 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout
         xmlns:android="http://schemas.android.com/apk/res/android"
-        xmlns:app="http://schemas.android.com/apk/res-auto" xmlns:tools="http://schemas.android.com/tools"
+        xmlns:tools="http://schemas.android.com/tools"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_margin="32dp"
         android:orientation="vertical"
         android:minWidth="9999dp"
         android:minHeight="9999dp">
-    <androidx.recyclerview.widget.RecyclerView
+    <com.mewhpm.mewsync.ui.recyclerview.impl.RecyclerViewBleDiscoveryImpl
             android:layout_weight="1"
             android:id="@+id/discoveryList"
             android:name="com.mewhpm.mewsync.fragments.DeviceDiscoveryFragment"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             tools:context=".fragments.DeviceDiscoveryDialogFragment"
-            tools:listitem="@layout/device_disovery_fragment_item">
-    </androidx.recyclerview.widget.RecyclerView>
+            tools:listitem="@layout/x01_recyclerview_pair_element"/>
     <Button
-            android:text="Stop scanning"
+            android:text="@string/stop_scanning"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_weight="0"
             android:id="@+id/button" android:textSize="18sp" android:textStyle="bold"
             android:textColor="@color/colorWhite" android:background="@color/colorBrandDark1"
-            android:layout_margin="4dp" android:gravity="center" android:paddingLeft="12dp"
-            android:paddingRight="16dp"/>
+            android:layout_margin="4dp" android:gravity="center" android:paddingStart="12dp"
+            android:paddingEnd="16dp"/>
 </LinearLayout>

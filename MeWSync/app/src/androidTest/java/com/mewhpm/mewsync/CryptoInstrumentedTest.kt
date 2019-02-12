@@ -1,7 +1,7 @@
 package com.mewhpm.mewsync
 
 import androidx.test.runner.AndroidJUnit4
-import com.mewhpm.mewsync.Utils.CryptoUtils
+import com.mewhpm.mewsync.utils.CryptoUtils
 import org.junit.Assert.*
 import org.junit.Test
 import org.junit.runner.RunWith

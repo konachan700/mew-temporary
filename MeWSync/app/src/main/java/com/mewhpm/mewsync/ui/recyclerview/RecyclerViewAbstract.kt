@@ -3,18 +3,20 @@ package com.mewhpm.mewsync.ui.recyclerview
 import android.content.Context
 import android.util.AttributeSet
 import androidx.recyclerview.widget.RecyclerView
+import com.mewhpm.mewsync.ui.recyclerview.adapters.TextPairWithIconAdapter
+import com.mewhpm.mewsync.ui.recyclerview.data.TextPairWithIcon
 
 abstract class RecyclerViewAbstract<T> : RecyclerView {
     constructor(context: Context) : super(context)
     constructor(context: Context, attributeSet: AttributeSet?) : super(context, attributeSet)
     constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int) : super(context, attrs, defStyleAttr)
 
-    abstract fun requestList() : List<Pair<DataTextPairWithIcon, T>>
-    abstract fun onElementClick(position: Int, item: DataTextPairWithIcon, obj: T)
-    abstract fun onElementLongClick(position: Int, item: DataTextPairWithIcon, obj: T)
+    abstract fun requestList() : List<Pair<TextPairWithIcon, T>>
+    abstract fun onElementClick(position: Int, item: TextPairWithIcon, obj: T)
+    abstract fun onElementLongClick(position: Int, item: TextPairWithIcon, obj: T)
 
-    inner class AdapterTextPairWithIconImpl : AdapterTextPairWithIcon() {
-        override fun requestDataTextPairWithIcon(position: Int): DataTextPairWithIcon = requestList()[position].first
+    inner class TextPairWithIconAdapterImpl : TextPairWithIconAdapter() {
+        override fun requestDataTextPairWithIcon(position: Int): TextPairWithIcon = requestList()[position].first
         override fun requestListSize(): Int = requestList().size
         override fun requestContext(): Context = this@RecyclerViewAbstract.context
 
@@ -29,6 +31,6 @@ abstract class RecyclerViewAbstract<T> : RecyclerView {
 
     open fun create() {
         this.layoutManager = androidx.recyclerview.widget.LinearLayoutManager(this.context)
-        this.adapter = AdapterTextPairWithIconImpl()
+        this.adapter = TextPairWithIconAdapterImpl()
     }
 }

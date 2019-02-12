@@ -21,24 +21,24 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content">
             <TextView
-                    android:text="MeW HPM"
+                    android:text="@string/mew_hpm"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:id="@+id/textView"
-                    android:textSize="36dp" android:textStyle="bold" android:fontFamily="sans-serif"
-                    android:paddingLeft="16dp" android:gravity="center|start"
+                    android:textSize="36sp" android:textStyle="bold" android:fontFamily="sans-serif"
+                    android:paddingStart="16dp" android:gravity="center|start"
                     android:textColor="@color/colorWhite"/>
             <TextView
-                    android:text="Hardware Password Manager"
+                    android:text="@string/hardware_password_manager"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:id="@+id/textView2"
                     android:textColor="@color/colorWhite"
-                    android:paddingLeft="20dp"
-                    android:textSize="14dp"/>
+                    android:paddingStart="20dp"
+                    android:textSize="14sp"/>
         </LinearLayout>
     </LinearLayout>
-    <include android:layout_width="match_parent" android:layout_height="match_parent" layout="@layout/wait_fragment"
+    <include android:layout_width="match_parent" android:layout_height="match_parent" layout="@layout/x00_wait_fragment"
              android:layout_weight="99" android:id="@+id/waitDummy1"/>
     <FrameLayout
             android:layout_weight="99"

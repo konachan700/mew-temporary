@@ -1,0 +1,12 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+      xmlns:app="http://schemas.android.com/apk/res-auto"
+      xmlns:tools="http://schemas.android.com/tools"
+      tools:context="com.mewhpm.mewsync.DeviceActivity">
+
+    <item android:id="@+id/menuItemPasswords"
+          app:iiv_color="@color/colorBrandDark1"
+          app:iiv_icon="gmd-plus-circle"
+          app:iiv_size="28dp"
+          android:title="@string/passwords"
+          android:orderInCategory="100"/>
+</menu>

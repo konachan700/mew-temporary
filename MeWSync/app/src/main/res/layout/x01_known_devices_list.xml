@@ -9,22 +9,26 @@
                   android:layout_height="match_parent"
                   android:orientation="vertical" android:gravity="center" android:padding="8dp"
                   android:background="@drawable/list_item_bg">
-        <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/list"
-                android:name="com.mewhpm.mewsync.fragments.DeviceDiscoveryFragment"
+        <com.mewhpm.mewsync.ui.recyclerview.impl.RecyclerViewDevicesImpl
+                android:id="@+id/listRV1"
+                android:name="com.mewhpm.mewsync.fragments.DevicesFragment"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:layout_marginLeft="0dp"
                 android:layout_marginRight="0dp"
                 android:layout_weight="0"
-                app:layoutManager="LinearLayoutManager"
-                tools:context=".fragments.DeviceDiscoveryDialogFragment"
-                tools:listitem="@layout/device_disovery_fragment_item" android:visibility="gone"/>
-        <include layout="@layout/no_items_in_list" android:id="@+id/noItems" android:layout_width="match_parent"
-                 android:layout_height="match_parent" android:layout_weight="1" android:visibility="visible"/>
+                tools:context=".fragments.DevicesFragment"
+                tools:listitem="@layout/x01_recyclerview_pair_element"
+                android:visibility="gone"/>
+        <include layout="@layout/x00_no_items_in_list"
+                 android:id="@+id/noItemsInList1"
+                 android:layout_width="match_parent"
+                 android:layout_height="match_parent"
+                 android:layout_weight="1"
+                 android:visibility="visible"/>
     </LinearLayout>
     <com.google.android.material.floatingactionbutton.FloatingActionButton
-            android:id="@+id/fab"
+            android:id="@+id/addNewBleDevBtn1"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="bottom|end"

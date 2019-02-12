@@ -6,5 +6,10 @@
     <string name="pincode_cannot_be_empty">Pincode cannot be empty!</string>
     <string name="entered_pincodes_does_not_match">Entered pincodes does not match!</string>
     <string name="incorrect_pincode">Incorrect pincode. Please, try again</string>
-    <string name="wait_for_keys_generating">Generate keypair...</string>
+    <string name="wait_for_keys_generating">Generate keypair…</string>
+    <string name="no_items_here">No items here</string>
+    <string name="mew_hpm">MeW HPM</string>
+    <string name="hardware_password_manager">Hardware Password Manager</string>
+    <string name="stop_scanning">Stop scanning</string>
+    <string name="passwords">Passwords</string>
 </resources>

@@ -1,7 +1,7 @@
 package com.mewhpm.mewsync.dao
 
-import com.mewhpm.mewsync.Utils.CryptoUtils.decryptRSA
-import com.mewhpm.mewsync.Utils.CryptoUtils.encryptRSA
+import com.mewhpm.mewsync.utils.CryptoUtils.decryptRSA
+import com.mewhpm.mewsync.utils.CryptoUtils.encryptRSA
 import com.mewhpm.mewsync.data.PasswordFolder
 import com.mewhpm.mewsync.data.PasswordRecord
 
