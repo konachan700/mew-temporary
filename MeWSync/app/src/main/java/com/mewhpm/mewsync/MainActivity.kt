@@ -1,5 +1,6 @@
 package com.mewhpm.mewsync
 
+import android.content.ContentProvider
 import android.content.Context
 import android.os.Bundle
 import android.view.Menu
@@ -33,16 +34,18 @@ class MainActivity : AppCompatActivity() {
         CryptoUtils.checkGenerated {
             this@MainActivity.runOnUiThread {
                 this.waitDummy1.visibility = View.GONE
-                this.bottomView.visibility = View.VISIBLE
+                //this.bottomView.visibility = View.VISIBLE
                 this.fragment_holder.visibility = View.VISIBLE
 
-                bottomView.addIcon(GoogleMaterial.Icon.gmd_bluetooth_connected, "MeW Devices") {
-                    showTab(_knownDevicesFragment)
-                }
 
-                bottomView.addIcon(GoogleMaterial.Icon.gmd_settings, "Settings") {
-                    toast("test2")
-                }
+
+//                bottomView.addIcon(GoogleMaterial.Icon.gmd_bluetooth_connected, "MeW Devices") {
+//                    showTab(_knownDevicesFragment)
+//                }
+//
+//                bottomView.addIcon(GoogleMaterial.Icon.gmd_settings, "Settings") {
+//                    toast("test2")
+//                }
 
                 val transaction = supportFragmentManager.beginTransaction()
                 transaction.add(R.id.fragment_holder, _knownDevicesFragment)

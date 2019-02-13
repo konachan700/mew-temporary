@@ -12,7 +12,7 @@ import androidx.fragment.app.DialogFragment
 import com.mewhpm.mewsync.R
 import com.mewhpm.mewsync.utils.CryptoUtils
 import com.mewhpm.mewsync.dao.KnownDevicesDao
-import com.mewhpm.mewsync.dao.database
+import com.mewhpm.mewsync.dao.connectionSource
 import com.mewhpm.mewsync.data.BleDevice
 import com.mewhpm.mewsync.services.BleDiscoveryService
 import com.mewhpm.mewsync.services.BleService
@@ -56,10 +56,15 @@ class DeviceDiscoveryDialogFragment : DialogFragment() {
     }
 
     private val _receiver = DeviceDiscoveryFragmentBroadcastReceiver()
-    private val _dao = KnownDevicesDao()
+    private var dao : KnownDevicesDao? = null
 
     private var _rvList: RecyclerViewBleDiscoveryImpl? = null
     private var _view: View? = null
+
+    private fun getDao() : KnownDevicesDao {
+        if (dao == null) dao = KnownDevicesDao(this.requireContext().applicationContext.connectionSource)
+        return dao!!
+    }
 
     override fun onDismiss(dialog: DialogInterface) {
         super.onDismiss(dialog)
@@ -95,10 +100,10 @@ class DeviceDiscoveryDialogFragment : DialogFragment() {
         with (_rvList!!) {
             create()
             fragmentManagerRequestEvent = { this@DeviceDiscoveryDialogFragment.fragmentManager!! }
-            deviceExistRequestEvent = { dev -> _dao.isExist(context?.database, dev) }
+            deviceExistRequestEvent = { dev -> getDao().isExist(dev) }
             pincodeCreatedEvent = {dev, pin ->
                 CryptoUtils.createPinCode(PreferenceManager.getDefaultSharedPreferences(context), pin, dev)
-                _dao.addNew(context?.database, dev)
+                getDao().addNew(dev)
                 toast("Device added!")
                 this@DeviceDiscoveryDialogFragment.dismiss()
             }

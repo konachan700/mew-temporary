@@ -18,6 +18,7 @@ import com.mewhpm.mewsync.DeviceActivity
 import com.mewhpm.mewsync.R
 import com.mewhpm.mewsync.utils.CryptoUtils
 import com.mewhpm.mewsync.dao.KnownDevicesDao
+import com.mewhpm.mewsync.dao.connectionSource
 import com.mewhpm.mewsync.dao.database
 import com.mewhpm.mewsync.data.BleDevice
 import com.mewhpm.mewsync.ui.recyclerview.impl.RecyclerViewDevicesImpl
@@ -32,13 +33,13 @@ class DevicesFragment : Fragment() {
         private const val ACCESS_COARSE_LOCATION = 43
     }
 
-    private val _dao = KnownDevicesDao()
     private val _bluetoothAdapter = BluetoothAdapter.getDefaultAdapter()
     private val _searchDialog = DeviceDiscoveryDialogFragment()
 
     private var _pref: SharedPreferences? = null
     private var _rvDevices : RecyclerViewDevicesImpl? = null
     private var _view: View? = null
+    private var dao : KnownDevicesDao? = null
 
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
         if (!_bluetoothAdapter.isEnabled) {
@@ -61,7 +62,7 @@ class DevicesFragment : Fragment() {
     }
 
     private fun refreshFromDb() {
-        val list: List<BleDevice> = _dao.getAll(requireContext().database)
+        val list: List<BleDevice> = getDao().getAll()
         if (_view != null) {
             _rvDevices!!.visibility = if (list.isEmpty()) View.GONE else View.VISIBLE
             _view!!.noItemsInList1.visibility = if (list.isEmpty()) View.VISIBLE else View.GONE
@@ -90,14 +91,20 @@ class DevicesFragment : Fragment() {
         _pref = null
     }
 
+    private fun getDao() : KnownDevicesDao {
+        if (dao == null) dao = KnownDevicesDao(this.requireContext().applicationContext.connectionSource)
+        return dao!!
+    }
+
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         _view = inflater.inflate(R.layout.x01_known_devices_list, container, false)
+
         _rvDevices = _view!!.listRV1
         with (_rvDevices!!) {
             create()
             fragmentManagerRequestEvent = { this@DevicesFragment.fragmentManager!! }
             deleteEvent = { _, _, dev ->
-                _dao.remove(this@DevicesFragment.requireContext().database, dev)
+                getDao().remove(dev)
                 refreshFromDb()
             }
             setDefaultEvent = { _, _, dev ->

@@ -15,7 +15,7 @@
         <ImageView
                 android:src="@drawable/mewlogo"
                 android:layout_height="76dp" android:id="@+id/imageView2"
-                android:adjustViewBounds="true" android:layout_width="wrap_content"/>
+                android:adjustViewBounds="true" android:layout_width="wrap_content" android:padding="6dp"/>
         <LinearLayout
                 android:orientation="vertical"
                 android:layout_width="match_parent"
@@ -46,7 +46,7 @@
             android:layout_height="match_parent" android:id="@+id/fragment_holder" android:visibility="gone">
 
     </FrameLayout>
-    <com.mewhpm.mewsync.ui.BottomView
+    <!--com.mewhpm.mewsync.ui.BottomView
             android:layout_weight="0"
             app:menu="@menu/bottom_nav_block"
             app:itemBackground="@color/colorBrandDark1"
@@ -54,5 +54,5 @@
             app:itemTextColor="@color/colorWhite"
             android:layout_width="match_parent"
             android:layout_height="64dp"
-            android:id="@+id/bottomView" android:background="@color/colorBrandDark1" android:visibility="gone"/>
+            android:id="@+id/bottomView" android:background="@color/colorBrandDark1" android:visibility="gone"/-->
 </LinearLayout>

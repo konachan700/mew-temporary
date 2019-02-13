@@ -1,40 +1,30 @@
 package com.mewhpm.mewsync.dao
 
+import com.j256.ormlite.dao.Dao
+import com.j256.ormlite.dao.DaoManager
+import com.j256.ormlite.support.ConnectionSource
+import com.j256.ormlite.table.TableUtils
 import com.mewhpm.mewsync.data.BleDevice
-import org.jetbrains.anko.db.classParser
-import org.jetbrains.anko.db.delete
-import org.jetbrains.anko.db.insert
-import org.jetbrains.anko.db.select
 
-class KnownDevicesDao {
-    private val TABLE = "BleDevices"
-
-    fun getAll(db: AppDatabaseOpenHelper?) : List<BleDevice> {
-        return db?.use {
-            select(TABLE).parseList(classParser<BleDevice>())
-        } ?: ArrayList()
+class KnownDevicesDao(val connectionSource : ConnectionSource) {
+    private val dao : Dao<BleDevice, Long> = DaoManager.createDao(connectionSource, BleDevice::class.java)
+    init {
+        TableUtils.createTableIfNotExists(connectionSource, BleDevice::class.java)
     }
 
-    fun isExist(db: AppDatabaseOpenHelper?, dev: BleDevice): Boolean {
-        val x = db?.use {
-            select(TABLE)
-                .whereArgs("mac = {mac}", "mac" to dev.mac)
-                .limit(1)
-                .parseOpt(classParser<BleDevice>())
-        }
-        return x != null
+    fun getAll() : List<BleDevice> {
+        return dao.queryForAll()
     }
 
-    fun addNew(db: AppDatabaseOpenHelper?, dev: BleDevice): Long {
-        return db?.use {
-            insert(TABLE,
-                "mac" to dev.mac, "name" to dev.name)
-        } ?: 0
+    fun isExist(dev: BleDevice): Boolean {
+        return !dao.queryForEq("mac", dev.mac).isEmpty()
     }
 
-    fun remove(db: AppDatabaseOpenHelper?, dev: BleDevice) {
-        db?.use {
-            delete(TABLE, "id = {devid}", "devid" to dev.id)
-        }
+    fun addNew(dev: BleDevice) {
+        dao.create(dev)
+    }
+
+    fun remove(dev: BleDevice) {
+        dao.delete(dev)
     }
 }

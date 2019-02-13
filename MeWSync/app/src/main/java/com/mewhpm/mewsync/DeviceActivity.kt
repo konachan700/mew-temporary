@@ -17,11 +17,11 @@ import org.jetbrains.anko.sdk27.coroutines.onClick
 import com.mikepenz.iconics.context.IconicsContextWrapper
 import ru.ztrap.iconics.kt.wrapByIconics
 import android.view.MenuInflater
+import android.view.MenuItem
 import com.mikepenz.iconics.utils.IconicsMenuInflaterUtil
 
 
 class DeviceActivity : Activity() {
-    private val menuIconMap : HashMap<Int, Drawable> = HashMap()
 
     private fun generateIconDrawable(icon: GoogleMaterial.Icon) : Drawable {
         return Icon.createWithBitmap(
@@ -39,6 +39,23 @@ class DeviceActivity : Activity() {
                 .toBitmap())
     }
 
+    private fun onMenuClickSelector(menuItemResId : Int) {
+        when (menuItemResId) {
+            R.id.menuItemPasswords -> {}
+            R.id.menuSync -> {}
+        }
+    }
+
+    private fun onMenuClickBase(menuItem : MenuItem) : Boolean {
+        for (i in 0..(this@DeviceActivity.navView1.menu.size() - 1)) {
+            this@DeviceActivity.navView1.menu.getItem(i).isChecked = false
+        }
+        menuItem.isChecked = true
+        this@DeviceActivity.drawerLayout1.closeDrawers()
+        onMenuClickSelector(menuItem.itemId)
+        return true
+    }
+
     override fun attachBaseContext(newBase: Context) {
         super.attachBaseContext(newBase.wrapByIconics())
     }
@@ -46,13 +63,13 @@ class DeviceActivity : Activity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.x02_activity_device)
-        menuIconMap.putAll(hashMapOf(
-            R.id.menuItemPasswords to generateIconDrawable(GoogleMaterial.Icon.gmd_vpn_key)
-        ))
 
+        this.navView1.menu.clear()
+        this.navView1.setNavigationItemSelectedListener { menuItem -> onMenuClickBase(menuItem) }
+        IconicsMenuInflaterUtil.inflate(menuInflater, this, R.menu.device_navigation_view, this.navView1.menu)
 
         with (this.menuButton) {
-            setImageIcon(generateIcon(GoogleMaterial.Icon.gmd_apps, R.color.colorBrandYellow))
+            setImageIcon(generateIcon(GoogleMaterial.Icon.gmd_apps, R.color.colorWhite))
             onClick {
                 this@DeviceActivity.drawerLayout1.openDrawer(GravityCompat.START)
             }
@@ -68,10 +85,6 @@ class DeviceActivity : Activity() {
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         IconicsMenuInflaterUtil.inflate(menuInflater, this, R.menu.device_navigation_view, menu)
-//        menuIconMap.forEach {
-//            val menuItem = menu.findItem(it.key)
-//            menuItem?.icon = it.value
-//        }
         return true
     }
 }

@@ -12,4 +12,5 @@
     <string name="hardware_password_manager">Hardware Password Manager</string>
     <string name="stop_scanning">Stop scanning</string>
     <string name="passwords">Passwords</string>
+    <string name="sync_with_device">Sync with MeW</string>
 </resources>
