@@ -1,4 +1,4 @@
-package com.mewhpm.mewsync.fragments
+package com.mewhpm.mewsync.ui.pinpad
 
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -21,6 +21,8 @@ abstract class PinCodeBaseDialogFragment: androidx.fragment.app.DialogFragment()
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val view = inflater.inflate(R.layout.x01_pincode_fragment, container, false)
         view.pincodeBox1.text.clear()
+
+        dialog?.window?.setBackgroundDrawableResource(R.drawable.x00_dialog_bg)
 
         view.button11.onClick { addNumber("1") }
         view.button12.onClick { addNumber("2") }

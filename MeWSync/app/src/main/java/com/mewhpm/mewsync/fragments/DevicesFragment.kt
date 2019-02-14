@@ -21,6 +21,7 @@ import com.mewhpm.mewsync.dao.KnownDevicesDao
 import com.mewhpm.mewsync.dao.connectionSource
 import com.mewhpm.mewsync.dao.database
 import com.mewhpm.mewsync.data.BleDevice
+import com.mewhpm.mewsync.ui.pinpad.verifyPin
 import com.mewhpm.mewsync.ui.recyclerview.impl.RecyclerViewDevicesImpl
 import com.mikepenz.google_material_typeface_library.GoogleMaterial
 import com.mikepenz.iconics.IconicsDrawable
@@ -92,7 +93,7 @@ class DevicesFragment : Fragment() {
     }
 
     private fun getDao() : KnownDevicesDao {
-        if (dao == null) dao = KnownDevicesDao(this.requireContext().applicationContext.connectionSource)
+        if (dao == null) dao = KnownDevicesDao.getInstance(this.requireContext().applicationContext.connectionSource)
         return dao!!
     }
 
@@ -102,18 +103,24 @@ class DevicesFragment : Fragment() {
         _rvDevices = _view!!.listRV1
         with (_rvDevices!!) {
             create()
-            fragmentManagerRequestEvent = { this@DevicesFragment.fragmentManager!! }
             deleteEvent = { _, _, dev ->
                 getDao().remove(dev)
                 refreshFromDb()
             }
             setDefaultEvent = { _, _, dev ->
-
+                getDao().setDefault(dev)
+                refreshFromDb()
             }
-            pinCodeEnteredEvent = { pin, dev ->
-                val retVal = CryptoUtils.verifyPinCode(_pref, pin, dev)
-                if (retVal) openDevice(pin, dev)
-                retVal
+            setDescriptionEvent = { dev, desc ->
+                dev.text = desc
+                getDao().save(dev)
+            }
+            deviceItemClickEvent = { dev ->
+                verifyPin { pin ->
+                    val retVal = CryptoUtils.verifyPinCode(_pref, pin, dev)
+                    if (retVal) openDevice(pin, dev)
+                    retVal
+                }
             }
         }
 

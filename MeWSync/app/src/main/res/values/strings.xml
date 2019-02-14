@@ -13,4 +13,7 @@
     <string name="stop_scanning">Stop scanning</string>
     <string name="passwords">Passwords</string>
     <string name="sync_with_device">Sync with MeW</string>
+    <string name="change_description">Change</string>
+    <string name="back">Back</string>
+    <string name="change_desc">Change descrition</string>
 </resources>

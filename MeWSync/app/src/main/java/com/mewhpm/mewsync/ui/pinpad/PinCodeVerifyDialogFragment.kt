@@ -1,4 +1,4 @@
-package com.mewhpm.mewsync.fragments
+package com.mewhpm.mewsync.ui.pinpad
 
 import android.os.Bundle
 import android.view.LayoutInflater

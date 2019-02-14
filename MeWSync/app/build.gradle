@@ -41,6 +41,10 @@ dependencies {
     // LOAD ANIMATIONS
     implementation 'com.github.ybq:Android-SpinKit:1.2.0'
 
+    // DIALOGS
+    implementation 'com.afollestad.material-dialogs:core:2.0.0'
+    implementation 'com.afollestad.material-dialogs:input:2.0.0'
+
     // ICONS
     implementation 'ru.ztrap.iconics:core-ktx:1.0.3'
     implementation 'ru.ztrap.iconics:views-ktx:1.0.3'

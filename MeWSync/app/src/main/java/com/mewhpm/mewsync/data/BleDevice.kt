@@ -24,4 +24,10 @@ class BleDevice {
 
     @DatabaseField
     var name: String = EMPTY
+
+    @DatabaseField
+    var text: String = EMPTY
+
+    @DatabaseField
+    var default: Boolean = false
 }

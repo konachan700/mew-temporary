@@ -16,6 +16,7 @@ import com.mewhpm.mewsync.dao.connectionSource
 import com.mewhpm.mewsync.data.BleDevice
 import com.mewhpm.mewsync.services.BleDiscoveryService
 import com.mewhpm.mewsync.services.BleService
+import com.mewhpm.mewsync.ui.pinpad.createPin
 import com.mewhpm.mewsync.ui.recyclerview.impl.RecyclerViewBleDiscoveryImpl
 import com.mikepenz.google_material_typeface_library.GoogleMaterial
 import com.mikepenz.iconics.IconicsDrawable
@@ -62,7 +63,7 @@ class DeviceDiscoveryDialogFragment : DialogFragment() {
     private var _view: View? = null
 
     private fun getDao() : KnownDevicesDao {
-        if (dao == null) dao = KnownDevicesDao(this.requireContext().applicationContext.connectionSource)
+        if (dao == null) dao = KnownDevicesDao.getInstance(this.requireContext().applicationContext.connectionSource)
         return dao!!
     }
 
@@ -99,13 +100,14 @@ class DeviceDiscoveryDialogFragment : DialogFragment() {
         _rvList = _view!!.discoveryList
         with (_rvList!!) {
             create()
-            fragmentManagerRequestEvent = { this@DeviceDiscoveryDialogFragment.fragmentManager!! }
             deviceExistRequestEvent = { dev -> getDao().isExist(dev) }
-            pincodeCreatedEvent = {dev, pin ->
-                CryptoUtils.createPinCode(PreferenceManager.getDefaultSharedPreferences(context), pin, dev)
-                getDao().addNew(dev)
-                toast("Device added!")
-                this@DeviceDiscoveryDialogFragment.dismiss()
+            deviceItemClickEvent = { dev ->
+                createPin { pin ->
+                    CryptoUtils.createPinCode(PreferenceManager.getDefaultSharedPreferences(context), pin, dev)
+                    getDao().addNew(dev)
+                    toast("Device added!")
+                    this@DeviceDiscoveryDialogFragment.dismiss()
+                }
             }
         }
 

@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-              android:orientation="vertical"
               android:layout_width="match_parent"
-              android:layout_height="match_parent" android:padding="12dp">
+              android:layout_height="match_parent" android:orientation="vertical">
 
     <TextView
             android:text="Enter PIN-code"
@@ -22,111 +21,114 @@
             android:text="Incorrect PIN-code. Please, try again."
             android:layout_width="match_parent"
             android:layout_height="wrap_content" android:id="@+id/incorrectPinWarning" android:layout_marginLeft="10dp"
-            android:layout_marginBottom="10dp" android:textStyle="bold" android:textColor="@color/colorAccent"/>
+            android:layout_marginBottom="10dp" android:textStyle="bold" android:textColor="@color/colorBrandDefaultElement"/>
+
     <LinearLayout
             android:orientation="horizontal"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content" android:gravity="center" android:layout_margin="0dp"
+            android:padding="1dp">
         <Button
                 android:text="1"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content" android:id="@+id/button11" android:layout_weight="1"
-                android:layout_margin="2dp" android:textStyle="bold" android:textSize="24sp"
-                android:background="@color/colorBrandDark1" android:textColor="@color/colorWhite"
-                android:padding="8dp" android:enabled="true"/>
-        <Button
-                android:text="2"
-                android:layout_width="wrap_content"
-                android:layout_margin="2dp"
-                android:layout_height="wrap_content" android:id="@+id/button12" android:layout_weight="1"
-                android:textStyle="bold" android:textSize="24sp" android:background="@color/colorBrandDark1"
-                android:textColor="@color/colorWhite" android:padding="8dp" android:enabled="true"/>
-        <Button
-                android:text="3"
-                android:layout_width="wrap_content"
-                android:layout_margin="2dp"
-                android:layout_height="wrap_content" android:id="@+id/button13" android:layout_weight="1"
-                android:textStyle="bold" android:textSize="24sp" android:background="@color/colorBrandDark1"
-                android:textColor="@color/colorWhite" android:padding="8dp" android:enabled="true"/>
-    </LinearLayout>
-    <LinearLayout
-            android:orientation="horizontal"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content">
-        <Button
-                android:text="4"
-                android:layout_margin="2dp"
+                android:id="@+id/button11"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:enabled="true"
+                style="@style/RoundButtonTheme"/>
+        <Button
+                android:text="2"
+                android:id="@+id/button12"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:enabled="true"
+                style="@style/RoundButtonTheme"/>
+        <Button
+                android:text="3"
+                android:id="@+id/button13"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:enabled="true"
+                style="@style/RoundButtonTheme"/>
+    </LinearLayout>
+    <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" android:gravity="center" android:layout_margin="0dp"
+            android:padding="1dp">
+        <Button
+                android:text="4"
                 android:id="@+id/button21"
-                android:layout_weight="1" android:textStyle="bold" android:textSize="24sp"
-                android:background="@color/colorBrandDark1" android:textColor="@color/colorWhite"
-                android:padding="8dp" android:enabled="true"/>
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:enabled="true"
+                style="@style/RoundButtonTheme"/>
         <Button
                 android:text="5"
-                android:layout_margin="2dp"
+                android:id="@+id/button22"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content" android:id="@+id/button22" android:layout_weight="1"
-                android:textStyle="bold" android:textSize="24sp" android:background="@color/colorBrandDark1"
-                android:textColor="@color/colorWhite" android:padding="8dp" android:enabled="true"/>
+                android:layout_height="wrap_content"
+                android:enabled="true"
+                style="@style/RoundButtonTheme"/>
         <Button
                 android:text="6"
-                android:layout_margin="2dp"
+                android:id="@+id/button23"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content" android:id="@+id/button23" android:layout_weight="1"
-                android:textStyle="bold" android:textSize="24sp" android:background="@color/colorBrandDark1"
-                android:textColor="@color/colorWhite" android:padding="8dp" android:enabled="true"/>
+                android:layout_height="wrap_content"
+                android:enabled="true"
+                style="@style/RoundButtonTheme"/>
     </LinearLayout>
     <LinearLayout
             android:orientation="horizontal"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content" android:gravity="center" android:layout_margin="0dp"
+            android:padding="1dp">
         <Button
                 android:text="7"
-                android:layout_margin="2dp"
+                android:id="@+id/button31"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content" android:id="@+id/button31" android:layout_weight="1"
-                android:textStyle="bold" android:textSize="24sp" android:background="@color/colorBrandDark1"
-                android:textColor="@color/colorWhite" android:padding="8dp" android:enabled="true"/>
+                android:layout_height="wrap_content"
+                android:enabled="true"
+                style="@style/RoundButtonTheme"/>
         <Button
                 android:text="8"
-                android:layout_margin="2dp"
+                android:id="@+id/button32"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content" android:id="@+id/button32" android:layout_weight="1"
-                android:textStyle="bold" android:textSize="24sp" android:background="@color/colorBrandDark1"
-                android:textColor="@color/colorWhite" android:padding="8dp" android:enabled="true"/>
+                android:layout_height="wrap_content"
+                android:enabled="true"
+                style="@style/RoundButtonTheme"/>
         <Button
                 android:text="9"
-                android:layout_margin="2dp"
+                android:id="@+id/button33"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content" android:id="@+id/button33" android:layout_weight="1"
-                android:textStyle="bold" android:textSize="24sp" android:background="@color/colorBrandDark1"
-                android:textColor="@color/colorWhite" android:padding="8dp" android:enabled="true"/>
+                android:layout_height="wrap_content"
+                android:enabled="true"
+                style="@style/RoundButtonTheme"/>
     </LinearLayout>
     <LinearLayout
             android:orientation="horizontal"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content" android:gravity="center" android:layout_margin="0dp"
+            android:padding="1dp">
         <Button
-                android:text="CLEAR"
-                android:layout_margin="2dp"
+                android:text="CLR"
+                android:id="@+id/button41"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content" android:id="@+id/button41" android:layout_weight="1"
-                android:textStyle="bold" android:textSize="24sp" android:background="@color/colorBrandDark1"
-                android:textColor="@color/colorWhite" android:padding="8dp" android:enabled="true"/>
+                android:layout_height="wrap_content"
+                android:enabled="true"
+                style="@style/RoundButtonTheme"/>
         <Button
                 android:text="0"
-                android:layout_margin="2dp"
+                android:id="@+id/button42"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content" android:id="@+id/button42" android:layout_weight="1"
-                android:textStyle="bold" android:textSize="24sp" android:background="@color/colorBrandDark1"
-                android:textColor="@color/colorWhite" android:padding="8dp" android:enabled="true"/>
+                android:layout_height="wrap_content"
+                android:enabled="true"
+                style="@style/RoundButtonTheme"/>
         <Button
                 android:text="OK"
-                android:layout_margin="2dp"
+                android:id="@+id/button43"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content" android:id="@+id/button43" android:layout_weight="1"
-                android:textStyle="bold" android:textSize="24sp" android:background="@color/colorBrandDark1"
-                android:textColor="@color/colorWhite" android:padding="8dp" android:enabled="true"/>
+                android:layout_height="wrap_content"
+                android:enabled="true"
+                style="@style/RoundButtonTheme"/>
     </LinearLayout>
 </LinearLayout>

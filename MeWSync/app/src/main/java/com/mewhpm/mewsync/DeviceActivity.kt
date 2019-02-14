@@ -76,7 +76,7 @@ class DeviceActivity : Activity() {
         }
 
         with (this.fragmentMenuButton) {
-            setImageIcon(generateIcon(GoogleMaterial.Icon.gmd_menu, R.color.colorWhite))
+            setImageIcon(generateIcon(GoogleMaterial.Icon.gmd_more_horiz, R.color.colorWhite))
             onClick {
 
             }

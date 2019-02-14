@@ -6,7 +6,7 @@ import androidx.core.content.ContextCompat
 import androidx.fragment.app.FragmentManager
 import com.mewhpm.mewsync.R
 import com.mewhpm.mewsync.data.BleDevice
-import com.mewhpm.mewsync.fragments.PinCodeCreateDialogFragment
+import com.mewhpm.mewsync.ui.pinpad.PinCodeCreateDialogFragment
 import com.mewhpm.mewsync.ui.recyclerview.data.TextPairWithIcon
 import com.mewhpm.mewsync.ui.recyclerview.RecyclerViewAbstract
 import com.mikepenz.google_material_typeface_library.GoogleMaterial
@@ -20,13 +20,9 @@ class RecyclerViewBleDiscoveryImpl : RecyclerViewAbstract<BleDevice> {
     constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int) : super(context, attrs, defStyleAttr)
 
     private val list = ArrayList<Pair<TextPairWithIcon, BleDevice>>()
-    private val pincodeFragment = PinCodeCreateDialogFragment()
 
-    var fragmentManagerRequestEvent : () -> FragmentManager = { throw NotImplementedError("fragmentManagerRequestEvent not set") }
     var deviceExistRequestEvent : (dev : BleDevice) -> Boolean = { throw NotImplementedError("deviceExistRequestEvent not set") }
-    var pincodeCreatedEvent : (dev: BleDevice, pincode: String) -> Unit = { _, _ -> throw NotImplementedError("pincodeCreatedEvent not set") }
-
-    private var _currentDevice : BleDevice? = null
+    var deviceItemClickEvent : (dev : BleDevice) -> Unit = { throw NotImplementedError("deviceExistRequestEvent not set") }
 
     override fun requestList(): ArrayList<Pair<TextPairWithIcon, BleDevice>> = list
     override fun onElementLongClick(position: Int, item: TextPairWithIcon, obj: BleDevice) {}
@@ -36,10 +32,9 @@ class RecyclerViewBleDiscoveryImpl : RecyclerViewAbstract<BleDevice> {
                 okButton {  }
             }.show()
         } else {
-            _currentDevice = obj
             context.alert (title = "Add new device", message = "Device with mac: \"${obj.mac}\" and name \"${obj.name}\" will be added now.") {
                 okButton {
-                    pincodeFragment.show(fragmentManagerRequestEvent(), "_pincodeCreatorDialog")
+                    deviceItemClickEvent.invoke(obj)
                 }
                 cancelButton {  }
             }.show()
@@ -59,11 +54,6 @@ class RecyclerViewBleDiscoveryImpl : RecyclerViewAbstract<BleDevice> {
             title = dev.name,
             titleColor = ContextCompat.getColor(context, R.color.colorBrandBlack)
         )
-    }
-
-    override fun create() {
-        super.create()
-        pincodeFragment.onPinCodeCreated = { pin -> pincodeCreatedEvent.invoke(_currentDevice!!, pin) }
     }
 
     fun add(dev : BleDevice) {
