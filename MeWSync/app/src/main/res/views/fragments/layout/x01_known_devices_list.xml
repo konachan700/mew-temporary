@@ -8,7 +8,7 @@
     <LinearLayout android:layout_width="match_parent"
                   android:layout_height="match_parent"
                   android:orientation="vertical" android:gravity="center" android:padding="8dp"
-                  android:background="@drawable/list_item_bg">
+                  android:background="@drawable/rec_view_list_item_bg">
         <com.mewhpm.mewsync.ui.recyclerview.impl.RecyclerViewDevicesImpl
                 android:id="@+id/listRV1"
                 android:name="com.mewhpm.mewsync.fragments.DevicesFragment"
@@ -33,6 +33,5 @@
             android:layout_height="wrap_content"
             android:layout_gravity="bottom|end"
             android:layout_margin="@dimen/fab_margin"
-            app:ico_icon="gmd-plus-circle"
             app:backgroundTint="@color/colorBrandDark1"/>
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

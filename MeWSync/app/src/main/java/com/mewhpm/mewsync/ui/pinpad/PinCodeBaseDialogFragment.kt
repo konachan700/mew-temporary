@@ -22,31 +22,31 @@ abstract class PinCodeBaseDialogFragment: androidx.fragment.app.DialogFragment()
         val view = inflater.inflate(R.layout.x01_pincode_fragment, container, false)
         view.pincodeBox1.text.clear()
 
-        dialog?.window?.setBackgroundDrawableResource(R.drawable.x00_dialog_bg)
+        dialog?.window?.setBackgroundDrawableResource(R.drawable.fragment_dialog_bg)
 
-        view.button11.onClick { addNumber("1") }
-        view.button12.onClick { addNumber("2") }
-        view.button13.onClick { addNumber("3") }
-        view.button21.onClick { addNumber("4") }
-        view.button22.onClick { addNumber("5") }
-        view.button23.onClick { addNumber("6") }
-        view.button31.onClick { addNumber("7") }
-        view.button32.onClick { addNumber("8") }
-        view.button33.onClick { addNumber("9") }
-        view.button42.onClick { addNumber("0") }
+        view.button11.setOnClickListener { addNumber("1") }
+        view.button12.setOnClickListener { addNumber("2") }
+        view.button13.setOnClickListener { addNumber("3") }
+        view.button21.setOnClickListener { addNumber("4") }
+        view.button22.setOnClickListener { addNumber("5") }
+        view.button23.setOnClickListener { addNumber("6") }
+        view.button31.setOnClickListener { addNumber("7") }
+        view.button32.setOnClickListener { addNumber("8") }
+        view.button33.setOnClickListener { addNumber("9") }
+        view.button42.setOnClickListener { addNumber("0") }
 
-        view.button41.onClick {
+        view.button41.setOnClickListener {
             VibroUtils.vibrate(context!!, 100)
             view.pincodeBox1.text.clear()
             _pinHash = EMPTY
         }
 
-        view.button43.onClick {
+        view.button43.setOnClickListener {
             VibroUtils.vibrate(context!!, 100)
             if (_pinHash.contentEquals(EMPTY)) {
                 view.incorrectPinWarning.visibility = View.VISIBLE
                 view.incorrectPinWarning.text = getString(R.string.pincode_cannot_be_empty)
-                return@onClick
+                return@setOnClickListener
             }
             onOkClick(_pinHash)
             _pinHash = EMPTY

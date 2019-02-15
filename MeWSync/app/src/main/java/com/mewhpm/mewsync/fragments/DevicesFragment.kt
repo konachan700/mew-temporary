@@ -19,7 +19,6 @@ import com.mewhpm.mewsync.R
 import com.mewhpm.mewsync.utils.CryptoUtils
 import com.mewhpm.mewsync.dao.KnownDevicesDao
 import com.mewhpm.mewsync.dao.connectionSource
-import com.mewhpm.mewsync.dao.database
 import com.mewhpm.mewsync.data.BleDevice
 import com.mewhpm.mewsync.ui.pinpad.verifyPin
 import com.mewhpm.mewsync.ui.recyclerview.impl.RecyclerViewDevicesImpl

@@ -1,6 +1,5 @@
 package com.mewhpm.mewsync
 
-import android.content.ContentProvider
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
@@ -15,10 +14,8 @@ import com.mewhpm.mewsync.dao.connectionSource
 import com.mewhpm.mewsync.utils.CryptoUtils
 import com.mewhpm.mewsync.fragments.DevicesFragment
 import com.mewhpm.mewsync.ui.pinpad.verifyPin
-import com.mikepenz.google_material_typeface_library.GoogleMaterial
 import kotlinx.android.synthetic.main.x01_activity_main.*
 import kotlinx.android.synthetic.main.x00_wait_fragment.view.*
-import org.jetbrains.anko.toast
 import ru.ztrap.iconics.kt.setIconicsFactory
 import ru.ztrap.iconics.kt.wrapByIconics
 

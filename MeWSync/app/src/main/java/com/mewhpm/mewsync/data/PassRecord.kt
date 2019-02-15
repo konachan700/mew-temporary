@@ -6,9 +6,16 @@ import java.util.*
 
 @DatabaseTable(tableName = "PassRecord")
 class PassRecord  {
+    constructor(nodeType: Long) {
+        this.nodeType = nodeType
+    }
+
+    constructor()
+
     companion object {
-        const val TYPE_FOLDER = 0L
-        const val TYPE_RECORD = 1L
+        const val TYPE_GO_TO_PARENT = 0L
+        const val TYPE_FOLDER = 100L
+        const val TYPE_RECORD = 200L
 
         private const val EMPTY = ""
     }

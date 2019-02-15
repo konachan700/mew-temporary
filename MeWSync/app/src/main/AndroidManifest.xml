@@ -23,7 +23,8 @@
             android:supportsRtl="true"
             android:theme="@style/AppTheme"
             tools:ignore="AllowBackup,GoogleAppIndexingWarning">
-        <activity android:name=".DeviceActivity">
+        <activity android:name=".DeviceActivity"
+                  android:label="@string/app_name">
         </activity>
 
         <service

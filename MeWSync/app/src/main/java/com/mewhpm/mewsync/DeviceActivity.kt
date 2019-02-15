@@ -8,20 +8,25 @@ import android.os.Bundle
 import android.view.Menu
 import androidx.core.content.ContextCompat
 import androidx.core.view.GravityCompat
-import androidx.core.view.LayoutInflaterCompat
 import com.mikepenz.google_material_typeface_library.GoogleMaterial
 import com.mikepenz.iconics.IconicsDrawable
-import com.mikepenz.iconics.context.IconicsLayoutInflater2
 import kotlinx.android.synthetic.main.x02_activity_device.*
 import org.jetbrains.anko.sdk27.coroutines.onClick
-import com.mikepenz.iconics.context.IconicsContextWrapper
 import ru.ztrap.iconics.kt.wrapByIconics
-import android.view.MenuInflater
 import android.view.MenuItem
+import androidx.appcompat.app.AppCompatActivity
+import com.mewhpm.mewsync.fragments.PasswordsRootFragment
+import com.mewhpm.mewsync.ui.fragmentpages.getFragmentBook
 import com.mikepenz.iconics.utils.IconicsMenuInflaterUtil
+import java.lang.IllegalArgumentException
 
 
-class DeviceActivity : Activity() {
+class DeviceActivity : AppCompatActivity() {
+    companion object {
+        const val TAB_PASSWORDS_TREE_ROOT = "passwords_tree"
+    }
+
+    val passwordFragment = PasswordsRootFragment()
 
     private fun generateIconDrawable(icon: GoogleMaterial.Icon) : Drawable {
         return Icon.createWithBitmap(
@@ -41,7 +46,7 @@ class DeviceActivity : Activity() {
 
     private fun onMenuClickSelector(menuItemResId : Int) {
         when (menuItemResId) {
-            R.id.menuItemPasswords -> {}
+            R.id.menuItemPasswords -> { this@DeviceActivity.getFragmentBook(R.id.fragment_holder_dev_1).showTopInGroup(TAB_PASSWORDS_TREE_ROOT) }
             R.id.menuSync -> {}
         }
     }
@@ -63,24 +68,30 @@ class DeviceActivity : Activity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.x02_activity_device)
+        this@DeviceActivity.getFragmentBook(R.id.fragment_holder_dev_1).groupTopFragmentRequest = { group ->
+            when (group) {
+                TAB_PASSWORDS_TREE_ROOT -> passwordFragment
+                else -> throw IllegalArgumentException("Fragment group $group not exist")
+            }
+        }
 
         this.navView1.menu.clear()
         this.navView1.setNavigationItemSelectedListener { menuItem -> onMenuClickBase(menuItem) }
         IconicsMenuInflaterUtil.inflate(menuInflater, this, R.menu.device_navigation_view, this.navView1.menu)
 
-        with (this.menuButton) {
-            setImageIcon(generateIcon(GoogleMaterial.Icon.gmd_apps, R.color.colorWhite))
-            onClick {
-                this@DeviceActivity.drawerLayout1.openDrawer(GravityCompat.START)
-            }
-        }
-
-        with (this.fragmentMenuButton) {
-            setImageIcon(generateIcon(GoogleMaterial.Icon.gmd_more_horiz, R.color.colorWhite))
-            onClick {
-
-            }
-        }
+//        with (this.menuButton) {
+//            setImageIcon(generateIcon(GoogleMaterial.Icon.gmd_apps, R.color.colorWhite))
+//            onClick {
+//                this@DeviceActivity.drawerLayout1.openDrawer(GravityCompat.START)
+//            }
+//        }
+//
+//        with (this.fragmentMenuButton) {
+//            setImageIcon(generateIcon(GoogleMaterial.Icon.gmd_more_horiz, R.color.colorWhite))
+//            onClick {
+//
+//            }
+//        }
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
