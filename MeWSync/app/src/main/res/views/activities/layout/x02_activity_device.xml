@@ -2,15 +2,22 @@
 <androidx.drawerlayout.widget.DrawerLayout
         xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:app="http://schemas.android.com/apk/res-auto"
-        xmlns:tools="http://schemas.android.com/tools" android:id="@+id/drawerLayout1"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:id="@+id/drawerLayout1"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:fitsSystemWindows="true">
     <LinearLayout
+            android:id="@+id/rootLayout1"
             tools:context=".DeviceActivity"
             android:orientation="vertical"
             android:layout_width="match_parent"
             android:layout_height="match_parent">
+
+        <android.support.v7.widget.Toolbar
+                android:id="@+id/activity_device_toolbar"
+                android:layout_height="wrap_content"
+                android:layout_width="match_parent" />
 
         <!--LinearLayout
                 android:orientation="horizontal"
@@ -44,6 +51,7 @@
                     android:layout_height="40dp"
                     android:id="@+id/fragmentMenuButton"/>
         </LinearLayout-->
+
         <FrameLayout
                 android:layout_weight="99"
                 android:layout_width="match_parent"
@@ -61,5 +69,33 @@
             android:id="@+id/navView1"
             app:menu="@menu/device_navigation_view"
             app:headerLayout="@layout/x02_nav_view_header"
-            android:fitsSystemWindows="false"/>
+            android:fitsSystemWindows="true">
+        <LinearLayout
+                android:id="@+id/logoutActionItem1"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="bottom"
+                android:orientation="horizontal"
+                android:padding="16dp"
+                android:background="@color/colorBrandDark1">
+            <ImageView
+                    android:src="@drawable/mewlogo"
+                    android:layout_height="22dp"
+                    android:id="@+id/logoutIcon1"
+                    android:adjustViewBounds="true"
+                    android:gravity="center"
+                    android:layout_width="22dp"/>
+            <TextView
+                    android:id="@+id/logoutTextView1"
+                    android:paddingStart="8dp"
+                    android:paddingEnd="8dp"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center|start"
+                    android:textStyle="bold"
+                    android:textSize="16sp"
+                    android:textColor="@color/colorWhite"
+                    android:text="Log out" />
+        </LinearLayout>
+    </com.google.android.material.navigation.NavigationView>
 </androidx.drawerlayout.widget.DrawerLayout>

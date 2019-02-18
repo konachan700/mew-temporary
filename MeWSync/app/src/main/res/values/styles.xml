@@ -23,4 +23,12 @@
         <item name="android:textStyle">bold</item>
         <item name="android:background">@drawable/round_button_for_pinpad_bg</item>
     </style>
+
+    <style name="DeviceActivityTheme" parent="AppTheme">
+        <item name="colorPrimary">@color/colorBrandDark1</item>
+        <item name="colorPrimaryDark">@color/colorBrandDark1</item>
+        <item name="colorAccent">@color/colorBrandDefaultElement</item>
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
+    </style>
 </resources>

@@ -1,24 +1,33 @@
 package com.mewhpm.mewsync.fragments
 
-import android.content.Context
 import android.os.Bundle
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
+import android.view.*
+import androidx.appcompat.widget.SearchView
 import androidx.fragment.app.Fragment
 import com.mewhpm.mewsync.R
+import com.mewhpm.mewsync.ui.fragmentpages.FragmentPage
 import kotlinx.android.synthetic.main.x02_fragment_passwords.view.*
 
-class PasswordsRootFragment : Fragment() {
+
+class PasswordsRootFragment : FragmentPage() {
     private var _view: View? = null
 
+    var onFragmentAppear : (fragment: Fragment, menuPresent: Boolean) -> Unit = { _, _ -> }
+
+    override fun onResume() {
+        super.onResume()
+        onFragmentAppear.invoke(this, false)
+    }
+
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+        super.setHasOptionsMenu(true)
         _view = inflater.inflate(R.layout.x02_fragment_passwords, container, false)
+
         with (_view!!.addNewPasswordElementBtn1) {
             setImageIcon(
                 android.graphics.drawable.Icon.createWithBitmap(
                     com.mikepenz.iconics.IconicsDrawable(requireContext())
-                        .icon(com.mikepenz.google_material_typeface_library.GoogleMaterial.Icon.gmd_add_circle_outline).sizeDp(32).color(
+                        .icon(com.mikepenz.google_material_typeface_library.GoogleMaterial.Icon.gmd_add_circle_outline).sizeDp(40).color(
                             android.graphics.Color.WHITE
                         ).toBitmap()
                 )
@@ -30,13 +39,16 @@ class PasswordsRootFragment : Fragment() {
         return _view
     }
 
-    override fun onAttach(context: Context) {
-        super.onAttach(context)
+    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+        inflater.inflate(R.menu.password_root_fragment_menu, menu)
+        val mItem: android.widget.SearchView = menu.findItem(R.id.passwords_fragment_search).actionView as android.widget.SearchView
+        mItem.setOnQueryTextListener(object : android.widget.SearchView.OnQueryTextListener {
+            override fun onQueryTextChange(newText: String): Boolean = false
+            override fun onQueryTextSubmit(query: String): Boolean {
 
-    }
-
-    override fun onDetach() {
-        super.onDetach()
-
+                mItem.clearFocus()
+                return true
+            }
+        })
     }
 }

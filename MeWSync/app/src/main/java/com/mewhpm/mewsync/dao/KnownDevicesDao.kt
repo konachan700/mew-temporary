@@ -40,6 +40,10 @@ class KnownDevicesDao private constructor (val connectionSource : ConnectionSour
         dao.update(dev)
     }
 
+    fun clearDefault() {
+        dao.updateBuilder().updateColumnValue("default", false).update()
+    }
+
     fun setDefault(dev: BleDevice) {
         dao.updateBuilder().updateColumnValue("default", false).update()
         dev.default = true

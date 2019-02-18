@@ -83,6 +83,10 @@ class DevicesFragment : Fragment() {
     override fun onAttach(context: Context) {
         super.onAttach(context)
         _pref = PreferenceManager.getDefaultSharedPreferences(context)
+    }
+
+    override fun onResume() {
+        super.onResume()
         refreshFromDb()
     }
 

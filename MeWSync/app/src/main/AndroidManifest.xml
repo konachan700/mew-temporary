@@ -24,6 +24,7 @@
             android:theme="@style/AppTheme"
             tools:ignore="AllowBackup,GoogleAppIndexingWarning">
         <activity android:name=".DeviceActivity"
+                  android:theme="@style/DeviceActivityTheme"
                   android:label="@string/app_name">
         </activity>
 

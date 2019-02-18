@@ -20,8 +20,11 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:id="@+id/textView"
-                android:textSize="24sp" android:textStyle="bold" android:fontFamily="sans-serif"
-                android:paddingStart="14dp" android:gravity="center|start"
+                android:textSize="24sp"
+                android:textStyle="bold"
+                android:fontFamily="sans-serif"
+                android:paddingStart="14dp"
+                android:gravity="center|start"
                 android:textColor="@color/colorWhite"/>
         <TextView
                 android:text="@string/hardware_password_manager"

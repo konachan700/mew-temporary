@@ -17,11 +17,12 @@ class FragmentBook private constructor() {
     var groupTopFragmentRequest: (group: String) -> Fragment = {
         throw NotImplementedError("groupTopFragmentRequest not implemented now")
     }
+    var currentFragment: Fragment? = null
 
     fun showTopInGroup(group: String) {
-        val requested = groupTopFragmentRequest(group)
+        currentFragment = groupTopFragmentRequest(group)
         val transaction = fragmentManager!!.beginTransaction()
-        transaction.replace(hostViewResId!!, requested)
+        transaction.replace(hostViewResId!!, currentFragment!!)
         transaction.commit()
     }
 }
