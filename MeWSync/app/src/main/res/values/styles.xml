@@ -30,5 +30,10 @@
         <item name="colorAccent">@color/colorBrandDefaultElement</item>
         <item name="windowActionBar">false</item>
         <item name="windowNoTitle">true</item>
+        <item name="searchViewStyle">@style/searchActionBarTheme</item>
+    </style>
+
+    <style name="searchActionBarTheme" parent="Widget.AppCompat.SearchView">
+        <item name="android:textColor">@color/colorWhite</item>
     </style>
 </resources>

@@ -2,4 +2,9 @@
 <resources>
     <string name="open_str">Open</string>
     <string name="close_str">Close</string>
+    <string name="directory_description">Directory description</string>
+    <string name="directory_name">Directory name</string>
+    <string name="password_description">Password description</string>
+    <string name="login">Login</string>
+    <string name="url_for_password">URL for password</string>
 </resources>

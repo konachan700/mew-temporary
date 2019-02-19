@@ -1,11 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:id="@+id/headerContainer1"
               android:orientation="horizontal"
               android:layout_weight="1"
               android:layout_width="match_parent"
               android:layout_height="80dp"
               android:gravity="center_vertical"
-              android:padding="7dp"
+              android:padding="1dp"
               android:background="@color/colorBrandDark1">
     <ImageView
             android:src="@drawable/mewlogo"

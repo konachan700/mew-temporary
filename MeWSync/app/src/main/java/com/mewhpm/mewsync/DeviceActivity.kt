@@ -3,26 +3,24 @@ package com.mewhpm.mewsync
 import android.content.Context
 import android.graphics.drawable.Icon
 import android.os.Bundle
-import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.widget.Toolbar
 import androidx.core.content.ContextCompat
 import androidx.core.view.GravityCompat
 import com.mewhpm.mewsync.dao.KnownDevicesDao
 import com.mewhpm.mewsync.dao.connectionSource
 import com.mewhpm.mewsync.fragments.PasswordsRootFragment
 import com.mewhpm.mewsync.ui.fragmentpages.getFragmentBook
+import com.mewhpm.mewsync.utils.fixColorOfSearchBar
+import com.mewhpm.mewsync.utils.fixPaddingTopForNavigationView
+import com.mewhpm.mewsync.utils.setOnLogoClickEvent
 import com.mikepenz.google_material_typeface_library.GoogleMaterial
 import com.mikepenz.iconics.IconicsDrawable
 import com.mikepenz.iconics.utils.IconicsMenuInflaterUtil
 import kotlinx.android.synthetic.main.x02_activity_device.*
-import org.jetbrains.anko.sdk27.coroutines.onClick
 import ru.ztrap.iconics.kt.wrapByIconics
-import android.view.LayoutInflater
-import androidx.appcompat.widget.Toolbar
-import com.mewhpm.mewsync.utils.hackFixOrder
-import kotlinx.android.synthetic.main.passwords_fragment_action_bar.view.*
 
 
 class DeviceActivity : AppCompatActivity() {
@@ -70,26 +68,15 @@ class DeviceActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.x02_activity_device)
-        setSupportActionBar(this.activity_device_toolbar as Toolbar)
-
-
-//        val inflator = this.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
-//        val viewAb = inflator.inflate(R.layout.passwords_fragment_action_bar, null)
-//        with (viewAb) {
-//            menuButton.setImageIcon(generateIcon(GoogleMaterial.Icon.gmd_apps, R.color.colorWhite))
-//            onClick {
-//                Log.e("-----", "viewAb onClick")
-//                this@DeviceActivity.drawerLayout1.openDrawer(GravityCompat.START)
-//            }
-//        }
-//
-//        with (supportActionBar!!) {
-//            setDisplayHomeAsUpEnabled(false)
-//            setDisplayShowHomeEnabled (false)
-//            setDisplayShowCustomEnabled(true)
-//            setDisplayShowTitleEnabled(false)
-//            customView = viewAb
-//        }
+        val toolbar: Toolbar = this.activity_device_toolbar as Toolbar
+        setSupportActionBar(toolbar)
+        supportActionBar!!.setDisplayShowTitleEnabled(false)
+        supportActionBar!!.setDisplayHomeAsUpEnabled(false)
+        supportActionBar!!.setDisplayUseLogoEnabled(true)
+        supportActionBar!!.setLogo(generateIcon(GoogleMaterial.Icon.gmd_apps, R.color.colorWhite).loadDrawable(this))
+        toolbar.setOnLogoClickEvent {
+            this@DeviceActivity.drawerLayout1.openDrawer(GravityCompat.START)
+        }
 
         getFragmentBook(R.id.fragment_holder_dev_1).groupTopFragmentRequest = { group ->
             when (group) {
@@ -102,19 +89,7 @@ class DeviceActivity : AppCompatActivity() {
         this.navView1.setNavigationItemSelectedListener { menuItem -> onMenuClickBase(menuItem) }
         IconicsMenuInflaterUtil.inflate(menuInflater, this, R.menu.device_navigation_view, this.navView1.menu)
 
-//        with (this.menuButton) {
-//            setImageIcon(generateIcon(GoogleMaterial.Icon.gmd_apps, R.color.colorWhite))
-//            onClick {
-//                this@DeviceActivity.drawerLayout1.openDrawer(GravityCompat.START)
-//            }
-//        }
-//
-//        with (this.fragmentMenuButton) {
-//            setImageIcon(generateIcon(GoogleMaterial.Icon.gmd_more_horiz, R.color.colorWhite))
-//            onClick {
-//                this@DeviceActivity.hack_ShowOptionMenu()
-//            }
-//        }
+        fixPaddingTopForNavigationView()
 
         this.logoutIcon1.setImageIcon(generateIcon(GoogleMaterial.Icon.gmd_arrow_back, R.color.colorWhite, 20))
         logoutTextView1.setOnClickListener {
@@ -127,17 +102,13 @@ class DeviceActivity : AppCompatActivity() {
     }
 
     override fun onPrepareOptionsMenu(menu: Menu?): Boolean {
-        //Log.e("-----", "onPrepareOptionsMenu ${menu?.size()}")
-//        if (menu != null && menu.size() > 0) {
-//            //menu.clear()
-//            menu.add(0, 0, 0, "1")
-//        }
+        if (menu == null) return super.onPrepareOptionsMenu(menu)
+        fixColorOfSearchBar(menu, R.id.passwords_fragment_search)
+
         return super.onPrepareOptionsMenu(menu)
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
-        Log.e("-----", "onCreateOptionsMenu ${menu?.size()}")
         return super.onCreateOptionsMenu(menu)
     }
-
 }
