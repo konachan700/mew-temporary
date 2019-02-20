@@ -5,14 +5,16 @@
     <color name="colorAccent">#d81b60</color>
 
     <color name="colorBrand">#77dd55</color>
-    <color name="colorBrandDark1">#338822</color>
-    <color name="colorBrandDark2">#334433</color>
-    <color name="colorBrandDark3">#116600</color>
+    <color name="colorBrandDark1">#000000</color>
+    <color name="colorBrandDark2">#333333</color>
+    <color name="colorBrandDark3">#000000</color>
     <color name="colorBrandBlack">#000000</color>
     <color name="colorBrandDefaultElement">#DD6600</color>
     <color name="colorBrandYellow">#FFFF77</color>
     <color name="colorBrandSelectedMenu">#D0D0D0</color>
+    <color name="colorBrandDarkGray">#999999</color>
+    <color name="colorBrandTransparent">#55000000</color>
 
-    <color name="colorWhite">#ffffff</color>
+    <color name="colorBrandWhite">#ffffff</color>
     <color name="lightGray1">#BDBDBD</color>
 </resources>

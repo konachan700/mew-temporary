@@ -13,7 +13,6 @@ import com.mewhpm.mewsync.dao.KnownDevicesDao
 import com.mewhpm.mewsync.dao.connectionSource
 import com.mewhpm.mewsync.fragments.PasswordsRootFragment
 import com.mewhpm.mewsync.ui.fragmentpages.getFragmentBook
-import com.mewhpm.mewsync.utils.fixColorOfSearchBar
 import com.mewhpm.mewsync.utils.fixPaddingTopForNavigationView
 import com.mewhpm.mewsync.utils.setOnLogoClickEvent
 import com.mikepenz.google_material_typeface_library.GoogleMaterial
@@ -26,14 +25,10 @@ import ru.ztrap.iconics.kt.wrapByIconics
 class DeviceActivity : AppCompatActivity() {
     companion object {
         const val TAB_PASSWORDS_TREE_ROOT = "passwords_tree"
+        var currentDeviceMac = ""
     }
 
     private val passwordFragment = PasswordsRootFragment()
-    init {
-        passwordFragment.onFragmentAppear = {f, me ->
-
-        }
-    }
 
     private fun generateIcon(icon: GoogleMaterial.Icon, colorResId: Int, size: Int = 28) : Icon {
         return Icon.createWithBitmap(
@@ -73,7 +68,7 @@ class DeviceActivity : AppCompatActivity() {
         supportActionBar!!.setDisplayShowTitleEnabled(false)
         supportActionBar!!.setDisplayHomeAsUpEnabled(false)
         supportActionBar!!.setDisplayUseLogoEnabled(true)
-        supportActionBar!!.setLogo(generateIcon(GoogleMaterial.Icon.gmd_apps, R.color.colorWhite).loadDrawable(this))
+        supportActionBar!!.setLogo(generateIcon(GoogleMaterial.Icon.gmd_apps, R.color.colorBrandWhite).loadDrawable(this))
         toolbar.setOnLogoClickEvent {
             this@DeviceActivity.drawerLayout1.openDrawer(GravityCompat.START)
         }
@@ -91,7 +86,7 @@ class DeviceActivity : AppCompatActivity() {
 
         fixPaddingTopForNavigationView()
 
-        this.logoutIcon1.setImageIcon(generateIcon(GoogleMaterial.Icon.gmd_arrow_back, R.color.colorWhite, 20))
+        this.logoutIcon1.setImageIcon(generateIcon(GoogleMaterial.Icon.gmd_arrow_back, R.color.colorBrandWhite, 20))
         logoutTextView1.setOnClickListener {
             KnownDevicesDao.getInstance(connectionSource).clearDefault()
             this@DeviceActivity.finish()
@@ -99,13 +94,6 @@ class DeviceActivity : AppCompatActivity() {
 
         this.navView1.menu.findItem(R.id.menuItemPasswords).isChecked = true
         getFragmentBook(R.id.fragment_holder_dev_1).showTopInGroup(TAB_PASSWORDS_TREE_ROOT)
-    }
-
-    override fun onPrepareOptionsMenu(menu: Menu?): Boolean {
-        if (menu == null) return super.onPrepareOptionsMenu(menu)
-        fixColorOfSearchBar(menu, R.id.passwords_fragment_search)
-
-        return super.onPrepareOptionsMenu(menu)
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {

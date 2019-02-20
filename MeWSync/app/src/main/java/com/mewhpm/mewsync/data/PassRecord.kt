@@ -16,6 +16,7 @@ class PassRecord  {
         const val TYPE_GO_TO_PARENT = 0L
         const val TYPE_FOLDER = 100L
         const val TYPE_RECORD = 200L
+        const val TYPE_BROKEN = 9999999L
 
         private const val EMPTY = ""
     }

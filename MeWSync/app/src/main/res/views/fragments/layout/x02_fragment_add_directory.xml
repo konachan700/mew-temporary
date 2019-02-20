@@ -26,7 +26,6 @@
                 android:layout_height="wrap_content"
                 android:inputType="textLongMessage"
                 android:ems="10"
-                android:paddingBottom="24dp"
                 android:id="@+id/editTextDirectoryDescription"/>
 
     </LinearLayout>

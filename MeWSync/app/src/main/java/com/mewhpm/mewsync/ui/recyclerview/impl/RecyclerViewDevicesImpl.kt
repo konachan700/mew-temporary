@@ -67,7 +67,7 @@ class RecyclerViewDevicesImpl : RecyclerViewAbstract<BleDevice> {
         return TextPairWithIcon(
             icon = GoogleMaterial.Icon.gmd_bluetooth,
             iconColor = ContextCompat.getColor(context, if (dev.default) R.color.colorBrandDefaultElement else R.color.colorBrandDark1),
-            iconSize = 32,
+            iconSize = 48,
             text = if (dev.text.isBlank()) dev.mac else dev.text,
             textColor = ContextCompat.getColor(context, R.color.colorBrandDark2),
             title = dev.name,

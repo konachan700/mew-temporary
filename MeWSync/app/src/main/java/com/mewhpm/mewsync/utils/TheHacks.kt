@@ -1,8 +1,11 @@
 package com.mewhpm.mewsync.utils
 
+import android.content.Context
 import android.content.res.ColorStateList
 import android.util.Log
 import android.view.Menu
+import android.view.View
+import android.view.inputmethod.InputMethodManager
 import android.widget.*
 import androidx.core.content.ContextCompat
 import com.mewhpm.mewsync.R
@@ -23,21 +26,21 @@ private fun <T> reflectionGetItem(obj: Any, field: String, clazz: Class<T>) : T 
 }
 
 // SearchView is not a simple-styleable element. I don't want to dig android sources for searching, what styles it can be used...
-fun androidx.appcompat.app.AppCompatActivity.fixColorOfSearchBar(menu: Menu, itemResId: Int) {
+fun androidx.fragment.app.Fragment.fixColorOfSearchBar(menu: Menu, itemResId: Int) {
     try {
         val sView = menu.findItem(itemResId).actionView as SearchView
         reflectionGetItem(sView, "mSearchButton", ImageView::class.java).imageTintList = ColorStateList.valueOf(
-            ContextCompat.getColor(this, R.color.colorWhite))
+            ContextCompat.getColor(this.requireContext(), R.color.colorBrandWhite))
         reflectionGetItem(sView, "mCloseButton", ImageView::class.java).imageTintList = ColorStateList.valueOf(
-            ContextCompat.getColor(this, R.color.colorWhite))
+            ContextCompat.getColor(this.requireContext(), R.color.colorBrandWhite))
         reflectionGetItem(sView, "mGoButton", ImageView::class.java).imageTintList = ColorStateList.valueOf(
-            ContextCompat.getColor(this, R.color.colorWhite))
+            ContextCompat.getColor(this.requireContext(), R.color.colorBrandWhite))
         reflectionGetItem(sView, "mVoiceButton", ImageView::class.java).imageTintList = ColorStateList.valueOf(
-            ContextCompat.getColor(this, R.color.colorWhite))
+            ContextCompat.getColor(this.requireContext(), R.color.colorBrandWhite))
         reflectionGetItem(sView, "mSearchSrcTextView", AutoCompleteTextView::class.java).textColor =
-            ContextCompat.getColor(this, R.color.colorWhite)
+            ContextCompat.getColor(this.requireContext(), R.color.colorBrandWhite)
     } catch (e: Throwable) {
-        Toast.makeText(this, "Can't use reflection for paint the search bar...", Toast.LENGTH_SHORT).show()
+        Toast.makeText(this.requireContext(), "Can't use reflection for paint the search bar...", Toast.LENGTH_SHORT).show()
     }
 }
 
@@ -49,4 +52,7 @@ fun androidx.appcompat.widget.Toolbar.setOnLogoClickEvent(ev : () -> Unit) {
     }
 }
 
-
+fun View.hideKeyboard() {
+    val imm = context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+    imm.hideSoftInputFromWindow(windowToken, 0)
+}

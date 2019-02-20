@@ -22,7 +22,7 @@
             android:layout_height="wrap_content"
             android:layout_weight="0"
             android:id="@+id/button" android:textSize="18sp" android:textStyle="bold"
-            android:textColor="@color/colorWhite" android:background="@color/colorBrandDark1"
+            android:textColor="@color/colorBrandWhite" android:background="@color/colorBrandDark1"
             android:layout_margin="4dp" android:gravity="center" android:paddingStart="12dp"
             android:paddingEnd="16dp"/>
 </LinearLayout>

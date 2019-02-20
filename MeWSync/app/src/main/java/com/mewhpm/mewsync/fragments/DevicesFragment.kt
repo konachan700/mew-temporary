@@ -121,7 +121,10 @@ class DevicesFragment : Fragment() {
             deviceItemClickEvent = { dev ->
                 verifyPin { pin ->
                     val retVal = CryptoUtils.verifyPinCode(_pref, pin, dev)
-                    if (retVal) openDevice(pin, dev)
+                    if (retVal) {
+                        DeviceActivity.currentDeviceMac = dev.mac
+                        openDevice(pin, dev)
+                    }
                     retVal
                 }
             }

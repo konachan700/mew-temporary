@@ -16,7 +16,7 @@
 
         <androidx.appcompat.widget.Toolbar
                 android:id="@+id/activity_device_toolbar"
-                android:textColor="@color/colorWhite"
+                android:textColor="@color/colorBrandWhite"
                 android:background="@drawable/actionbar_bg"
                 android:layout_height="wrap_content"
                 android:layout_width="match_parent">
@@ -58,7 +58,7 @@
                     android:fontFamily="sans-serif"
                     android:paddingLeft="16dp"
                     android:gravity="center|start"
-                    android:textColor="@color/colorWhite"/>
+                    android:textColor="@color/colorBrandWhite"/>
             <ImageButton
                     android:layout_weight="0"
                     android:background="@null"
@@ -70,7 +70,8 @@
         <FrameLayout
                 android:layout_weight="99"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent" android:id="@+id/fragment_holder_dev_1">
+                android:layout_height="match_parent"
+                android:id="@+id/fragment_holder_dev_1">
 
         </FrameLayout>
     </LinearLayout>
@@ -109,7 +110,7 @@
                     android:gravity="center|start"
                     android:textStyle="bold"
                     android:textSize="16sp"
-                    android:textColor="@color/colorWhite"
+                    android:textColor="@color/colorBrandWhite"
                     android:text="Log out" />
         </LinearLayout>
     </com.google.android.material.navigation.NavigationView>

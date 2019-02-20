@@ -1,5 +1,6 @@
 package com.mewhpm.mewsync.ui.pinpad
 
+import android.content.DialogInterface
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -14,6 +15,8 @@ abstract class PinCodeBaseDialogFragment: androidx.fragment.app.DialogFragment()
     companion object {
         const val EMPTY = ""
     }
+
+    var onDialogExit: () -> Unit = { }
 
     abstract fun onOkClick(pincode : String)
     private var _pinHash = EMPTY
@@ -51,7 +54,14 @@ abstract class PinCodeBaseDialogFragment: androidx.fragment.app.DialogFragment()
             onOkClick(_pinHash)
             _pinHash = EMPTY
         }
+
+        this.dialog!!.setOnCancelListener { onDialogExit.invoke() }
         return view
+    }
+
+    override fun onDismiss(dialog: DialogInterface) {
+        onDialogExit.invoke()
+        super.onDismiss(dialog)
     }
 
     private fun addNumber(number: String) {

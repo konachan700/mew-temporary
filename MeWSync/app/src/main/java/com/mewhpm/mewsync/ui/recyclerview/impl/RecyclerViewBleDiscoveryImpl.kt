@@ -48,7 +48,7 @@ class RecyclerViewBleDiscoveryImpl : RecyclerViewAbstract<BleDevice> {
                 context,
                 if (deviceExistRequestEvent(dev)) R.color.colorBrandDefaultElement else R.color.colorBrandDark1
             ),
-            iconSize = 32,
+            iconSize = 48,
             text = dev.mac,
             textColor = ContextCompat.getColor(context, R.color.colorBrandDark2),
             title = dev.name,

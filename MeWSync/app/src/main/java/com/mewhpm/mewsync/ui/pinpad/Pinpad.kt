@@ -7,8 +7,12 @@ class Pinpad {
         private val verifyDialogFragment: PinCodeVerifyDialogFragment = PinCodeVerifyDialogFragment()
         private val createDialogFragment: PinCodeCreateDialogFragment = PinCodeCreateDialogFragment()
 
-        fun verify(fm: FragmentManager, onPincodeEntered: (pincode: String) -> Boolean) {
+        fun verify(fm: FragmentManager,
+                   onPincodeEntered: (pincode: String) -> Boolean,
+                   onExit: () -> Unit = {}
+        ) {
             verifyDialogFragment.onPincodeEntered = onPincodeEntered
+            verifyDialogFragment.onDialogExit = onExit
             verifyDialogFragment.show(fm, "pinpad-verify")
         }
 
@@ -27,6 +31,9 @@ fun androidx.fragment.app.Fragment.createPin(onPinCodeCreated: (pinHash: String)
     Pinpad.create(fragmentManager!!, onPinCodeCreated)
 }
 
-fun androidx.appcompat.app.AppCompatActivity.verifyPin(onPincodeEntered: (pincode: String) -> Boolean) {
+fun androidx.appcompat.app.AppCompatActivity.verifyPin(
+    onPincodeEntered: (pincode: String) -> Boolean,
+    onExit: () -> Unit = {}
+) {
     com.mewhpm.mewsync.ui.pinpad.Pinpad.verify(supportFragmentManager, onPincodeEntered)
 }

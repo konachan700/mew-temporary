@@ -31,37 +31,43 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         layoutInflater.setIconicsFactory(delegate)
         super.onCreate(savedInstanceState)
-
-        val defaultDevice = KnownDevicesDao.getInstance(applicationContext.connectionSource).getDefault()
-        if (defaultDevice != null) {
-            verifyPin { pin ->
-                val pref: SharedPreferences = PreferenceManager.getDefaultSharedPreferences(applicationContext)
-                val retVal = CryptoUtils.verifyPinCode(pref, pin, defaultDevice)
-                if (retVal) {
-                    val act2 = Intent(applicationContext, DeviceActivity::class.java)
-                    act2.putExtra("pincode", "")
-                    act2.putExtra("dev_mac", defaultDevice.mac)
-                    act2.putExtra("dev_name", defaultDevice.name)
-                    startActivityForResult(act2, 0)
-                    finish()
-                }
-                retVal
-            }
-        }
-
         setContentView(R.layout.x01_activity_main)
 
-        this.waitDummy1.waitText1.text = getString(R.string.wait_for_keys_generating)
-        CryptoUtils.checkGenerated {
-            this@MainActivity.runOnUiThread {
-                this.waitDummy1.visibility = View.GONE
-                this.fragment_holder.visibility = View.VISIBLE
+        val transaction = supportFragmentManager.beginTransaction()
+        transaction.add(R.id.fragment_holder, _knownDevicesFragment)
+        transaction.commit()
 
-                val transaction = supportFragmentManager.beginTransaction()
-                transaction.add(R.id.fragment_holder, _knownDevicesFragment)
-                transaction.commit()
-            }
-        }
+//        val defaultDevice = KnownDevicesDao.getInstance(applicationContext.connectionSource).getDefault()
+//        if (defaultDevice != null) {
+//            verifyPin { pin ->
+//                val pref: SharedPreferences = PreferenceManager.getDefaultSharedPreferences(applicationContext)
+//                val retVal = CryptoUtils.verifyPinCode(pref, pin, defaultDevice)
+//                if (retVal) {
+//                    DeviceActivity.currentDeviceMac = defaultDevice.mac
+//                    val act2 = Intent(applicationContext, DeviceActivity::class.java)
+//                    act2.putExtra("pincode", "")
+//                    act2.putExtra("dev_mac", defaultDevice.mac)
+//                    act2.putExtra("dev_name", defaultDevice.name)
+//                    startActivityForResult(act2, 0)
+//                    finish()
+//                }
+//                retVal
+//            }
+//        }
+
+
+
+//        this.waitDummy1.waitText1.text = getString(R.string.wait_for_keys_generating)
+//        CryptoUtils.checkGenerated {
+//            this@MainActivity.runOnUiThread {
+//                this.waitDummy1.visibility = View.GONE
+//                this.fragment_holder.visibility = View.VISIBLE
+//
+//                val transaction = supportFragmentManager.beginTransaction()
+//                transaction.add(R.id.fragment_holder, _knownDevicesFragment)
+//                transaction.commit()
+//            }
+//        }
     }
 
     private fun showTab(fragment: Fragment) {
