@@ -41,6 +41,15 @@ class PasswordsDao private constructor (val connectionSource : ConnectionSource)
         return decrypt(unsorted.sortedWith(compareBy(PassRecord::nodeType, PassRecord::title)))
     }
 
+    fun getById(nodeId: Long) : PassRecord? {
+        if (nodeId == 0L) return null
+        return try {
+            return dao.queryForId(nodeId)
+        } catch (e : SQLException) {
+            null
+        }
+    }
+
     fun getParent(nodeId: Long) : PassRecord? {
         if (nodeId == 0L) return null
         return try {
@@ -51,6 +60,11 @@ class PasswordsDao private constructor (val connectionSource : ConnectionSource)
         } catch (e : SQLException) {
             null
         }
+    }
+
+    fun save(passRecord: PassRecord) {
+        encrypt(passRecord)
+        dao.update(passRecord)
     }
 
     fun create(passRecord: PassRecord) {

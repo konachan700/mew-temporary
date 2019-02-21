@@ -1,12 +1,16 @@
 package com.mewhpm.mewsync.fragments
 
+import android.graphics.drawable.Icon
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import com.mewhpm.mewsync.R
 import com.mewhpm.mewsync.utils.VibroUtils
+import com.mikepenz.google_material_typeface_library.GoogleMaterial
+import com.mikepenz.iconics.IconicsDrawable
 import kotlinx.android.synthetic.main.x00_pincode_fragment.view.*
 import org.jetbrains.anko.sdk27.coroutines.onClick
 
@@ -37,6 +41,15 @@ class PincodeFragment : Fragment() {
         _view = inflater.inflate(R.layout.x00_pincode_fragment, container, false)
 
         if (_title.isNotBlank()) _view?.pincodeFragmentTitle?.text = _title
+
+        _view!!.pincodeDeleteButton.setImageIcon(
+            Icon.createWithBitmap(
+                IconicsDrawable(context!!)
+                    .icon(GoogleMaterial.Icon.gmd_backspace)
+                    .sizeDp(48)
+                    .color(ContextCompat.getColor(context!!, R.color.colorBrandWhite))
+                    .toBitmap()
+            ))
 
         _view!!.button11.setOnClickListener { addNum("1") }
         _view!!.button12.setOnClickListener { addNum("2") }

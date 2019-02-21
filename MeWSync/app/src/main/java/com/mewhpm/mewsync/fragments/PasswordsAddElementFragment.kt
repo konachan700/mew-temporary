@@ -66,7 +66,7 @@ class PasswordsAddElementFragment : androidx.fragment.app.Fragment() {
                     PassRecord.TYPE_RECORD -> {
                         val desc = _view!!.editTextPassDescription.text.toString()
                         if (desc.isBlank()) {
-                            toast("Password description can't be blank").show()
+                            toast(getString(R.string.password_not_be_blank)).show()
                             return super.onOptionsItemSelected(item)
                         }
                         if (desc.length > PRIMARY_TEXT_MAX_LEN) {

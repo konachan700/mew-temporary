@@ -15,12 +15,13 @@
     <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.Light"/>
 
     <style name="RoundButtonTheme" parent="Theme.AppCompat.Light">
+        <item name="android:fontFamily">@font/brand</item>
         <item name="android:textColor">#FFFFFF</item>
         <item name="android:minHeight">77dp</item>
         <item name="android:minWidth">77dp</item>
         <item name="android:layout_margin">1dp</item>
         <item name="android:textSize">36sp</item>
-        <item name="android:textStyle">bold</item>
+        <item name="android:textStyle">normal</item>
         <item name="android:background">@drawable/round_button_for_pinpad_bg</item>
     </style>
 

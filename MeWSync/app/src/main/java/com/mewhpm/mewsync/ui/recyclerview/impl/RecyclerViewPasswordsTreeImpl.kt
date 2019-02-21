@@ -36,6 +36,8 @@ class RecyclerViewPasswordsTreeImpl : RecyclerViewAbstract<PassRecord> {
     private val list = ArrayList<Pair<TextPairWithIcon, PassRecord>>()
 
     var onDeleteEvent : (record : PassRecord) -> Unit = {}
+    var onEditEvent : (record : PassRecord) -> Unit = {}
+
     var onItemClickEvent : (record : PassRecord) -> Unit = {}
     var onBackEvent : () -> Unit = {}
 
@@ -105,7 +107,7 @@ class RecyclerViewPasswordsTreeImpl : RecyclerViewAbstract<PassRecord> {
         val actions = listOf("Edit", "Delete")
         context.selector("Actions", actions) { _, index ->
             when (index) {
-                0 -> {  }
+                0 -> { onEditEvent.invoke(obj) }
                 1 -> { onDeleteEvent.invoke(obj) }
             }
         }

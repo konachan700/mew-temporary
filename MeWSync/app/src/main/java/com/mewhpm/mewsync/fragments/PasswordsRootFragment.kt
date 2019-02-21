@@ -30,15 +30,39 @@ class PasswordsRootFragment : androidx.fragment.app.Fragment() {
     private val gson = Gson()
 
     private val onOkClick : (bundle: Bundle) -> Unit = { bundle ->
+        val id = bundle.getLong(KEY_ELEMENT_ID)
         val dao = PasswordsDao.getInstance(this.requireContext().connectionSource)
         when (bundle.getLong(KEY_TYPE, 0)) {
             PassRecord.TYPE_FOLDER -> {
-                val entity = createDirectoryRecord(bundle)
-                dao.create(entity)
+                if (id == 0L) {
+                    val entity = createDirectoryRecord(bundle)
+                    dao.create(entity)
+                } else {
+                    val element = dao.getById(id)
+                    if (element != null) {
+                        element.text = bundle.getString(KEY_DIR_DESC, "error")
+                        element.title = bundle.getString(KEY_DIR_NAME, "error")
+                        dao.save(element)
+                    }
+                }
             }
             PassRecord.TYPE_RECORD -> {
-                val entity = createPasswordRecord(bundle)
-                dao.create(entity)
+                if (id == 0L) {
+                    val entity = createPasswordRecord(bundle)
+                    dao.create(entity)
+                } else {
+                    val element = dao.getById(id)
+                    if (element != null) {
+                        val meta = PassRecordMetadata()
+                        meta.url = bundle.getString(KEY_PASS_URL, "error")
+                        meta.login = bundle.getString(KEY_PASS_LOGIN, "error")
+
+                        element.text = ""
+                        element.title = bundle.getString(KEY_PASS_DESC, "error")
+                        element.metadataJson = gson.toJson(meta)
+                        dao.save(element)
+                    }
+                }
             }
         }
     }
@@ -119,30 +143,49 @@ class PasswordsRootFragment : androidx.fragment.app.Fragment() {
                 }
                 refresh()
             }
+            onEditEvent = { record ->
+                openEditor(record.id, record.nodeType, record)
+            }
         }
         return _view
     }
 
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+    private fun openEditor(id: Long, type: Long, record: PassRecord? = null) {
         val editorFragment = PasswordsAddElementFragment()
         editorFragment.onOkClick = onOkClick
-        val bundle = Bundle()
-        bundle.putLong(KEY_ELEMENT_ID, 0)
-        bundle.putLong(KEY_PARENT_ID, _currentFolderId)
 
-        when (item.itemId) {
-            R.id.menuCreateNewFolder1 -> {
-                bundle.putLong(KEY_TYPE, PassRecord.TYPE_FOLDER)
-            }
-            R.id.menuCreateNewPassword1 -> {
-                bundle.putLong(KEY_TYPE, PassRecord.TYPE_RECORD)
+        val bundle = Bundle()
+        bundle.putLong(KEY_ELEMENT_ID, id)
+        bundle.putLong(KEY_PARENT_ID, _currentFolderId)
+        bundle.putLong(KEY_TYPE, type)
+
+        if (record != null) {
+            when (type) {
+                PassRecord.TYPE_FOLDER -> {
+                    bundle.putString(KEY_DIR_NAME, record.title)
+                    bundle.putString(KEY_DIR_NAME, record.text)
+                }
+                PassRecord.TYPE_RECORD -> {
+                    bundle.putString(KEY_PASS_DESC, record.title)
+                    val meta = gson.fromJson<PassRecordMetadata>(record.metadataJson, PassRecordMetadata::class.java)
+                    bundle.putString(KEY_PASS_URL, meta.url)
+                    bundle.putString(KEY_PASS_LOGIN, meta.login)
+                }
             }
         }
+
         editorFragment.arguments = bundle
         activity!!.supportFragmentManager.beginTransaction()
             .replace(R.id.fragment_holder_dev_1, editorFragment)
             .addToBackStack("passEditor")
             .commit()
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        when (item.itemId) {
+            R.id.menuCreateNewFolder1 -> { openEditor(0, PassRecord.TYPE_FOLDER) }
+            R.id.menuCreateNewPassword1 -> { openEditor(0, PassRecord.TYPE_RECORD) }
+        }
         return super.onOptionsItemSelected(item)
     }
 

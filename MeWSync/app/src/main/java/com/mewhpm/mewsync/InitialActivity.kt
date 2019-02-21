@@ -35,7 +35,7 @@ class InitialActivity : AppCompatActivity() {
                     startActivityForResult(act2, 0)
                     null
                 } else
-                    "Incorrect pincode! Please, try again."
+                    getString(R.string.incorrect_pin_code)
             }
         }
     }

@@ -117,7 +117,7 @@ class DevicesFragment : Fragment() {
                     activity!!.supportFragmentManager.popBackStack()
                     null
                 } else
-                    "Incorrect pincode! Please, try again."
+                    getString(R.string.incorrect_pin_code)
             }
         }
         return pincodeFragment
