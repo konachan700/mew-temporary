@@ -17,14 +17,13 @@ import com.mewhpm.mewsync.fragments.PasswordsAddElementFragment.Companion.KEY_PA
 import com.mewhpm.mewsync.fragments.PasswordsAddElementFragment.Companion.KEY_PASS_LOGIN
 import com.mewhpm.mewsync.fragments.PasswordsAddElementFragment.Companion.KEY_PASS_URL
 import com.mewhpm.mewsync.fragments.PasswordsAddElementFragment.Companion.KEY_TYPE
-import com.mewhpm.mewsync.ui.fragmentpages.FragmentPage
 import com.mewhpm.mewsync.utils.fixColorOfSearchBar
 import com.mewhpm.mewsync.utils.hideKeyboard
 import com.mikepenz.iconics.utils.IconicsMenuInflaterUtil
 import kotlinx.android.synthetic.main.x02_fragment_passwords.view.*
 import java.util.*
 
-class PasswordsRootFragment : FragmentPage() {
+class PasswordsRootFragment : androidx.fragment.app.Fragment() {
     private var _view: View? = null
     private var _currentFolderId = 0L
 

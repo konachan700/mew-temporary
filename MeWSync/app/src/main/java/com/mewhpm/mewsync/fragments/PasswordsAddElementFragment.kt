@@ -4,15 +4,13 @@ import android.os.Bundle
 import android.view.*
 import com.mewhpm.mewsync.R
 import com.mewhpm.mewsync.data.PassRecord
-import com.mewhpm.mewsync.ui.fragmentpages.FragmentPage
 import com.mewhpm.mewsync.utils.hideKeyboard
 import com.mikepenz.iconics.utils.IconicsMenuInflaterUtil
 import kotlinx.android.synthetic.main.x02_fragment_add_directory.view.*
 import kotlinx.android.synthetic.main.x02_fragment_add_password.view.*
 import org.jetbrains.anko.support.v4.toast
-import java.lang.IllegalArgumentException
 
-class PasswordsAddElementFragment : FragmentPage() {
+class PasswordsAddElementFragment : androidx.fragment.app.Fragment() {
     companion object {
         const val PRIMARY_TEXT_MAX_LEN = 40
 

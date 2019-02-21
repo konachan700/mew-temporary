@@ -20,11 +20,11 @@ import com.mewhpm.mewsync.utils.CryptoUtils
 import com.mewhpm.mewsync.dao.KnownDevicesDao
 import com.mewhpm.mewsync.dao.connectionSource
 import com.mewhpm.mewsync.data.BleDevice
-import com.mewhpm.mewsync.ui.pinpad.verifyPin
 import com.mewhpm.mewsync.ui.recyclerview.impl.RecyclerViewDevicesImpl
+import com.mewhpm.mewsync.utils.PinUtil
 import com.mikepenz.google_material_typeface_library.GoogleMaterial
 import com.mikepenz.iconics.IconicsDrawable
-import kotlinx.android.synthetic.main.x01_known_devices_list.view.*
+import kotlinx.android.synthetic.main.x01_known_devices_fragment.view.*
 import org.jetbrains.anko.okButton
 import org.jetbrains.anko.support.v4.alert
 
@@ -34,7 +34,13 @@ class DevicesFragment : Fragment() {
     }
 
     private val _bluetoothAdapter = BluetoothAdapter.getDefaultAdapter()
-    private val _searchDialog = DeviceDiscoveryDialogFragment()
+    private val _bleDiscoveryFragment = BleDiscoveryFragment()
+
+    private var _pinCreateFirstInput = true
+    private var _pinCreateHash1 = ""
+    private var _pinCreateHash2 = ""
+
+    private var _pinHash = ""
 
     private var _pref: SharedPreferences? = null
     private var _rvDevices : RecyclerViewDevicesImpl? = null
@@ -50,7 +56,10 @@ class DevicesFragment : Fragment() {
             when (requestCode) {
                 ACCESS_COARSE_LOCATION -> {
                     if (grantResults.all { it == PackageManager.PERMISSION_GRANTED }) {
-                        _searchDialog.show(fragmentManager!!, "_searchDialog")
+                        activity!!.supportFragmentManager.beginTransaction()
+                            .replace(R.id.fragment_holder, _bleDiscoveryFragment, "DevicesFragment")
+                            .addToBackStack("bleDiscoveryFragment")
+                            .commit()
                     } else {
                         alert("No permissions to BLE", "Bluetooth") {
                             okButton {  }
@@ -70,14 +79,6 @@ class DevicesFragment : Fragment() {
 
         _rvDevices?.clear()
         list.forEach { _rvDevices?.add(it) }
-    }
-
-    private fun openDevice(enteredPincode: String, device: BleDevice) {
-        val intent = Intent(this.context, DeviceActivity::class.java)
-        intent.putExtra("pincode", enteredPincode)
-        intent.putExtra("dev_mac", device.mac)
-        intent.putExtra("dev_name", device.name)
-        startActivityForResult(intent, 1)
     }
 
     override fun onAttach(context: Context) {
@@ -100,8 +101,77 @@ class DevicesFragment : Fragment() {
         return dao!!
     }
 
+    private fun createPincodeVerifyFragment() : PincodeFragment {
+        val pincodeFragment = PincodeFragment()
+        with (pincodeFragment) {
+            onBackPressEvent = { activity!!.supportFragmentManager.popBackStack() }
+            onClearAllEvent = { _pinHash = "" }
+            onNumberAddedEvent = { _pinHash = PinUtil.addNumber(this@DevicesFragment.requireContext(), _pinHash, it) }
+            onOKPressedEvent = {
+                val pref: SharedPreferences = PreferenceManager.getDefaultSharedPreferences(this@DevicesFragment.requireContext())
+                val retVal = CryptoUtils.verifyPinCode(pref, _pinHash, DeviceActivity.currentDeviceMac)
+                if (retVal) {
+                    val act2 = Intent(this@DevicesFragment.requireContext(), DeviceActivity::class.java)
+                    act2.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
+                    startActivityForResult(act2, 0)
+                    activity!!.supportFragmentManager.popBackStack()
+                    null
+                } else
+                    "Incorrect pincode! Please, try again."
+            }
+        }
+        return pincodeFragment
+    }
+
+    private fun createPincodeCreateFragment(dev : BleDevice) : PincodeFragment {
+        val pincodeFragment = PincodeFragment()
+        with (pincodeFragment) {
+            onBackPressEvent = { activity!!.supportFragmentManager.popBackStack() }
+            onClearAllEvent = {
+                if (_pinCreateFirstInput)
+                    _pinCreateHash1 = ""
+                else
+                    _pinCreateHash2 = ""
+            }
+            onNumberAddedEvent = {
+                if (_pinCreateFirstInput)
+                    _pinCreateHash1 = PinUtil.addNumber(this@DevicesFragment.requireContext(), _pinCreateHash1, it)
+                else
+                    _pinCreateHash2 = PinUtil.addNumber(this@DevicesFragment.requireContext(), _pinCreateHash2, it)
+            }
+            onOKPressedEvent = { createPincode(pincodeFragment, dev) }
+        }
+        return pincodeFragment
+    }
+
+    private fun createPincode(pincodeFragment: PincodeFragment, dev : BleDevice) : String? {
+        if (_pinCreateFirstInput) {
+            if (_pinCreateHash1.isBlank()) return "Empty pincode not allowed!"
+
+            pincodeFragment.clearInput()
+            _pinCreateFirstInput = !_pinCreateFirstInput
+
+            return "Please, repeat the pincode."
+        } else {
+            if (_pinCreateHash1.contentEquals(_pinCreateHash2)) {
+                CryptoUtils.createPinCode(PreferenceManager.getDefaultSharedPreferences(context), _pinCreateHash2, dev)
+                getDao().addNew(dev)
+                activity!!.supportFragmentManager.popBackStack()
+                return null
+            }
+
+            _pinCreateHash1 = ""
+            _pinCreateHash2 = ""
+            pincodeFragment.clearInput()
+            _pinCreateFirstInput = !_pinCreateFirstInput
+
+            return "Entered pincodes don't match"
+        }
+    }
+
+
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        _view = inflater.inflate(R.layout.x01_known_devices_list, container, false)
+        _view = inflater.inflate(R.layout.x01_known_devices_fragment, container, false)
 
         _rvDevices = _view!!.listRV1
         with (_rvDevices!!) {
@@ -119,14 +189,25 @@ class DevicesFragment : Fragment() {
                 getDao().save(dev)
             }
             deviceItemClickEvent = { dev ->
-                verifyPin { pin ->
-                    val retVal = CryptoUtils.verifyPinCode(_pref, pin, dev)
-                    if (retVal) {
-                        DeviceActivity.currentDeviceMac = dev.mac
-                        openDevice(pin, dev)
-                    }
-                    retVal
-                }
+                DeviceActivity.currentDeviceMac = dev.mac
+                val pincodeFragment1 = createPincodeVerifyFragment()
+                activity!!.supportFragmentManager.beginTransaction()
+                    .replace(R.id.fragment_holder, pincodeFragment1, "DevicesFragment")
+                    .addToBackStack("DevicesFragment")
+                    .commit()
+            }
+        }
+
+        with (_bleDiscoveryFragment) {
+            onExitEvent = { activity!!.supportFragmentManager.popBackStack() }
+            onDeviceSelectEvent = { dev ->
+                activity!!.supportFragmentManager.popBackStackImmediate()
+                val pincodeFragment2 = createPincodeCreateFragment(dev)
+                pincodeFragment2.setTitle("Create your new pincode")
+                this@DevicesFragment.activity!!.supportFragmentManager.beginTransaction()
+                    .replace(R.id.fragment_holder, pincodeFragment2, "DevicesFragment")
+                    .addToBackStack("DevicesFragment")
+                    .commit()
             }
         }
 
@@ -143,12 +224,7 @@ class DevicesFragment : Fragment() {
             }
         }
 
-        _searchDialog.closeListener = {
-            refreshFromDb()
-        }
-
         refreshFromDb()
-
         return _view
     }
 }

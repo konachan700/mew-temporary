@@ -206,7 +206,12 @@ public class CryptoUtils {
 
     @SuppressWarnings("unused")
     private static String generatePrefName(BleDevice device) {
-        return "MewHPMAuthData-" + device.getMac().replace(':','0');
+        return generatePrefName(device.getMac());
+    }
+
+    @SuppressWarnings("unused")
+    private static String generatePrefName(String mac) {
+        return "MewHPMAuthData-" + mac.replace(':','0');
     }
 
     @SuppressWarnings("unused")
@@ -216,6 +221,13 @@ public class CryptoUtils {
             sb.append(String.format("%02x", b));
         }
         return sb.toString();
+    }
+
+    public static boolean verifyPinCode(SharedPreferences pref, String enteredPincode, String devMac) throws NoSuchPaddingException,
+            InvalidKeyException, NoSuchAlgorithmException, KeyStoreException, NoSuchProviderException, UnrecoverableEntryException, IOException {
+        final String stored = pref.getString(generatePrefName(devMac), "NO-PIN");
+        final String decoded = decryptRSA(stored);
+        return decoded.contentEquals(enteredPincode);
     }
 
     public static boolean verifyPinCode(SharedPreferences pref, String enteredPincode, BleDevice device) throws NoSuchPaddingException,

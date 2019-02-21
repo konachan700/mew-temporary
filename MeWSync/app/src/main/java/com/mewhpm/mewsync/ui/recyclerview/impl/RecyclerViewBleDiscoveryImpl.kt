@@ -3,12 +3,10 @@ package com.mewhpm.mewsync.ui.recyclerview.impl
 import android.content.Context
 import android.util.AttributeSet
 import androidx.core.content.ContextCompat
-import androidx.fragment.app.FragmentManager
 import com.mewhpm.mewsync.R
 import com.mewhpm.mewsync.data.BleDevice
-import com.mewhpm.mewsync.ui.pinpad.PinCodeCreateDialogFragment
-import com.mewhpm.mewsync.ui.recyclerview.data.TextPairWithIcon
 import com.mewhpm.mewsync.ui.recyclerview.RecyclerViewAbstract
+import com.mewhpm.mewsync.ui.recyclerview.data.TextPairWithIcon
 import com.mikepenz.google_material_typeface_library.GoogleMaterial
 import org.jetbrains.anko.alert
 import org.jetbrains.anko.cancelButton

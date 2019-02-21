@@ -3,7 +3,6 @@ package com.mewhpm.mewsync
 import android.content.Context
 import android.graphics.drawable.Icon
 import android.os.Bundle
-import android.view.Menu
 import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
@@ -94,9 +93,5 @@ class DeviceActivity : AppCompatActivity() {
 
         this.navView1.menu.findItem(R.id.menuItemPasswords).isChecked = true
         getFragmentBook(R.id.fragment_holder_dev_1).showTopInGroup(TAB_PASSWORDS_TREE_ROOT)
-    }
-
-    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
-        return super.onCreateOptionsMenu(menu)
     }
 }

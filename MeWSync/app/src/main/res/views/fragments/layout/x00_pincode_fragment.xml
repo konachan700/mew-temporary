@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-              android:layout_width="match_parent"
+              xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
               android:layout_height="match_parent"
               android:background="@color/colorBrandDark1"
               android:orientation="vertical">
@@ -8,19 +8,37 @@
     <TextView
             android:text="Enter PIN-code"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content" android:id="@+id/textView3" android:layout_marginTop="32dp"
-            android:layout_marginLeft="12dp" android:layout_marginRight="12dp" android:textSize="18sp"
-            android:textColor="@color/colorBrandWhite" android:gravity="center"/>
-    <EditText
+            android:layout_height="wrap_content" android:id="@+id/pincodeFragmentTitle" android:layout_marginTop="32dp"
+            android:layout_marginLeft="12dp" android:layout_marginRight="12dp" android:textSize="24sp"
+            android:textColor="@color/colorBrandDefaultElement" android:gravity="center" android:textStyle="bold"/>
+    <LinearLayout
+            android:orientation="horizontal"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:inputType="text"
-            android:ems="10"
-            android:id="@+id/pincodeBox1"
-            android:textStyle="bold" android:textSize="36sp"
-            android:gravity="center" android:layout_margin="8dp"
-            android:textIsSelectable="false" android:singleLine="true" android:enabled="false"
-            android:textAlignment="center" android:textColor="@color/colorBrandWhite"/>
+            android:layout_height="wrap_content">
+        <View
+                android:layout_height="match_parent"
+                android:layout_width="80dp"
+                android:layout_weight="1"/>
+        <EditText
+                android:layout_weight="100"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="text"
+                android:ems="10"
+                android:id="@+id/pincodeBox1"
+                android:textStyle="bold" android:textSize="36sp"
+                android:gravity="center" android:layout_margin="8dp"
+                android:textIsSelectable="false" android:singleLine="true" android:enabled="false"
+                android:textAlignment="center" android:textColor="@color/colorBrandWhite"/>
+        <ImageView
+                android:id="@+id/pincodeDeleteButton"
+                android:alpha="0.5"
+                android:layout_width="80dp"
+                android:layout_height="match_parent"
+                tools:srcCompat="@android:drawable/ic_input_delete"
+                android:layout_weight="1"
+                android:padding="20dp"/>
+    </LinearLayout>
     <TextView
             android:text="Incorrect PIN-code. Please, try again."
             android:layout_width="match_parent"
@@ -138,12 +156,13 @@
                 android:padding="1dp" android:layout_gravity="center">
             <com.mewhpm.mewsync.ui.SquareButton
                     android:layout_weight="100"
-                    android:text="CLR"
+                    android:text="Back"
                     android:id="@+id/button41"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:enabled="true"
-                    style="@style/RoundButtonTheme"/>
+                    style="@style/RoundButtonTheme" android:textSize="24sp"
+                    android:textColor="@color/colorBrandDefaultElement"/>
             <com.mewhpm.mewsync.ui.SquareButton
                     android:layout_weight="100"
                     android:text="0"
@@ -159,7 +178,8 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:enabled="true"
-                    style="@style/RoundButtonTheme"/>
+                    style="@style/RoundButtonTheme" android:textSize="24sp"
+                    android:textColor="@color/colorBrandDefaultElement"/>
         </LinearLayout>
     </LinearLayout>
 </LinearLayout>
