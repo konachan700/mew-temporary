@@ -85,7 +85,7 @@ class DeviceActivity : AppCompatActivity() {
 
         fixPaddingTopForNavigationView()
 
-        this.logoutIcon1.setImageIcon(generateIcon(GoogleMaterial.Icon.gmd_arrow_back, R.color.colorBrandWhite, 20))
+        this.logoutIcon1.setImageIcon(generateIcon(GoogleMaterial.Icon.gmd_exit_to_app, R.color.colorBrandWhite, 20))
         logoutTextView1.setOnClickListener {
             KnownDevicesDao.getInstance(connectionSource).clearDefault()
             this@DeviceActivity.finish()
