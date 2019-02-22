@@ -66,4 +66,9 @@ class RecyclerViewBleDiscoveryImpl : RecyclerViewAbstract<BleDevice> {
         list.clear()
         this.adapter?.notifyDataSetChanged()
     }
+
+    override fun create() {
+        super.create()
+        this.adapter = TextPairWithIconAdapterImpl()
+    }
 }

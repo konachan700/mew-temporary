@@ -6,43 +6,40 @@ import androidx.core.content.ContextCompat
 import com.mewhpm.mewsync.R
 import com.mewhpm.mewsync.data.PassRecord
 import com.mewhpm.mewsync.ui.recyclerview.RecyclerViewAbstract
+import com.mewhpm.mewsync.ui.recyclerview.adapters.SimpleTextIconAdapter
 import com.mewhpm.mewsync.ui.recyclerview.data.TextPairWithIcon
 import com.mikepenz.google_material_typeface_library.GoogleMaterial
 import org.jetbrains.anko.selector
 import java.text.SimpleDateFormat
 import java.util.*
 
-class RecyclerViewPasswordsTreeImpl : RecyclerViewAbstract<PassRecord> {
+class RecyclerViewForPasswordsKeyboard : RecyclerViewAbstract<PassRecord> {
     constructor(context: Context) : super(context)
     constructor(context: Context, attributeSet: AttributeSet?) : super(context, attributeSet)
     constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int) : super(context, attrs, defStyleAttr)
     companion object {
-        const val ICON_SIZE_DP = 48
+        const val ICON_SIZE_DP = 24
         const val ICON_COLOR_RES_ID = R.color.colorBrandDarkGray
     }
-
-    private val formatter = SimpleDateFormat("HH:mm dd.MM.yyyy", Locale.US)
 
     private val backToParentItem = TextPairWithIcon(
         icon = GoogleMaterial.Icon.gmd_subdirectory_arrow_left,
         iconColor = ContextCompat.getColor(context, R.color.colorBrandBlack),
         iconSize = ICON_SIZE_DP,
-        text = "Back to parent element",
-        textColor = ContextCompat.getColor(context, ICON_COLOR_RES_ID),
+        text = "",
+        textColor = 0,
         title = "...",
         titleColor = ContextCompat.getColor(context, R.color.colorBrandBlack)
     )
     private val passRecordForBackItem = PassRecord(PassRecord.TYPE_GO_TO_PARENT)
     private val list = ArrayList<Pair<TextPairWithIcon, PassRecord>>()
 
-    var onDeleteEvent : (record : PassRecord) -> Unit = {}
-    var onEditEvent : (record : PassRecord) -> Unit = {}
-
     var onItemClickEvent : (record : PassRecord) -> Unit = {}
     var onBackEvent : () -> Unit = {}
 
     fun addItems(items: List<PassRecord>, isRoot: Boolean = false) {
         list.clear()
+        (this.adapter as SimpleTextIconAdapter)._index = -1
         val endList : List<Pair<TextPairWithIcon, PassRecord>> = items.map {
             when (it.nodeType) {
                 PassRecord.TYPE_FOLDER -> {
@@ -51,7 +48,7 @@ class RecyclerViewPasswordsTreeImpl : RecyclerViewAbstract<PassRecord> {
                             icon = GoogleMaterial.Icon.gmd_folder,
                             iconColor = ContextCompat.getColor(context, ICON_COLOR_RES_ID),
                             iconSize = ICON_SIZE_DP,
-                            text = if (it.text.isBlank()) "Created " + formatter.format(Date(it.timestamp)) else it.text,
+                            text = it.text,
                             textColor = ContextCompat.getColor(context, ICON_COLOR_RES_ID),
                             title = it.title,
                             titleColor = ContextCompat.getColor(context, R.color.colorBrandBlack)
@@ -64,8 +61,8 @@ class RecyclerViewPasswordsTreeImpl : RecyclerViewAbstract<PassRecord> {
                             icon = GoogleMaterial.Icon.gmd_vpn_key,
                             iconColor = ContextCompat.getColor(context, ICON_COLOR_RES_ID),
                             iconSize = ICON_SIZE_DP,
-                            text = "Created " + formatter.format(Date(it.timestamp)),
-                            textColor = ContextCompat.getColor(context, ICON_COLOR_RES_ID),
+                            text = "",
+                            textColor = 0,
                             title = it.title,
                             titleColor = ContextCompat.getColor(context, R.color.colorBrandBlack)
                         ), it
@@ -77,8 +74,8 @@ class RecyclerViewPasswordsTreeImpl : RecyclerViewAbstract<PassRecord> {
                             icon = GoogleMaterial.Icon.gmd_sentiment_dissatisfied,
                             iconColor = ContextCompat.getColor(context, R.color.colorBrandDefaultElement),
                             iconSize = ICON_SIZE_DP,
-                            text = "Data corrupted (id=${it.id})",
-                            textColor = ContextCompat.getColor(context, ICON_COLOR_RES_ID),
+                            text = "",
+                            textColor = 0,
                             title = "Broken element",
                             titleColor = ContextCompat.getColor(context, R.color.colorBrandBlack)
                         ), it
@@ -101,20 +98,10 @@ class RecyclerViewPasswordsTreeImpl : RecyclerViewAbstract<PassRecord> {
         }
     }
 
-    override fun onElementLongClick(position: Int, item: TextPairWithIcon, obj: PassRecord) {
-        if (obj.nodeType == PassRecord.TYPE_GO_TO_PARENT) return
-
-        val actions = listOf("Edit", "Delete")
-        context.selector("Actions", actions) { _, index ->
-            when (index) {
-                0 -> { onEditEvent.invoke(obj) }
-                1 -> { onDeleteEvent.invoke(obj) }
-            }
-        }
-    }
+    override fun onElementLongClick(position: Int, item: TextPairWithIcon, obj: PassRecord) { }
 
     override fun create() {
         super.create()
-        this.adapter = TextPairWithIconAdapterImpl()
+        this.adapter = SimpleTextIconAdapterImpl()
     }
 }

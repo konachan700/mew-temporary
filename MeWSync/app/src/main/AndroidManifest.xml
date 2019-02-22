@@ -40,14 +40,28 @@
                 android:theme="@style/AppTheme.NoActionBar">
         </activity>
 
-        <service
+        <!--service
                 android:name=".services.BleService"
                 android:enabled="true"
-                android:exported="false"/>
+                android:exported="false"/-->
+
+        <!-- BLE discovery service -->
         <service
                 android:name=".services.BleDiscoveryService"
                 android:enabled="true"
                 android:exported="false"/>
+
+        <!-- MeW input method service -->
+        <service android:name=".services.MewIMEService"
+                 android:enabled="true"
+                 android:label="MeW Password Pad"
+                 android:permission="android.permission.BIND_INPUT_METHOD">
+            <meta-data android:name="android.view.im" android:resource="@xml/method"/>
+            <intent-filter>
+                <action android:name="android.view.InputMethod" />
+            </intent-filter>
+        </service>
+
     </application>
 
 </manifest>

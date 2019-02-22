@@ -100,4 +100,9 @@ class RecyclerViewDevicesImpl : RecyclerViewAbstract<BleDevice> {
     fun reload() {
         this.adapter?.notifyDataSetChanged()
     }
+
+    override fun create() {
+        super.create()
+        this.adapter = TextPairWithIconAdapterImpl()
+    }
 }

@@ -24,19 +24,19 @@ class PasswordsDao private constructor (val connectionSource : ConnectionSource)
         TableUtils.createTableIfNotExists(connectionSource, PassRecord::class.java)
     }
 
-    fun getAllChild(parentId: Long, nodeType: Long) : List<PassRecord> {
+    fun getAllChild(parentId: Long, nodeType: Long, mac: String = DeviceActivity.currentDeviceMac) : List<PassRecord> {
         val unsorted = dao.queryForFieldValuesArgs(mapOf(
             "parentId" to parentId,
             "nodeType" to nodeType,
-            "deviceAddr" to DeviceActivity.currentDeviceMac
+            "deviceAddr" to mac
         ))
         return decrypt(unsorted.sortedWith(compareBy(PassRecord::title)))
     }
 
-    fun getAllChild(parentId: Long) : List<PassRecord> {
+    fun getAllChild(parentId: Long, mac: String = DeviceActivity.currentDeviceMac) : List<PassRecord> {
         val unsorted = dao.queryForFieldValuesArgs(mapOf(
             "parentId" to parentId,
-            "deviceAddr" to DeviceActivity.currentDeviceMac
+            "deviceAddr" to mac
         ))
         return decrypt(unsorted.sortedWith(compareBy(PassRecord::nodeType, PassRecord::title)))
     }
