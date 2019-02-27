@@ -223,16 +223,24 @@ public class CryptoUtils {
         return sb.toString();
     }
 
+    public static boolean isPinPresent(SharedPreferences pref, String devMac) {
+        return pref.getString(generatePrefName(devMac), null) != null;
+    }
+
     public static boolean verifyPinCode(SharedPreferences pref, String enteredPincode, String devMac) throws NoSuchPaddingException,
             InvalidKeyException, NoSuchAlgorithmException, KeyStoreException, NoSuchProviderException, UnrecoverableEntryException, IOException {
-        final String stored = pref.getString(generatePrefName(devMac), "NO-PIN");
+        final String stored = pref.getString(generatePrefName(devMac), null);
+        if (stored == null) throw new IllegalStateException("Pin not present");
+
         final String decoded = decryptRSA(stored);
         return decoded.contentEquals(enteredPincode);
     }
 
     public static boolean verifyPinCode(SharedPreferences pref, String enteredPincode, BleDevice device) throws NoSuchPaddingException,
             InvalidKeyException, NoSuchAlgorithmException, KeyStoreException, NoSuchProviderException, UnrecoverableEntryException, IOException {
-        final String stored = pref.getString(generatePrefName(device), "NO-PIN");
+        final String stored = pref.getString(generatePrefName(device), null);
+        if (stored == null) throw new IllegalStateException("Pin not present");
+
         final String decoded = decryptRSA(stored);
         return decoded.contentEquals(enteredPincode);
     }

@@ -8,6 +8,7 @@ import android.content.SharedPreferences
 import android.content.pm.PackageManager
 import android.graphics.Color
 import android.graphics.drawable.Icon
+import android.location.LocationManager
 import android.os.Bundle
 import android.preference.PreferenceManager
 import android.view.LayoutInflater
@@ -25,6 +26,8 @@ import com.mewhpm.mewsync.utils.PinUtil
 import com.mikepenz.google_material_typeface_library.GoogleMaterial
 import com.mikepenz.iconics.IconicsDrawable
 import kotlinx.android.synthetic.main.x01_known_devices_fragment.view.*
+import org.jetbrains.anko.alert
+import org.jetbrains.anko.cancelButton
 import org.jetbrains.anko.okButton
 import org.jetbrains.anko.support.v4.alert
 
@@ -48,22 +51,31 @@ class DevicesFragment : Fragment() {
     private var dao : KnownDevicesDao? = null
 
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
-        if (!_bluetoothAdapter.isEnabled) {
-            alert("Bluetooth", "Bluetooth is disabled!") {
+        val location = context!!.getSystemService(LocationManager::class.java) as LocationManager
+        if (!location.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
+            alert("Location service is disabled, but it needed for BLE scanning.", "Location") {
                 okButton {  }
             }.show()
-        } else {
-            when (requestCode) {
-                ACCESS_COARSE_LOCATION -> {
-                    if (grantResults.all { it == PackageManager.PERMISSION_GRANTED }) {
-                        activity!!.supportFragmentManager.beginTransaction()
-                            .replace(R.id.fragment_holder, _bleDiscoveryFragment, "DevicesFragment")
-                            .addToBackStack("bleDiscoveryFragment")
-                            .commit()
-                    } else {
-                        alert("No permissions to BLE", "Bluetooth") {
-                            okButton {  }
-                        }
+            return
+        }
+
+        if (!_bluetoothAdapter.isEnabled) {
+            alert("Bluetooth is disabled!", "Bluetooth") {
+                okButton {  }
+            }.show()
+            return
+        }
+
+        when (requestCode) {
+            ACCESS_COARSE_LOCATION -> {
+                if (grantResults.all { it == PackageManager.PERMISSION_GRANTED }) {
+                    activity!!.supportFragmentManager.beginTransaction()
+                        .replace(R.id.fragment_holder, _bleDiscoveryFragment, "DevicesFragment")
+                        .addToBackStack("bleDiscoveryFragment")
+                        .commit()
+                } else {
+                    alert("No permissions to BLE", "Bluetooth") {
+                        okButton {  }
                     }
                 }
             }
@@ -71,14 +83,8 @@ class DevicesFragment : Fragment() {
     }
 
     private fun refreshFromDb() {
-        val list: List<BleDevice> = getDao().getAll()
-        if (_view != null) {
-            _rvDevices!!.visibility = if (list.isEmpty()) View.GONE else View.VISIBLE
-            _view!!.noItemsInList1.visibility = if (list.isEmpty()) View.VISIBLE else View.GONE
-        }
-
         _rvDevices?.clear()
-        list.forEach { _rvDevices?.add(it) }
+        getDao().getAll().forEach { _rvDevices?.add(it) }
     }
 
     override fun onAttach(context: Context) {
@@ -155,7 +161,15 @@ class DevicesFragment : Fragment() {
         } else {
             if (_pinCreateHash1.contentEquals(_pinCreateHash2)) {
                 CryptoUtils.createPinCode(PreferenceManager.getDefaultSharedPreferences(context), _pinCreateHash2, dev)
-                getDao().addNew(dev)
+                if (KnownDevicesDao.isDeviceZero(dev.mac)) {
+                    this@DevicesFragment.alert (
+                        title = "Create pincode",
+                        message = "Pincode created.") {
+                        okButton {}
+                    }.show()
+                } else {
+                    getDao().addNew(dev)
+                }
                 activity!!.supportFragmentManager.popBackStack()
                 return null
             }
@@ -190,11 +204,24 @@ class DevicesFragment : Fragment() {
             }
             deviceItemClickEvent = { dev ->
                 DeviceActivity.currentDeviceMac = dev.mac
-                val pincodeFragment1 = createPincodeVerifyFragment()
-                activity!!.supportFragmentManager.beginTransaction()
-                    .replace(R.id.fragment_holder, pincodeFragment1, "DevicesFragment")
-                    .addToBackStack("DevicesFragment")
-                    .commit()
+                val pref: SharedPreferences = PreferenceManager.getDefaultSharedPreferences(this@DevicesFragment.requireContext())
+                if (!CryptoUtils.isPinPresent(pref, DeviceActivity.currentDeviceMac)) {
+                    val devx = getDao().getByMac(KnownDevicesDao.ZERO_MAC)
+                    if (devx != null) {
+                        val pincodeFragment1 = createPincodeCreateFragment(devx)
+                        pincodeFragment1.setTitle("Create your new pincode")
+                        activity!!.supportFragmentManager.beginTransaction()
+                            .replace(R.id.fragment_holder, pincodeFragment1, "DevicesFragment")
+                            .addToBackStack("DevicesFragment")
+                            .commit()
+                    }
+                } else {
+                    val pincodeFragment1 = createPincodeVerifyFragment()
+                    activity!!.supportFragmentManager.beginTransaction()
+                        .replace(R.id.fragment_holder, pincodeFragment1, "DevicesFragment")
+                        .addToBackStack("DevicesFragment")
+                        .commit()
+                }
             }
         }
 

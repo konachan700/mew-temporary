@@ -33,7 +33,7 @@ class BleDiscoveryService: Service() {
             if (result != null &&
                 result.device != null &&
                 result.device.name != null &&
-                result.device.type == BluetoothDevice.DEVICE_TYPE_LE
+                (result.device.type == BluetoothDevice.DEVICE_TYPE_LE /*|| result.device.type == BluetoothDevice.DEVICE_TYPE_DUAL*/)
             ) {
                 val addr = result.device.address.toUpperCase()
                 if (!_foundDevices.contains(addr)) {

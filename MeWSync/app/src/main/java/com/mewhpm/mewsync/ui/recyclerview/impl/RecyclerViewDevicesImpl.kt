@@ -6,6 +6,7 @@ import androidx.core.content.ContextCompat
 import com.afollestad.materialdialogs.MaterialDialog
 import com.afollestad.materialdialogs.input.input
 import com.mewhpm.mewsync.R
+import com.mewhpm.mewsync.dao.KnownDevicesDao
 import com.mewhpm.mewsync.data.BleDevice
 import com.mewhpm.mewsync.ui.recyclerview.RecyclerViewAbstract
 import com.mewhpm.mewsync.ui.recyclerview.data.TextPairWithIcon
@@ -33,6 +34,16 @@ class RecyclerViewDevicesImpl : RecyclerViewAbstract<BleDevice> {
     }
 
     override fun onElementLongClick(position: Int, item: TextPairWithIcon, obj: BleDevice) {
+        if (KnownDevicesDao.isDeviceZero(obj.mac)) {
+            context.alert (title = "Device Zero", message = "Do you really want setup a Device Zero as default?") {
+                okButton {
+                    sefDefault(position, item, obj)
+                }
+                cancelButton {  }
+            }.show()
+            return
+        }
+
         val actions = listOf("Set default", "Change description", "Delete")
         context.selector("Actions", actions) { _, index ->
             when (index) {
@@ -63,7 +74,11 @@ class RecyclerViewDevicesImpl : RecyclerViewAbstract<BleDevice> {
 
     private fun createDataTextPairWithIcon(dev : BleDevice) : TextPairWithIcon {
         return TextPairWithIcon(
-            icon = GoogleMaterial.Icon.gmd_bluetooth,
+            icon =
+                if (KnownDevicesDao.isDeviceZero(dev.mac))
+                    GoogleMaterial.Icon.gmd_sd_storage
+                else
+                    GoogleMaterial.Icon.gmd_bluetooth,
             iconColor = ContextCompat.getColor(context, if (dev.default) R.color.colorBrandDefaultElement else R.color.colorBrandDark1),
             iconSize = 48,
             text = if (dev.text.isBlank()) dev.mac else dev.text,
