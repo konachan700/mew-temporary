@@ -9,4 +9,8 @@
     <string name="url_for_password">URL for password</string>
     <string name="incorrect_pin_code">Incorrect PIN-code.</string>
     <string name="password_not_be_blank">Password description can\'t be blank</string>
+    <string name="u_url_u">URL</string>
+    <string name="u_login_u">Login</string>
+    <string name="u_password_u">Password</string>
+    <string name="click_for_enter">Click for enter:</string>
 </resources>
