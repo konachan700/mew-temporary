@@ -2,32 +2,30 @@ package com.mewhpm.mewsync.fragments
 
 import android.os.Bundle
 import android.view.*
-import com.google.gson.Gson
 import com.mewhpm.mewsync.DeviceActivity
 import com.mewhpm.mewsync.R
 import com.mewhpm.mewsync.dao.PasswordsDao
 import com.mewhpm.mewsync.dao.connectionSource
 import com.mewhpm.mewsync.data.PassRecord
-import com.mewhpm.mewsync.data.PassRecordMetadata
 import com.mewhpm.mewsync.fragments.PasswordsAddElementFragment.Companion.KEY_DIR_DESC
 import com.mewhpm.mewsync.fragments.PasswordsAddElementFragment.Companion.KEY_DIR_NAME
 import com.mewhpm.mewsync.fragments.PasswordsAddElementFragment.Companion.KEY_ELEMENT_ID
 import com.mewhpm.mewsync.fragments.PasswordsAddElementFragment.Companion.KEY_PARENT_ID
 import com.mewhpm.mewsync.fragments.PasswordsAddElementFragment.Companion.KEY_PASS_DESC
-import com.mewhpm.mewsync.fragments.PasswordsAddElementFragment.Companion.KEY_PASS_LOGIN
-import com.mewhpm.mewsync.fragments.PasswordsAddElementFragment.Companion.KEY_PASS_URL
+import com.mewhpm.mewsync.fragments.PasswordsAddElementFragment.Companion.KEY_PASS_META_JSON
 import com.mewhpm.mewsync.fragments.PasswordsAddElementFragment.Companion.KEY_TYPE
 import com.mewhpm.mewsync.utils.fixColorOfSearchBar
 import com.mewhpm.mewsync.utils.hideKeyboard
 import com.mikepenz.iconics.utils.IconicsMenuInflaterUtil
 import kotlinx.android.synthetic.main.x02_fragment_passwords.view.*
+import java.security.SecureRandom
 import java.util.*
 
 class PasswordsRootFragment : androidx.fragment.app.Fragment() {
     private var _view: View? = null
     private var _currentFolderId = 0L
 
-    private val gson = Gson()
+    private val srand = SecureRandom()
 
     private val onOkClick : (bundle: Bundle) -> Unit = { bundle ->
         val id = bundle.getLong(KEY_ELEMENT_ID)
@@ -53,13 +51,9 @@ class PasswordsRootFragment : androidx.fragment.app.Fragment() {
                 } else {
                     val element = dao.getById(id)
                     if (element != null) {
-                        val meta = PassRecordMetadata()
-                        meta.url = bundle.getString(KEY_PASS_URL, "error")
-                        meta.login = bundle.getString(KEY_PASS_LOGIN, "error")
-
                         element.text = ""
                         element.title = bundle.getString(KEY_PASS_DESC, "error")
-                        element.metadataJson = gson.toJson(meta)
+                        element.metadataJson = bundle.getString(KEY_PASS_META_JSON, "")
                         dao.save(element)
                     }
                 }
@@ -84,16 +78,11 @@ class PasswordsRootFragment : androidx.fragment.app.Fragment() {
         entity.nodeType = PassRecord.TYPE_RECORD
         entity.text = ""
         entity.title = bundle.getString(KEY_PASS_DESC, "error")
-        entity.hwUID = 0L
+        entity.hwUID = srand.nextLong()
         entity.timestamp = Date().time
         entity.parentId = bundle.getLong(KEY_PARENT_ID, 0)
         entity.deviceAddr = DeviceActivity.currentDeviceMac
-
-        val meta = PassRecordMetadata()
-        meta.url = bundle.getString(KEY_PASS_URL, "error")
-        meta.login = bundle.getString(KEY_PASS_LOGIN, "error")
-
-        entity.metadataJson = gson.toJson(meta)
+        entity.metadataJson = bundle.getString(KEY_PASS_META_JSON, "")
         return entity
     }
 
@@ -167,9 +156,7 @@ class PasswordsRootFragment : androidx.fragment.app.Fragment() {
                 }
                 PassRecord.TYPE_RECORD -> {
                     bundle.putString(KEY_PASS_DESC, record.title)
-                    val meta = gson.fromJson<PassRecordMetadata>(record.metadataJson, PassRecordMetadata::class.java)
-                    bundle.putString(KEY_PASS_URL, meta.url)
-                    bundle.putString(KEY_PASS_LOGIN, meta.login)
+                    bundle.putString(KEY_PASS_META_JSON, record.metadataJson)
                 }
             }
         }

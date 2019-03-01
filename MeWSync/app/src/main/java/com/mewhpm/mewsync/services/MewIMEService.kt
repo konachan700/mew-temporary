@@ -13,6 +13,8 @@ import com.mewhpm.mewsync.dao.PasswordsDao
 import com.mewhpm.mewsync.dao.connectionSource
 import com.mewhpm.mewsync.data.PassRecord
 import com.mewhpm.mewsync.data.PassRecordMetadata
+import com.mewhpm.mewsync.security.LocalPasswordProviderImpl
+import com.mewhpm.mewsync.security.PasswordProvider
 import com.mewhpm.mewsync.ui.FixedHeightLinearLayout
 import com.mewhpm.mewsync.utils.setGmdIcon
 import com.mikepenz.google_material_typeface_library.GoogleMaterial
@@ -30,6 +32,8 @@ class MewIMEService : InputMethodService() {
     private var _currentFolderId = 0L
     private var _currentMetadata : PassRecordMetadata? = null
     private var _currentPassword : PassRecord? = null
+
+    private val localPassProvider : PasswordProvider = LocalPasswordProviderImpl.getInstance()
 
     override fun onCreateInputView(): View {
         _myView = View.inflate(this, com.mewhpm.mewsync.R.layout.x00_keyboard_view_real, null) as FixedHeightLinearLayout
@@ -51,7 +55,9 @@ class MewIMEService : InputMethodService() {
         with (_myView!!.textViewPassword) {
             paintFlags = paintFlags or Paint.UNDERLINE_TEXT_FLAG
             setOnClickListener {
-                input("password") // TODO: add password provider
+                if (KnownDevicesDao.isDeviceZero(_currentPassword!!.deviceAddr)) {
+                    input(localPassProvider.generatePassword(context, _currentPassword!!.hwUID, _currentPassword!!.deviceAddr, _currentMetadata))
+                }
             }
         }
 
@@ -105,7 +111,7 @@ class MewIMEService : InputMethodService() {
 
     override fun onStartInputView(info: EditorInfo?, restarting: Boolean) {
         super.onStartInputView(info, restarting)
-        _myView?.listRVPasswordsKeyboard?.addItems(fillList(), _currentFolderId == 0L)
+        if (restarting) _myView?.listRVPasswordsKeyboard?.addItems(fillList(), _currentFolderId == 0L)
     }
 
     override fun onEvaluateFullscreenMode(): Boolean {

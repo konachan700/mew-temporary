@@ -56,7 +56,7 @@ abstract class SimpleTextIconAdapter: androidx.recyclerview.widget.RecyclerView.
             )
 
             mView.background = ContextCompat.getDrawable(context,
-                if (_index != position) R.drawable.rec_view_list_item_bg else R.drawable.rec_view_list_item_bg_selected)
+                if (_index != position) R.drawable.x00_rv_keyboard_list_item_bg else R.drawable.x00_rv_keyboard_list_item_bg_selected)
 
             mView.setOnClickListener {
                 _index = position

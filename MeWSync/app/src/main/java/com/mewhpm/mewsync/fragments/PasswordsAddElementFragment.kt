@@ -2,8 +2,11 @@ package com.mewhpm.mewsync.fragments
 
 import android.os.Bundle
 import android.view.*
+import com.google.gson.Gson
 import com.mewhpm.mewsync.R
 import com.mewhpm.mewsync.data.PassRecord
+import com.mewhpm.mewsync.data.PassRecordMetadata
+import com.mewhpm.mewsync.data.enums.PassRecordType
 import com.mewhpm.mewsync.utils.hideKeyboard
 import com.mikepenz.iconics.utils.IconicsMenuInflaterUtil
 import kotlinx.android.synthetic.main.x02_fragment_add_directory.view.*
@@ -12,24 +15,15 @@ import org.jetbrains.anko.support.v4.toast
 
 class PasswordsAddElementFragment : androidx.fragment.app.Fragment() {
     companion object {
+        const val MAX_PASSWORD_LEN_INPUT = 80
         const val PRIMARY_TEXT_MAX_LEN = 40
-
-        const val KEY_TYPE = "dialogType"
-        const val KEY_ELEMENT_ID = "elementId"
-        const val KEY_PARENT_ID = "parentId"
-
-        const val KEY_DIR_NAME = "editTextDirectoryName"
-        const val KEY_DIR_DESC = "editTextDirectoryDescription"
-
-        const val KEY_PASS_URL = "editTextPassURL"
-        const val KEY_PASS_DESC = "editTextPassDescription"
-        const val KEY_PASS_LOGIN = "editTextPassLogin"
+        const val JSON = "object_json"
     }
 
-    private var _type = PassRecord.TYPE_FOLDER
     private var _view: View? = null
-    private var _currentId = 0L
-    private var _parentId = 0L
+    private val gson = Gson()
+    private var currentRecord : PassRecord = PassRecord()
+    private var currentMeta : PassRecordMetadata = PassRecordMetadata()
 
     var onOkClick : (bundle: Bundle) -> Unit = {}
 
@@ -41,12 +35,8 @@ class PasswordsAddElementFragment : androidx.fragment.app.Fragment() {
             }
             R.id.menuCreateNewElementOk -> {
                 val bundle = Bundle()
-                bundle.putLong(KEY_TYPE, _type)
-                bundle.putLong(KEY_ELEMENT_ID, _currentId)
-                bundle.putLong(KEY_PARENT_ID, _parentId)
-
-                when (_type) {
-                    PassRecord.TYPE_FOLDER -> {
+                when (currentRecord.recordType) {
+                    PassRecordType.DIRECTORY -> {
                         val dirName = _view!!.editTextDirectoryName.text.toString()
                         if (dirName.isBlank()) {
                             toast("Directory name can't be blank").show()
@@ -56,14 +46,10 @@ class PasswordsAddElementFragment : androidx.fragment.app.Fragment() {
                             toast("Directory name must be a 1-$PRIMARY_TEXT_MAX_LEN chars").show()
                             return super.onOptionsItemSelected(item)
                         }
-                        bundle.putString(KEY_DIR_NAME, dirName)
-                        bundle.putString(KEY_DIR_DESC, _view!!.editTextDirectoryDescription.text.toString())
-                        onOkClick.invoke(bundle)
-
-                        _view!!.hideKeyboard()
-                        activity!!.supportFragmentManager.popBackStack()
+                        currentRecord.title = dirName
+                        currentMeta.text = _view!!.editTextDirectoryDescription.text.toString()
                     }
-                    PassRecord.TYPE_RECORD -> {
+                    PassRecordType.PASSWORD -> {
                         val desc = _view!!.editTextPassDescription.text.toString()
                         if (desc.isBlank()) {
                             toast(getString(R.string.password_not_be_blank)).show()
@@ -73,17 +59,45 @@ class PasswordsAddElementFragment : androidx.fragment.app.Fragment() {
                             toast("Password description must be a 1-$PRIMARY_TEXT_MAX_LEN chars").show()
                             return super.onOptionsItemSelected(item)
                         }
+                        currentRecord.title = desc
 
-                        bundle.putString(KEY_PASS_URL, _view!!.editTextPassURL.text.toString())
-                        bundle.putString(KEY_PASS_DESC, desc)
-                        bundle.putString(KEY_PASS_LOGIN, _view!!.editTextPassLogin.text.toString())
-                        onOkClick.invoke(bundle)
+                        with (_view!!) {
+                            currentMeta.url = editTextPassURL.text.toString()
+                            currentMeta.login = editTextPassLogin.text.toString()
+                            currentMeta.containDigits = checkBoxDigits.isChecked
+                            currentMeta.containSymbols = checkBoxSymbols.isChecked
+                            currentMeta.containUppercaseAlphabet = checkBoxAlphaUpper.isChecked
+                            currentMeta.containLowercaseAlphabet = checkBoxAlphaLower.isChecked
 
-                        _view!!.hideKeyboard()
-                        activity!!.supportFragmentManager.popBackStack()
+                            try {
+                                currentMeta.minLen = Integer.parseInt(editTextMinLen.text.toString())
+                                currentMeta.maxLen = Integer.parseInt(editTextMaxLen.text.toString())
+                                if (currentMeta.minLen <= 2) {
+                                    toast("Password is too small, minimum 3 chars allowed").show()
+                                    return super.onOptionsItemSelected(item)
+                                }
+
+                                if (currentMeta.maxLen > MAX_PASSWORD_LEN_INPUT) {
+                                    toast("Password is too big, maximum $MAX_PASSWORD_LEN_INPUT chars allowed").show()
+                                    return super.onOptionsItemSelected(item)
+                                }
+                            } catch (e : NumberFormatException) {
+                                toast("Invalid max/min value entered").show()
+                                return super.onOptionsItemSelected(item)
+                            }
+                        }
                     }
-                    else -> throw IllegalArgumentException("PasswordsAddElementFragment::onOptionsItemSelected - Strange error")
                 }
+                val metaJson = gson.toJson(currentMeta)
+                currentRecord.metadataJson = metaJson
+
+                val json = gson.toJson(currentRecord)
+                bundle.putString(JSON, json)
+
+                onOkClick.invoke(bundle)
+
+                _view!!.hideKeyboard()
+                activity!!.supportFragmentManager.popBackStack()
             }
         }
         return super.onOptionsItemSelected(item)
@@ -94,34 +108,41 @@ class PasswordsAddElementFragment : androidx.fragment.app.Fragment() {
         IconicsMenuInflaterUtil.inflate(inflater, this.requireContext(), R.menu.password_add_element_fragment_menu, menu)
     }
 
-    override fun onResume() {
-        super.onResume()
-
-    }
-
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         super.setHasOptionsMenu(true)
 
-        _currentId = arguments!!.getLong(KEY_ELEMENT_ID, 0L)
-        _parentId = arguments!!.getLong(KEY_PARENT_ID, 0L)
-        _type = arguments!!.getLong(KEY_TYPE, PassRecord.TYPE_FOLDER)
+        val json = arguments!!.getString(JSON, null)
+        if (json != null && json.isNotBlank()) {
+            currentRecord = gson.fromJson(json, PassRecord::class.java) ?: PassRecord()
+            currentMeta = gson.fromJson<PassRecordMetadata>(currentRecord.metadataJson, PassRecordMetadata::class.java) ?: PassRecordMetadata()
 
-        when (_type) {
-            PassRecord.TYPE_FOLDER -> {
-                _view = inflater.inflate(R.layout.x02_fragment_add_directory, container, false)
-                _view!!.editTextDirectoryName.setText(arguments!!.getString(KEY_DIR_NAME, ""))
-                _view!!.editTextDirectoryDescription.setText(arguments!!.getString(KEY_DIR_DESC, ""))
+            when (currentRecord.recordType) {
+                PassRecordType.DIRECTORY -> {
+                    _view = inflater.inflate(R.layout.x02_fragment_add_directory, container, false)
+                    with (_view!!) {
+                        editTextDirectoryName.setText(currentRecord.title)
+                        editTextDirectoryDescription.setText(currentMeta.text)
+                    }
+                }
+                PassRecordType.PASSWORD -> {
+                    _view = inflater.inflate(R.layout.x02_fragment_add_password, container, false)
 
+                    with (_view!!) {
+                        editTextPassURL.setText(currentMeta.url)
+                        editTextPassLogin.setText(currentMeta.login)
+                        editTextPassDescription.setText("")
+
+                        checkBoxAlphaLower.isChecked = currentMeta.containLowercaseAlphabet
+                        checkBoxAlphaUpper.isChecked = currentMeta.containUppercaseAlphabet
+                        checkBoxSymbols.isChecked = currentMeta.containSymbols
+                        checkBoxDigits.isChecked = currentMeta.containDigits
+
+                        editTextMinLen.setText(currentMeta.minLen.toString(10))
+                        editTextMaxLen.setText(currentMeta.maxLen.toString(10))
+                    }
+                }
             }
-            PassRecord.TYPE_RECORD -> {
-                _view = inflater.inflate(R.layout.x02_fragment_add_password, container, false)
-                _view!!.editTextPassURL.setText(arguments!!.getString(KEY_PASS_URL, ""))
-                _view!!.editTextPassLogin.setText(arguments!!.getString(KEY_PASS_LOGIN, ""))
-                _view!!.editTextPassDescription.setText(arguments!!.getString(KEY_PASS_DESC, ""))
-            }
-            else -> throw IllegalArgumentException("PasswordsAddElementFragment::onCreateView - Strange error")
         }
-
         return _view
     }
 }

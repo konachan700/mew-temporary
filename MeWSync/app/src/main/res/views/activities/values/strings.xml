@@ -4,7 +4,7 @@
     <string name="close_str">Close</string>
     <string name="directory_description">Directory description</string>
     <string name="directory_name">Directory name</string>
-    <string name="password_description">Password description</string>
+    <string name="password_description">Password description*</string>
     <string name="login">Login</string>
     <string name="url_for_password">URL for password</string>
     <string name="incorrect_pin_code">Incorrect PIN-code.</string>
@@ -13,4 +13,10 @@
     <string name="u_login_u">Login</string>
     <string name="u_password_u">Password</string>
     <string name="click_for_enter">Click for enter:</string>
+    <string name="contain_digits">Contain digits</string>
+    <string name="contain_lowercase_alphabet">Contain lowercase alphabet</string>
+    <string name="contain_uppercase_alphabet">Contain uppercase alphabet</string>
+    <string name="contain_symbols">Contain symbols</string>
+    <string name="minimum_password_length">Minimum password length</string>
+    <string name="maximum_password_length">Maximum password length</string>
 </resources>
