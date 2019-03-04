@@ -13,6 +13,7 @@ import com.mewhpm.mewsync.dao.PasswordsDao
 import com.mewhpm.mewsync.dao.connectionSource
 import com.mewhpm.mewsync.data.PassRecord
 import com.mewhpm.mewsync.data.PassRecordMetadata
+import com.mewhpm.mewsync.data.enums.PassRecordType
 import com.mewhpm.mewsync.security.LocalPasswordProviderImpl
 import com.mewhpm.mewsync.security.PasswordProvider
 import com.mewhpm.mewsync.ui.FixedHeightLinearLayout
@@ -87,12 +88,12 @@ class MewIMEService : InputMethodService() {
             }
             onItemClickEvent = {
                 _currentPassword = it
-                when (_currentPassword!!.nodeType) {
-                    PassRecord.TYPE_FOLDER -> {
+                when (_currentPassword!!.recordType) {
+                    PassRecordType.DIRECTORY -> {
                         _currentFolderId = _currentPassword!!.id
                         addItems(fillList(), _currentFolderId == 0L)
                     }
-                    PassRecord.TYPE_RECORD -> {
+                    PassRecordType.PASSWORD -> {
                         _currentMetadata = gson.fromJson<PassRecordMetadata>(_currentPassword!!.metadataJson, PassRecordMetadata::class.java)
                         _myView!!.textViewPassword.visibility = View.VISIBLE
                         _myView!!.textViewTitleKb.visibility = View.VISIBLE
@@ -126,11 +127,19 @@ class MewIMEService : InputMethodService() {
         _myView!!.textViewTitleNoItems.visibility = View.VISIBLE
 
         val defaultDevice = KnownDevicesDao.getInstance(applicationContext.connectionSource).getDefault()
-        return if (defaultDevice == null)
-            Collections.EMPTY_LIST as List<PassRecord>
-        else
-            PasswordsDao.getInstance(applicationContext.connectionSource).getAllChild(parentId = _currentFolderId, mac = defaultDevice.mac)
+        val daoDev = KnownDevicesDao.getInstance(applicationContext.connectionSource)
+        val daoPwd = PasswordsDao.getInstance(applicationContext.connectionSource)
 
+        return if (defaultDevice == null) {
+            val zero = daoDev.getDeviceZero()
+            if (zero != null) {
+                daoPwd.getAllChild(parentId = _currentFolderId, mac = zero.mac)
+            } else {
+                Collections.EMPTY_LIST as List<PassRecord>
+            }
+        } else {
+            daoPwd.getAllChild(parentId = _currentFolderId, mac = defaultDevice.mac)
+        }
     }
 
     private fun input(data: String) {

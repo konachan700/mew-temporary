@@ -49,6 +49,11 @@ class KnownDevicesDao private constructor (val connectionSource : ConnectionSour
         return if (list.isEmpty()) null else list[0]
     }
 
+    fun getDeviceZero(): BleDevice? {
+        val list = dao.queryForEq("mac", KnownDevicesDao.ZERO_MAC)
+        return if (list.isEmpty()) null else list[0]
+    }
+
     fun addNew(dev: BleDevice) {
         dao.create(dev)
     }

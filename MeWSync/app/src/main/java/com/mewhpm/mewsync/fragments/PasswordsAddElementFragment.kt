@@ -47,7 +47,7 @@ class PasswordsAddElementFragment : androidx.fragment.app.Fragment() {
                             return super.onOptionsItemSelected(item)
                         }
                         currentRecord.title = dirName
-                        currentMeta.text = _view!!.editTextDirectoryDescription.text.toString()
+                        //currentMeta.text = _view!!.editTextDirectoryDescription.text.toString()
                     }
                     PassRecordType.PASSWORD -> {
                         val desc = _view!!.editTextPassDescription.text.toString()
@@ -121,7 +121,7 @@ class PasswordsAddElementFragment : androidx.fragment.app.Fragment() {
                     _view = inflater.inflate(R.layout.x02_fragment_add_directory, container, false)
                     with (_view!!) {
                         editTextDirectoryName.setText(currentRecord.title)
-                        editTextDirectoryDescription.setText(currentMeta.text)
+                        //editTextDirectoryDescription.setText(currentMeta.text)
                     }
                 }
                 PassRecordType.PASSWORD -> {
@@ -130,7 +130,7 @@ class PasswordsAddElementFragment : androidx.fragment.app.Fragment() {
                     with (_view!!) {
                         editTextPassURL.setText(currentMeta.url)
                         editTextPassLogin.setText(currentMeta.login)
-                        editTextPassDescription.setText("")
+                        editTextPassDescription.setText(currentRecord.title)
 
                         checkBoxAlphaLower.isChecked = currentMeta.containLowercaseAlphabet
                         checkBoxAlphaUpper.isChecked = currentMeta.containUppercaseAlphabet

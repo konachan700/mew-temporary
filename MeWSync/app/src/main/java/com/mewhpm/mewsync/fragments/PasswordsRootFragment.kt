@@ -2,18 +2,14 @@ package com.mewhpm.mewsync.fragments
 
 import android.os.Bundle
 import android.view.*
+import com.google.gson.Gson
 import com.mewhpm.mewsync.DeviceActivity
 import com.mewhpm.mewsync.R
 import com.mewhpm.mewsync.dao.PasswordsDao
 import com.mewhpm.mewsync.dao.connectionSource
 import com.mewhpm.mewsync.data.PassRecord
-import com.mewhpm.mewsync.fragments.PasswordsAddElementFragment.Companion.KEY_DIR_DESC
-import com.mewhpm.mewsync.fragments.PasswordsAddElementFragment.Companion.KEY_DIR_NAME
-import com.mewhpm.mewsync.fragments.PasswordsAddElementFragment.Companion.KEY_ELEMENT_ID
-import com.mewhpm.mewsync.fragments.PasswordsAddElementFragment.Companion.KEY_PARENT_ID
-import com.mewhpm.mewsync.fragments.PasswordsAddElementFragment.Companion.KEY_PASS_DESC
-import com.mewhpm.mewsync.fragments.PasswordsAddElementFragment.Companion.KEY_PASS_META_JSON
-import com.mewhpm.mewsync.fragments.PasswordsAddElementFragment.Companion.KEY_TYPE
+import com.mewhpm.mewsync.data.PassRecordMetadata
+import com.mewhpm.mewsync.data.enums.PassRecordType
 import com.mewhpm.mewsync.utils.fixColorOfSearchBar
 import com.mewhpm.mewsync.utils.hideKeyboard
 import com.mikepenz.iconics.utils.IconicsMenuInflaterUtil
@@ -25,65 +21,18 @@ class PasswordsRootFragment : androidx.fragment.app.Fragment() {
     private var _view: View? = null
     private var _currentFolderId = 0L
 
+    private val gson = Gson()
     private val srand = SecureRandom()
 
     private val onOkClick : (bundle: Bundle) -> Unit = { bundle ->
-        val id = bundle.getLong(KEY_ELEMENT_ID)
+        val entity = createPassRecord(bundle)
         val dao = PasswordsDao.getInstance(this.requireContext().connectionSource)
-        when (bundle.getLong(KEY_TYPE, 0)) {
-            PassRecord.TYPE_FOLDER -> {
-                if (id == 0L) {
-                    val entity = createDirectoryRecord(bundle)
-                    dao.create(entity)
-                } else {
-                    val element = dao.getById(id)
-                    if (element != null) {
-                        element.text = bundle.getString(KEY_DIR_DESC, "error")
-                        element.title = bundle.getString(KEY_DIR_NAME, "error")
-                        dao.save(element)
-                    }
-                }
-            }
-            PassRecord.TYPE_RECORD -> {
-                if (id == 0L) {
-                    val entity = createPasswordRecord(bundle)
-                    dao.create(entity)
-                } else {
-                    val element = dao.getById(id)
-                    if (element != null) {
-                        element.text = ""
-                        element.title = bundle.getString(KEY_PASS_DESC, "error")
-                        element.metadataJson = bundle.getString(KEY_PASS_META_JSON, "")
-                        dao.save(element)
-                    }
-                }
-            }
-        }
+        dao.createOrSave(entity)
     }
 
-    private fun createDirectoryRecord(bundle: Bundle) : PassRecord {
-        val entity = PassRecord()
-        entity.nodeType = PassRecord.TYPE_FOLDER
-        entity.text = bundle.getString(KEY_DIR_DESC, "error")
-        entity.title = bundle.getString(KEY_DIR_NAME, "error")
-        entity.hwUID = 0L
-        entity.timestamp = Date().time
-        entity.parentId = bundle.getLong(KEY_PARENT_ID, 0)
-        entity.deviceAddr = DeviceActivity.currentDeviceMac
-        return entity
-    }
-
-    private fun createPasswordRecord(bundle: Bundle) : PassRecord {
-        val entity = PassRecord()
-        entity.nodeType = PassRecord.TYPE_RECORD
-        entity.text = ""
-        entity.title = bundle.getString(KEY_PASS_DESC, "error")
-        entity.hwUID = srand.nextLong()
-        entity.timestamp = Date().time
-        entity.parentId = bundle.getLong(KEY_PARENT_ID, 0)
-        entity.deviceAddr = DeviceActivity.currentDeviceMac
-        entity.metadataJson = bundle.getString(KEY_PASS_META_JSON, "")
-        return entity
+    private fun createPassRecord(bundle: Bundle) : PassRecord {
+        val jsonPassRecord = bundle.getString(PasswordsAddElementFragment.JSON)
+        return if (jsonPassRecord == null) PassRecord() else gson.fromJson(jsonPassRecord, PassRecord::class.java)
     }
 
     private fun refresh() {
@@ -114,52 +63,42 @@ class PasswordsRootFragment : androidx.fragment.app.Fragment() {
                 refresh()
             }
             onItemClickEvent = { item ->
-                when (item.nodeType) {
-                    PassRecord.TYPE_FOLDER -> {
+                when (item.recordType) {
+                    PassRecordType.DIRECTORY -> {
                         _currentFolderId = item.id
                         refresh()
                     }
-                    PassRecord.TYPE_RECORD -> {
-
-                    }
+                    PassRecordType.PASSWORD -> { }
                 }
             }
             onDeleteEvent = { record ->
                 val dao = PasswordsDao.getInstance(this@PasswordsRootFragment.requireContext().connectionSource)
-                when (record.nodeType) {
-                    PassRecord.TYPE_FOLDER -> dao.removeDir(record)
-                    PassRecord.TYPE_RECORD -> dao.remove(record)
+                when (record.recordType) {
+                    PassRecordType.DIRECTORY -> dao.removeDir(record)
+                    PassRecordType.PASSWORD -> dao.remove(record)
                 }
                 refresh()
             }
-            onEditEvent = { record ->
-                openEditor(record.id, record.nodeType, record)
-            }
+            onEditEvent = { record -> openEditor(record.recordType, record) }
         }
         return _view
     }
 
-    private fun openEditor(id: Long, type: Long, record: PassRecord? = null) {
+    private fun openEditor(type: PassRecordType, record: PassRecord? = null) {
         val editorFragment = PasswordsAddElementFragment()
         editorFragment.onOkClick = onOkClick
 
-        val bundle = Bundle()
-        bundle.putLong(KEY_ELEMENT_ID, id)
-        bundle.putLong(KEY_PARENT_ID, _currentFolderId)
-        bundle.putLong(KEY_TYPE, type)
+        val json = if (record != null) gson.toJson(record) else gson.toJson(PassRecord().also {
+            it.recordType = type
+            it.hwUID = srand.nextLong()
+            it.deviceAddr = DeviceActivity.currentDeviceMac
+            it.parentId = _currentFolderId
+            it.timestamp = Date().time
+            it.metadataJson = gson.toJson(PassRecordMetadata())
+        })
 
-        if (record != null) {
-            when (type) {
-                PassRecord.TYPE_FOLDER -> {
-                    bundle.putString(KEY_DIR_NAME, record.title)
-                    bundle.putString(KEY_DIR_NAME, record.text)
-                }
-                PassRecord.TYPE_RECORD -> {
-                    bundle.putString(KEY_PASS_DESC, record.title)
-                    bundle.putString(KEY_PASS_META_JSON, record.metadataJson)
-                }
-            }
-        }
+        val bundle = Bundle()
+        bundle.putString(PasswordsAddElementFragment.JSON, json)
 
         editorFragment.arguments = bundle
         activity!!.supportFragmentManager.beginTransaction()
@@ -170,8 +109,8 @@ class PasswordsRootFragment : androidx.fragment.app.Fragment() {
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
-            R.id.menuCreateNewFolder1 -> { openEditor(0, PassRecord.TYPE_FOLDER) }
-            R.id.menuCreateNewPassword1 -> { openEditor(0, PassRecord.TYPE_RECORD) }
+            R.id.menuCreateNewFolder1 -> { openEditor(PassRecordType.DIRECTORY) }
+            R.id.menuCreateNewPassword1 -> { openEditor(PassRecordType.PASSWORD) }
         }
         return super.onOptionsItemSelected(item)
     }

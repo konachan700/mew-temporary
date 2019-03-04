@@ -7,7 +7,9 @@ import com.j256.ormlite.support.ConnectionSource
 import com.j256.ormlite.table.TableUtils
 import com.mewhpm.mewsync.DeviceActivity
 import com.mewhpm.mewsync.data.PassRecord
+import com.mewhpm.mewsync.data.enums.PassRecordType
 import com.mewhpm.mewsync.utils.CryptoUtils
+import java.lang.Exception
 import java.sql.SQLException
 
 class PasswordsDao private constructor (val connectionSource : ConnectionSource) {
@@ -38,7 +40,7 @@ class PasswordsDao private constructor (val connectionSource : ConnectionSource)
             "parentId" to parentId,
             "deviceAddr" to mac
         ))
-        return decrypt(unsorted.sortedWith(compareBy(PassRecord::nodeType, PassRecord::title)))
+        return decrypt(unsorted.sortedWith(compareBy(PassRecord::recordType, PassRecord::title)))
     }
 
     fun getById(nodeId: Long) : PassRecord? {
@@ -60,6 +62,10 @@ class PasswordsDao private constructor (val connectionSource : ConnectionSource)
         } catch (e : SQLException) {
             null
         }
+    }
+
+    fun createOrSave(passRecord: PassRecord) {
+        if (passRecord.id == 0L) create(passRecord) else save(passRecord)
     }
 
     fun save(passRecord: PassRecord) {
@@ -85,9 +91,9 @@ class PasswordsDao private constructor (val connectionSource : ConnectionSource)
     }
 
     fun removeDir(passRecord: PassRecord) {
-        if (passRecord.nodeType != PassRecord.TYPE_FOLDER) return
+        if (passRecord.recordType != PassRecordType.DIRECTORY) return
         getAllChild(passRecord.id).forEach { child ->
-            if (child.nodeType == PassRecord.TYPE_FOLDER) {
+            if (child.recordType == PassRecordType.DIRECTORY) {
                 removeDir(child)
             } else {
                 remove(child)
@@ -107,16 +113,24 @@ class PasswordsDao private constructor (val connectionSource : ConnectionSource)
     }
 
     private fun encrypt(passRecord: PassRecord) : PassRecord {
-        //passRecord.metadataJson = CryptoUtils.encryptRSA(passRecord.metadataJson)
-        //passRecord.title = CryptoUtils.encryptRSA(passRecord.title)
-        //passRecord.text = CryptoUtils.encryptRSA(passRecord.text)
+        try {
+            passRecord.metadataJson = CryptoUtils.encryptRSA(passRecord.metadataJson)
+        } catch (e : Exception) {
+            Log.d("encrypt", "Bad json found in database")
+            Log.d("encrypt", "\tid#${passRecord.id};\tjson: \"${passRecord.metadataJson}\"")
+            Log.d("encrypt", "\terror: \"${e.message}\"")
+        }
         return passRecord
     }
 
     private fun decrypt(passRecord: PassRecord) : PassRecord {
-        //passRecord.metadataJson = CryptoUtils.decryptRSA(passRecord.metadataJson)
-        //passRecord.title = CryptoUtils.decryptRSA(passRecord.title)
-        //passRecord.text = CryptoUtils.decryptRSA(passRecord.text)
+        try {
+            passRecord.metadataJson = CryptoUtils.decryptRSA(passRecord.metadataJson)
+        } catch (e : Exception) {
+            Log.d("decrypt", "Bad json found in database")
+            Log.d("decrypt", "\tid#${passRecord.id};\tjson: \"${passRecord.metadataJson}\"")
+            Log.d("encrypt", "\terror: \"${e.message}\"")
+        }
         return passRecord
     }
 }

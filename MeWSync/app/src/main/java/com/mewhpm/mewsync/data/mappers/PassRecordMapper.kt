@@ -2,8 +2,10 @@ package com.mewhpm.mewsync.data.mappers
 
 import android.content.Context
 import androidx.core.content.ContextCompat
+import com.google.gson.Gson
 import com.mewhpm.mewsync.R
 import com.mewhpm.mewsync.data.DisplayablePassRecord
+import com.mewhpm.mewsync.data.PassRecordMetadata
 import com.mewhpm.mewsync.data.enums.PassRecordType
 import com.mewhpm.mewsync.ui.recyclerview.data.TextPairWithIcon
 import com.mikepenz.google_material_typeface_library.GoogleMaterial
@@ -35,7 +37,7 @@ class PassRecordMapper {
                 PassRecordType.PASSWORD -> {
                     Pair(
                         TextPairWithIcon(
-                            icon = GoogleMaterial.Icon.gmd_vpn_key,
+                            icon = GoogleMaterial.Icon.gmd_label_outline,
                             iconColor = ContextCompat.getColor(context, iconColor),
                             iconSize = iconSizeDp,
                             text = "",
@@ -45,7 +47,6 @@ class PassRecordMapper {
                         ), passRecord
                     )
                 }
-                else -> throw IllegalArgumentException("PassRecordMapper.Companion.toTextPairWithIconForKeyboard : Unknown element type")
             }
         }
 
@@ -56,7 +57,7 @@ class PassRecordMapper {
             val iconColor = R.color.colorBrandDarkGray
             val iconSizeDp = 48
             val titleColor = R.color.colorBrandBlack
-            val textColor = R.color.colorBrandBlack
+            val textColor = R.color.colorBrandDarkGray
             return when (passRecord.recordType) {
                 PassRecordType.DIRECTORY -> {
                     Pair(
@@ -64,7 +65,7 @@ class PassRecordMapper {
                             icon = GoogleMaterial.Icon.gmd_folder,
                             iconColor = ContextCompat.getColor(context, iconColor),
                             iconSize = iconSizeDp,
-                            text = passRecord.text,
+                            text = "Directory",
                             textColor = ContextCompat.getColor(context, textColor),
                             title = passRecord.title,
                             titleColor = ContextCompat.getColor(context, titleColor)
@@ -74,7 +75,7 @@ class PassRecordMapper {
                 PassRecordType.PASSWORD -> {
                     Pair(
                         TextPairWithIcon(
-                            icon = GoogleMaterial.Icon.gmd_vpn_key,
+                            icon = GoogleMaterial.Icon.gmd_dialpad,
                             iconColor = ContextCompat.getColor(context, iconColor),
                             iconSize = iconSizeDp,
                             text = "Password",
@@ -84,7 +85,6 @@ class PassRecordMapper {
                         ), passRecord
                     )
                 }
-                else -> throw IllegalArgumentException("PassRecordMapper.Companion.toTextPairWithIconForKeyboard : Unknown element type")
             }
         }
 
