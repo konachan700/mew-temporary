@@ -1,7 +1,7 @@
 syntax = "proto3";
 
 option java_outer_classname = "PassRecordDTO";
-option java_package = "";
+option java_package = "com.mewhpm.mewsync.data.generated";
 
 message record {
     int32 packageId             = 1;

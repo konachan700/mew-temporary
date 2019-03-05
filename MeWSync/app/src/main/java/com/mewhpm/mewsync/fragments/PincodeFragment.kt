@@ -64,7 +64,7 @@ class PincodeFragment : Fragment() {
 
         _view!!.button41.setOnClickListener {
             onBackPressEvent.invoke()
-            VibroUtils.vibrate(this@PincodeFragment.requireContext(), 200)
+            VibroUtils.vibrate(this@PincodeFragment.requireContext(), 100)
         }
 
         _view!!.button43.setOnClickListener {
@@ -78,14 +78,14 @@ class PincodeFragment : Fragment() {
 
             _view!!.pincodeBox1.text.clear()
             onClearAllEvent.invoke()
-            VibroUtils.vibrate(this.requireContext(), 200)
+            VibroUtils.vibrate(this.requireContext(), 100)
         }
 
         _view!!.pincodeDeleteButton.onClick {
             _view!!.pincodeBox1.text.clear()
             _view!!.incorrectPinWarning.visibility = View.INVISIBLE
             onClearAllEvent.invoke()
-            VibroUtils.vibrate(this@PincodeFragment.requireContext(), 200)
+            VibroUtils.vibrate(this@PincodeFragment.requireContext(), 100)
         }
 
         return _view

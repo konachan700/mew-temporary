@@ -8,7 +8,6 @@ import android.content.SharedPreferences
 import android.content.pm.PackageManager
 import android.graphics.Color
 import android.graphics.drawable.Icon
-import android.location.LocationManager
 import android.os.Bundle
 import android.preference.PreferenceManager
 import android.view.LayoutInflater
@@ -17,27 +16,29 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import com.mewhpm.mewsync.DeviceActivity
 import com.mewhpm.mewsync.R
-import com.mewhpm.mewsync.utils.CryptoUtils
 import com.mewhpm.mewsync.dao.KnownDevicesDao
 import com.mewhpm.mewsync.dao.connectionSource
 import com.mewhpm.mewsync.data.BleDevice
 import com.mewhpm.mewsync.ui.recyclerview.impl.RecyclerViewDevicesImpl
+import com.mewhpm.mewsync.utils.CryptoUtils
 import com.mewhpm.mewsync.utils.PinUtil
 import com.mikepenz.google_material_typeface_library.GoogleMaterial
 import com.mikepenz.iconics.IconicsDrawable
+import com.polidea.rxandroidble2.RxBleClient
 import kotlinx.android.synthetic.main.x01_known_devices_fragment.view.*
-import org.jetbrains.anko.alert
-import org.jetbrains.anko.cancelButton
 import org.jetbrains.anko.okButton
 import org.jetbrains.anko.support.v4.alert
+import android.provider.Settings
+
 
 class DevicesFragment : Fragment() {
     companion object {
         private const val ACCESS_COARSE_LOCATION = 43
+        private const val REQUEST_ENABLE_BT = 1
     }
 
-    private val _bluetoothAdapter = BluetoothAdapter.getDefaultAdapter()
     private val _bleDiscoveryFragment = BleDiscoveryFragment()
+    private var _rxBleClient: RxBleClient? = null
 
     private var _pinCreateFirstInput = true
     private var _pinCreateHash1 = ""
@@ -50,33 +51,26 @@ class DevicesFragment : Fragment() {
     private var _view: View? = null
     private var dao : KnownDevicesDao? = null
 
+    private fun showDiscoveryFragment() {
+        activity!!.supportFragmentManager.beginTransaction()
+            .replace(R.id.fragment_holder, _bleDiscoveryFragment, "DevicesFragment")
+            .addToBackStack("bleDiscoveryFragment")
+            .commit()
+    }
+
+    private fun msg(msg : String, ok: () -> Unit = {}) {
+        alert(msg, "Bluetooth") {
+            okButton { ok.invoke() }
+        }.show()
+    }
+
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
-        val location = context!!.getSystemService(LocationManager::class.java) as LocationManager
-        if (!location.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
-            alert("Location service is disabled, but it needed for BLE scanning.", "Location") {
-                okButton {  }
-            }.show()
-            return
-        }
-
-        if (!_bluetoothAdapter.isEnabled) {
-            alert("Bluetooth is disabled!", "Bluetooth") {
-                okButton {  }
-            }.show()
-            return
-        }
-
         when (requestCode) {
             ACCESS_COARSE_LOCATION -> {
                 if (grantResults.all { it == PackageManager.PERMISSION_GRANTED }) {
-                    activity!!.supportFragmentManager.beginTransaction()
-                        .replace(R.id.fragment_holder, _bleDiscoveryFragment, "DevicesFragment")
-                        .addToBackStack("bleDiscoveryFragment")
-                        .commit()
+                    showDiscoveryFragment()
                 } else {
-                    alert("No permissions to BLE", "Bluetooth") {
-                        okButton {  }
-                    }
+                    msg("Permissions not granted!")
                 }
             }
         }
@@ -94,6 +88,7 @@ class DevicesFragment : Fragment() {
 
     override fun onResume() {
         super.onResume()
+        _rxBleClient = RxBleClient.create(requireContext())
         refreshFromDb()
     }
 
@@ -183,7 +178,6 @@ class DevicesFragment : Fragment() {
         }
     }
 
-
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         _view = inflater.inflate(R.layout.x01_known_devices_fragment, container, false)
 
@@ -244,13 +238,29 @@ class DevicesFragment : Fragment() {
                     .icon(GoogleMaterial.Icon.gmd_bluetooth_searching).sizeDp(32).color(Color.WHITE).toBitmap()
             ))
             setOnClickListener {
-                requestPermissions(arrayOf(
-                    Manifest.permission.ACCESS_COARSE_LOCATION,
-                    Manifest.permission.BLUETOOTH,
-                    Manifest.permission.BLUETOOTH_ADMIN), ACCESS_COARSE_LOCATION)
+                when (_rxBleClient?.state) {
+                    RxBleClient.State.BLUETOOTH_NOT_ENABLED -> {
+                        msg("Bluetooth not enable! Please, enable it.") {
+                            val enableBtIntent = Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE)
+                            activity?.startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT)
+                        }
+                    }
+                    RxBleClient.State.BLUETOOTH_NOT_AVAILABLE -> msg("This device hasn't a BLE module")
+                    RxBleClient.State.LOCATION_SERVICES_NOT_ENABLED -> {
+                        msg("Location service is disabled. Please, enable it.") {
+                            val intent = Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS)
+                            startActivity(intent)
+                        }
+                    }
+                    RxBleClient.State.LOCATION_PERMISSION_NOT_GRANTED -> {
+                        requestPermissions(arrayOf(Manifest.permission.ACCESS_COARSE_LOCATION), ACCESS_COARSE_LOCATION)
+                    }
+                    RxBleClient.State.READY -> {
+                        showDiscoveryFragment()
+                    }
+                }
             }
         }
-
         refreshFromDb()
         return _view
     }

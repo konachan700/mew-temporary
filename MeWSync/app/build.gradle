@@ -2,9 +2,7 @@ apply plugin: 'com.android.application'
 apply plugin: 'com.google.protobuf'
 apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-android-extensions'
-
-def protobufGeneratedSource = new File("$buildDir/generated/source/proto/debug/javalite/")
-def protobufGeneratedDestination = new File("$projectDir/src/main/java/com/mewhpm/mewsync/data/generated/")
+apply plugin: 'idea'
 
 android {
     compileSdkVersion 28
@@ -69,6 +67,8 @@ dependencies {
     implementation 'com.mikepenz:google-material-typeface:3.0.1.3.original@aar'
     // PROTOBUF
     implementation 'com.google.protobuf:protobuf-lite:3.0.0'
+    // BLE
+    implementation "com.polidea.rxandroidble2:rxandroidble:1.8.1"
     // TESTS
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'androidx.test:runner:1.1.1'
@@ -78,43 +78,33 @@ dependencies {
 
 protobuf {
     protoc {
-        // You still need protoc like in the non-Android case
         artifact = 'com.google.protobuf:protoc:3.0.0'
     }
     plugins {
         javalite {
-            // The codegen for lite comes as a separate artifact
             artifact = 'com.google.protobuf:protoc-gen-javalite:3.0.0'
         }
     }
     generateProtoTasks {
         all().each { task ->
             task.builtins {
-                // In most cases you don't need the full Java output
-                // if you use the lite output.
                 remove java
             }
             task.plugins {
                 javalite { }
             }
+            generatedFilesBaseDir = "$projectDir/src/generated"
         }
     }
 }
 
-task copyProtobufSources(type: Copy) {
-    copy {
-        from(protobufGeneratedSource)
-        into(protobufGeneratedDestination)
-        include '**/*.java'
-    }
-}
-
-preBuild.dependsOn copyProtobufSources
-
 clean {
     delete protobuf.generatedFilesBaseDir
-//    delete fileTree(protobufGeneratedDestination).matching {
-//        include "**/*.java"
-//    }
+}
+
+idea {
+    module {
+        sourceDirs += file("${protobuf.generatedFilesBaseDir}/src/generated/main/java")
+    }
 }
 

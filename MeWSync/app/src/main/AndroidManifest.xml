@@ -7,12 +7,8 @@
             android:name="android.hardware.bluetooth_le"
             android:required="true"/>
 
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
-    <uses-permission android:name="android.permission.BLUETOOTH"/>
-    <uses-permission android:name="android.permission.BLUETOOTH_ADMIN"/>
-    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
-    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
-    <uses-permission android:name="android.permission.READ_PHONE_STATE"/>
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" android:maxSdkVersion="22"/>
+    <!--uses-permission android:name="android.permission.READ_PHONE_STATE"/-->
     <uses-permission android:name="android.permission.VIBRATE" />
 
     <application
@@ -44,12 +40,6 @@
                 android:name=".services.BleService"
                 android:enabled="true"
                 android:exported="false"/-->
-
-        <!-- BLE discovery service -->
-        <service
-                android:name=".services.BleDiscoveryService"
-                android:enabled="true"
-                android:exported="false"/>
 
         <!-- MeW input method service -->
         <service android:name=".services.MewIMEService"
