@@ -1,7 +1,7 @@
 package com.mewhpm.mewsync
 
 import com.mewhpm.mewsync.dao.KnownDevicesDao
-import com.mewhpm.mewsync.data.PassRecordMetadata
+import com.mewhpm.mewsync.data.meta.PassRecordMetadata
 import com.mewhpm.mewsync.security.LocalPasswordProviderImpl
 import com.mewhpm.mewsync.security.PasswordProvider
 import junit.framework.Assert.assertEquals

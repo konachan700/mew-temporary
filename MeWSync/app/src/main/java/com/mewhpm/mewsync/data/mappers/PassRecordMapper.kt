@@ -2,10 +2,8 @@ package com.mewhpm.mewsync.data.mappers
 
 import android.content.Context
 import androidx.core.content.ContextCompat
-import com.google.gson.Gson
 import com.mewhpm.mewsync.R
 import com.mewhpm.mewsync.data.DisplayablePassRecord
-import com.mewhpm.mewsync.data.PassRecordMetadata
 import com.mewhpm.mewsync.data.enums.PassRecordType
 import com.mewhpm.mewsync.ui.recyclerview.data.TextPairWithIcon
 import com.mikepenz.google_material_typeface_library.GoogleMaterial

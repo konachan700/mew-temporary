@@ -5,7 +5,7 @@ import android.view.*
 import com.google.gson.Gson
 import com.mewhpm.mewsync.R
 import com.mewhpm.mewsync.data.PassRecord
-import com.mewhpm.mewsync.data.PassRecordMetadata
+import com.mewhpm.mewsync.data.meta.PassRecordMetadata
 import com.mewhpm.mewsync.data.enums.PassRecordType
 import com.mewhpm.mewsync.utils.hideKeyboard
 import com.mikepenz.iconics.utils.IconicsMenuInflaterUtil
@@ -23,7 +23,8 @@ class PasswordsAddElementFragment : androidx.fragment.app.Fragment() {
     private var _view: View? = null
     private val gson = Gson()
     private var currentRecord : PassRecord = PassRecord()
-    private var currentMeta : PassRecordMetadata = PassRecordMetadata()
+    private var currentMeta : PassRecordMetadata =
+        PassRecordMetadata()
 
     var onOkClick : (bundle: Bundle) -> Unit = {}
 

@@ -8,7 +8,7 @@ import com.mewhpm.mewsync.R
 import com.mewhpm.mewsync.dao.PasswordsDao
 import com.mewhpm.mewsync.dao.connectionSource
 import com.mewhpm.mewsync.data.PassRecord
-import com.mewhpm.mewsync.data.PassRecordMetadata
+import com.mewhpm.mewsync.data.meta.PassRecordMetadata
 import com.mewhpm.mewsync.data.enums.PassRecordType
 import com.mewhpm.mewsync.utils.fixColorOfSearchBar
 import com.mewhpm.mewsync.utils.hideKeyboard

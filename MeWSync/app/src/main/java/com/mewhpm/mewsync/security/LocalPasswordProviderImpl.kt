@@ -4,7 +4,7 @@ import android.content.Context
 import android.content.SharedPreferences
 import android.preference.PreferenceManager
 import android.util.Base64
-import com.mewhpm.mewsync.data.PassRecordMetadata
+import com.mewhpm.mewsync.data.meta.PassRecordMetadata
 import com.mewhpm.mewsync.utils.CryptoUtils
 import java.io.ByteArrayOutputStream
 import java.security.MessageDigest

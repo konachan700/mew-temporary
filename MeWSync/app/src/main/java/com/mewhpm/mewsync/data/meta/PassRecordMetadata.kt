@@ -1,4 +1,4 @@
-package com.mewhpm.mewsync.data
+package com.mewhpm.mewsync.data.meta
 
 import java.io.Serializable
 
