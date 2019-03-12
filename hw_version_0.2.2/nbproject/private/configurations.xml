@@ -1,0 +1,278 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configurationDescriptor version="100">
+  <logicalFolder name="root" displayName="root" projectFiles="true" kind="ROOT">
+    <df root="." name="0">
+      <df name="app">
+        <df name="keyboard">
+          <in>input-event-codes.h</in>
+        </df>
+        <df name="packet_parser">
+          <in>parser.c</in>
+          <in>parser.h</in>
+        </df>
+        <df name="pwd_generator">
+          <in>mew_passgen.c</in>
+          <in>mew_passgen.h</in>
+          <in>mew_xor_algo.c</in>
+        </df>
+      </df>
+      <df name="drivers">
+        <df name="bluetooth">
+          <in>bluetooth.h</in>
+          <in>bt_usart.c</in>
+        </df>
+        <df name="display">
+          <in>display.c</in>
+          <in>display.h</in>
+          <in>logo.h</in>
+          <in>ts_tsc2007.c</in>
+        </df>
+        <df name="duart">
+          <in>duart.c</in>
+          <in>duart.h</in>
+        </df>
+        <df name="flash">
+          <in>flash.h</in>
+          <in>otp_storage.c</in>
+        </df>
+        <df name="hw_crypt">
+          <in>aes256.c</in>
+          <in>crypto.h</in>
+          <in>sha2_256.c</in>
+        </df>
+        <df name="i2c">
+          <in>i2c.c</in>
+          <in>i2c.h</in>
+        </df>
+        <df name="spi_flash">
+          <in>flash.c</in>
+          <in>flash.h</in>
+          <in>w25n01gvzeig.c</in>
+        </df>
+        <df name="system">
+          <in>clock.c</in>
+          <in>random.c</in>
+          <in>system.c</in>
+          <in>system.h</in>
+          <in>systick.c</in>
+        </df>
+        <df name="usb">
+          <in>mew_usb_hid.c</in>
+          <in>mew_usb_hid.h</in>
+        </df>
+      </df>
+      <df name="lvgl">
+        <df name="docs">
+        </df>
+        <df name="lv_core">
+          <in>lv_group.c</in>
+          <in>lv_group.h</in>
+          <in>lv_indev.c</in>
+          <in>lv_indev.h</in>
+          <in>lv_obj.c</in>
+          <in>lv_obj.h</in>
+          <in>lv_refr.c</in>
+          <in>lv_refr.h</in>
+          <in>lv_style.c</in>
+          <in>lv_style.h</in>
+          <in>lv_vdb.c</in>
+          <in>lv_vdb.h</in>
+        </df>
+        <df name="lv_draw">
+          <in>lv_draw.c</in>
+          <in>lv_draw.h</in>
+          <in>lv_draw_rbasic.c</in>
+          <in>lv_draw_rbasic.h</in>
+          <in>lv_draw_vbasic.c</in>
+          <in>lv_draw_vbasic.h</in>
+        </df>
+        <df name="lv_hal">
+          <in>lv_hal.h</in>
+          <in>lv_hal_disp.c</in>
+          <in>lv_hal_disp.h</in>
+          <in>lv_hal_indev.c</in>
+          <in>lv_hal_indev.h</in>
+          <in>lv_hal_tick.c</in>
+          <in>lv_hal_tick.h</in>
+        </df>
+        <df name="lv_misc">
+          <df name="lv_fonts">
+            <in>lv_font_dejavu_10.c</in>
+            <in>lv_font_dejavu_10_cyrillic.c</in>
+            <in>lv_font_dejavu_10_latin_sup.c</in>
+            <in>lv_font_dejavu_20.c</in>
+            <in>lv_font_dejavu_20_cyrillic.c</in>
+            <in>lv_font_dejavu_20_latin_sup.c</in>
+            <in>lv_font_dejavu_30.c</in>
+            <in>lv_font_dejavu_30_cyrillic.c</in>
+            <in>lv_font_dejavu_30_latin_sup.c</in>
+            <in>lv_font_dejavu_40.c</in>
+            <in>lv_font_dejavu_40_cyrillic.c</in>
+            <in>lv_font_dejavu_40_latin_sup.c</in>
+            <in>lv_font_symbol_10.c</in>
+            <in>lv_font_symbol_20.c</in>
+            <in>lv_font_symbol_30.c</in>
+            <in>lv_font_symbol_40.c</in>
+            <in>lv_symbol_def.h</in>
+          </df>
+          <in>lv_anim.c</in>
+          <in>lv_anim.h</in>
+          <in>lv_area.c</in>
+          <in>lv_area.h</in>
+          <in>lv_circ.c</in>
+          <in>lv_circ.h</in>
+          <in>lv_color.c</in>
+          <in>lv_color.h</in>
+          <in>lv_font.c</in>
+          <in>lv_font.h</in>
+          <in>lv_fs.c</in>
+          <in>lv_fs.h</in>
+          <in>lv_ll.c</in>
+          <in>lv_ll.h</in>
+          <in>lv_math.c</in>
+          <in>lv_math.h</in>
+          <in>lv_mem.c</in>
+          <in>lv_mem.h</in>
+          <in>lv_task.c</in>
+          <in>lv_task.h</in>
+          <in>lv_templ.c</in>
+          <in>lv_templ.h</in>
+          <in>lv_trigo.c</in>
+          <in>lv_trigo.h</in>
+          <in>lv_txt.c</in>
+          <in>lv_txt.h</in>
+          <in>lv_ufs.c</in>
+          <in>lv_ufs.h</in>
+        </df>
+        <df name="lv_objx">
+          <in>lv_bar.c</in>
+          <in>lv_bar.h</in>
+          <in>lv_btn.c</in>
+          <in>lv_btn.h</in>
+          <in>lv_btnm.c</in>
+          <in>lv_btnm.h</in>
+          <in>lv_cb.c</in>
+          <in>lv_cb.h</in>
+          <in>lv_chart.c</in>
+          <in>lv_chart.h</in>
+          <in>lv_cont.c</in>
+          <in>lv_cont.h</in>
+          <in>lv_ddlist.c</in>
+          <in>lv_ddlist.h</in>
+          <in>lv_gauge.c</in>
+          <in>lv_gauge.h</in>
+          <in>lv_img.c</in>
+          <in>lv_img.h</in>
+          <in>lv_kb.c</in>
+          <in>lv_kb.h</in>
+          <in>lv_label.c</in>
+          <in>lv_label.h</in>
+          <in>lv_led.c</in>
+          <in>lv_led.h</in>
+          <in>lv_line.c</in>
+          <in>lv_line.h</in>
+          <in>lv_list.c</in>
+          <in>lv_list.h</in>
+          <in>lv_lmeter.c</in>
+          <in>lv_lmeter.h</in>
+          <in>lv_mbox.c</in>
+          <in>lv_mbox.h</in>
+          <in>lv_objx_templ.c</in>
+          <in>lv_objx_templ.h</in>
+          <in>lv_page.c</in>
+          <in>lv_page.h</in>
+          <in>lv_roller.c</in>
+          <in>lv_roller.h</in>
+          <in>lv_slider.c</in>
+          <in>lv_slider.h</in>
+          <in>lv_sw.c</in>
+          <in>lv_sw.h</in>
+          <in>lv_ta.c</in>
+          <in>lv_ta.h</in>
+          <in>lv_tabview.c</in>
+          <in>lv_tabview.h</in>
+          <in>lv_win.c</in>
+          <in>lv_win.h</in>
+        </df>
+        <df name="lv_themes">
+          <in>lv_theme.c</in>
+          <in>lv_theme.h</in>
+          <in>lv_theme_alien.c</in>
+          <in>lv_theme_alien.h</in>
+          <in>lv_theme_default.c</in>
+          <in>lv_theme_default.h</in>
+          <in>lv_theme_material.c</in>
+          <in>lv_theme_material.h</in>
+          <in>lv_theme_mono.c</in>
+          <in>lv_theme_mono.h</in>
+          <in>lv_theme_night.c</in>
+          <in>lv_theme_night.h</in>
+          <in>lv_theme_templ.c</in>
+          <in>lv_theme_templ.h</in>
+          <in>lv_theme_zen.c</in>
+          <in>lv_theme_zen.h</in>
+        </df>
+        <in>lvgl.h</in>
+      </df>
+      <df name="ui">
+        <in>mew_logo.c</in>
+        <in>pinpad.c</in>
+        <in>ui.h</in>
+        <in>ui_lhandlers.c</in>
+      </df>
+      <in>debug.c</in>
+      <in>debug.h</in>
+      <in>lv_conf.h</in>
+      <in>mew.c</in>
+      <in>mew.h</in>
+    </df>
+  </logicalFolder>
+  <projectmakefile>Makefile</projectmakefile>
+  <confs>
+    <conf name="Default" type="0">
+      <toolsSet>
+        <developmentServer>localhost</developmentServer>
+        <platform>2</platform>
+      </toolsSet>
+      <compile>
+        <compiledirpicklist>
+          <compiledirpicklistitem>.</compiledirpicklistitem>
+          <compiledirpicklistitem>${AUTO_FOLDER}</compiledirpicklistitem>
+        </compiledirpicklist>
+        <compiledir>${AUTO_FOLDER}</compiledir>
+        <compilecommandpicklist>
+          <compilecommandpicklistitem>${MAKE} ${ITEM_NAME}.o</compilecommandpicklistitem>
+          <compilecommandpicklistitem>${AUTO_COMPILE}</compilecommandpicklistitem>
+        </compilecommandpicklist>
+        <compilecommand>${AUTO_COMPILE}</compilecommand>
+      </compile>
+      <dbx_gdbdebugger version="1">
+        <gdb_pathmaps>
+        </gdb_pathmaps>
+        <gdb_interceptlist>
+          <gdbinterceptoptions gdb_all="false" gdb_unhandled="true" gdb_unexpected="true"/>
+        </gdb_interceptlist>
+        <gdb_options>
+          <DebugOptions>
+          </DebugOptions>
+        </gdb_options>
+        <gdb_buildfirst gdb_buildfirst_overriden="false" gdb_buildfirst_old="false"/>
+      </dbx_gdbdebugger>
+      <nativedebugger version="1">
+        <engine>gdb</engine>
+      </nativedebugger>
+      <runprofile version="9">
+        <runcommandpicklist>
+          <runcommandpicklistitem>"${OUTPUT_PATH}"</runcommandpicklistitem>
+        </runcommandpicklist>
+        <runcommand>"${OUTPUT_PATH}"</runcommand>
+        <rundir>.</rundir>
+        <buildfirst>false</buildfirst>
+        <terminal-type>0</terminal-type>
+        <remove-instrumentation>0</remove-instrumentation>
+        <environment>
+        </environment>
+      </runprofile>
+    </conf>
+  </confs>
+</configurationDescriptor>
