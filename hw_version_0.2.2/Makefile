@@ -39,11 +39,12 @@ STBOOT		= $(shell which stm32flash)
 LDSCRIPT	?= $(BINARY).ld
 #SRC		= $(wildcard *.c) $(wildcard **/*.c)
 SRC		= $(shell find . -name "*.c")
+ASMSRC		= $(shell find . -name "*.s")
 #OBJS		= $(addprefix $(OBJDIR)/, $(SRC:%.c=%.o))
 OBJS		= $(addprefix ./, $(SRC:%.c=%.o))
 
 ifeq ($(strip $(OPENCM3_DIR)),)
-OPENCM3_DIR := /home/kaori/devel/stm32/libopencm3
+OPENCM3_DIR := /home/konata/devel/libopencm3
 ###/home/misaki/devel/stm32/libopencm3
 $(info Using $(OPENCM3_DIR) path to library)
 endif
@@ -61,6 +62,7 @@ CFLAGS		+= -Wredundant-decls -Wstrict-prototypes
 CFLAGS		+= -fno-common -ffunction-sections -fdata-sections
 #-Werror -pedantic-errors  -Wmissing-prototypes
 CFLAGS  	+= -Wno-sign-compare -Wno-overlength-strings -Wno-unused-function -Wno-unused-parameter -Wno-unused-but-set-variable -Wno-unused-variable
+CFLAGS  	+= -Wno-cast-function-type
 
 ###############################################################################
 # C & C++ preprocessor common flags
@@ -103,8 +105,15 @@ $(OBJDIR):
 $(OBJDIR)/%.o: %.c
 	@printf "  CC      $<\n"
 	$(CC) $(CFLAGS) $(CPPFLAGS) $(ARCH_FLAGS) -o $@ -c $<
+	
+$(OBJDIR)/%.o: %.s
+	@printf "  AS      $<\n"
+	$(AS) -o $@ $<
 
 $(SRC) : %.c : %.h $(INDEPENDENT_HEADERS)
+	@touch $@
+	
+$(ASMSRC) : %.s 
 	@touch $@
 
 %.h: ;

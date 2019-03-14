@@ -3,6 +3,7 @@
 
 static void __mew_pp_reset(void);
 static void __mew_comm_timeout_reset(void);
+static uint32_t __mew_pp_checksum(uint8_t * data, uint32_t len);
 
 static uint8_t _mew_comm_buffer[MEW_COMM_BUF_MAX_SIZE];
 static volatile uint32_t _mew_comm_buffer_counter = 0;
@@ -15,6 +16,7 @@ static volatile uint32_t _mew_comm_last_time = 0;
 static uint8_t _mew_comm_payload[MEW_COMM_PAYLOAD_MAX_SIZE];
 static volatile uint32_t _mew_comm_payload_present  = 0;
 static volatile uint32_t _mew_comm_last_error       = 0;
+static volatile uint32_t current_checksum = 0;
 
 
 //static void __mew_comm_reset(void) {
@@ -44,17 +46,10 @@ void mew_comm_get_payload(uint8_t* payload, uint32_t* length) {
 }
 
 void mew_comm_add_byte(uint32_t driver_id, uint8_t b) {
-    uint32_t current_crc32;
-    
-    if (_mew_comm_last_error > 0) {
-        return;
-    }
-    
-    // если в буфере данных что-то есть - больше ничего с порта не принимаем, пока данные не заберут
-    if (_mew_comm_payload_present == 1) {
-        //_mew_comm_last_error = MEW_COMM_ERR_BISY;
-        return;
-    }
+    uint32_t i = 0;
+
+    if (_mew_comm_last_error > 0) return;
+    if (_mew_comm_payload_present == 1) return;
     
     // очистка буфера по таймауту, чтобы данные не залеживались =)
     __mew_comm_timeout_reset();
@@ -74,39 +69,34 @@ void mew_comm_add_byte(uint32_t driver_id, uint8_t b) {
         return;
     }
 
-    // если буфер пустой - ничего не делаем
-    if (_mew_comm_buffer_counter < 2) {
-        return;
-    }
-    
-    // если в буфере нет магического числа - очищаем буфер
-    if ((_mew_comm_buffer_counter == 2) && 
-            ((_mew_comm_buffer[0] != MEW_COMM_MAGIC_1) || (_mew_comm_buffer[1] != MEW_COMM_MAGIC_2))) {
-        _mew_comm_last_error = MEW_COMM_ERR_BAD_PACKAGE_MAGIC;
-        return;
-    }
-    
-    // проверяем длину полезной части - если она больше максимально разрешенной - очищаем буфер
-    if (_mew_comm_buffer_counter == 4) {
-        _mew_comm_payload_length = MEW_COMM_BYTES_TO_UINT16(_mew_comm_buffer[2], _mew_comm_buffer[3]);
-        if (_mew_comm_payload_length > MEW_COMM_PAYLOAD_MAX_SIZE) {
-            _mew_comm_last_error = MEW_COMM_ERR_BAD_PAYLOAD_SIZE;
-            return;
-        }
-    }
-    
-    // запоминаем контрольную сумму пакета
-    if (_mew_comm_buffer_counter == 8) {
-        _mew_comm_payload_crc32 = MEW_COMM_BYTES_TO_UINT32(_mew_comm_buffer[4], _mew_comm_buffer[5], _mew_comm_buffer[6], _mew_comm_buffer[7]);
-    }
-    
-    // если длина буфера равна заголовку плюс полезным данным, проверяем контрольную сумму
-    if (_mew_comm_buffer_counter >= (_mew_comm_payload_length + 8)) {
+    if (_mew_comm_buffer_counter <= 10) {
+		switch (_mew_comm_buffer_counter) {
+		case 2: // MAGIC VERIFY
+			if (MEW_COMM_IS_MAGIC_INVALID(_mew_comm_buffer)) {
+				_mew_comm_last_error = MEW_COMM_ERR_BAD_PACKAGE_MAGIC;
+				return;
+			}
+			break;
+		case 4: // COMMAND
+
+			break;
+		case 6: // PAYLOAD SIZE
+			_mew_comm_payload_length = MEW_COMM_GET_PL_SIZE(_mew_comm_buffer);
+			if (_mew_comm_payload_length > MEW_COMM_PAYLOAD_MAX_SIZE) {
+				_mew_comm_last_error = MEW_COMM_ERR_BAD_PAYLOAD_SIZE;
+				return;
+			}
+			break;
+		case 10:
+			_mew_comm_payload_crc32 = MEW_COMM_GET_PL_CRC32(_mew_comm_buffer);
+			break;
+		}
+    } else if (_mew_comm_buffer_counter >= (_mew_comm_payload_length + MEW_COMM_HEADER_MAX_SIZE)) {
         memset(_mew_comm_payload, 0, MEW_COMM_PAYLOAD_MAX_SIZE);
-        memcpy(_mew_comm_payload, _mew_comm_buffer + 8, _mew_comm_payload_length);
+        memcpy(_mew_comm_payload, _mew_comm_buffer + MEW_COMM_HEADER_MAX_SIZE, _mew_comm_payload_length);
         
-        current_crc32 = crc_calculate_block((uint32_t*) _mew_comm_payload, MEW_COMM_PAYLOAD_MAX_SIZE / 4);
-        if (current_crc32 != _mew_comm_payload_crc32) {
+        current_checksum = __mew_pp_checksum(_mew_comm_payload, _mew_comm_payload_length);
+        if (current_checksum != _mew_comm_payload_crc32) {
             _mew_comm_last_error = MEW_COMM_ERR_BAD_PAYLOAD_CRC32;
             return;
         }
@@ -116,6 +106,15 @@ void mew_comm_add_byte(uint32_t driver_id, uint8_t b) {
         _mew_comm_buffer_counter  = 0;
         _mew_comm_payload_crc32   = 0;
     }
+}
+
+static uint32_t __mew_pp_checksum(uint8_t * data, uint32_t len) {
+	uint32_t i = 0;
+	uint32_t checksum = 0x437700FF;
+
+	for (i=0; i<len; i++) checksum ^= (data[i] << (i % 24));
+
+	return checksum;
 }
 
 static void __mew_pp_reset(void) {
@@ -134,6 +133,8 @@ unsigned int mew_comm_handler(void) {
     if (_mew_comm_last_error > 0) {
         mew_debug_print("ERROR:");
         mew_debug_print_hex((const char*)&_mew_comm_last_error, sizeof(uint32_t));
+        mew_debug_print_hex((const char*)&current_checksum, sizeof(uint32_t));
+        mew_debug_print_hex((const char*)&_mew_comm_payload_crc32, sizeof(uint32_t));
         mew_debug_print_hex((const char*)_mew_comm_buffer, _mew_comm_buffer_counter);
         
         __mew_pp_reset();
