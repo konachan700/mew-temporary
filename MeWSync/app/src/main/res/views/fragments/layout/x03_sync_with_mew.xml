@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              xmlns:app="http://schemas.android.com/apk/res-auto" xmlns:tools="http://schemas.android.com/tools"
+              android:orientation="vertical"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent">
+
+    <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+        <ImageView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:srcCompat="@drawable/sync_fragment_header"
+                android:id="@+id/imageView"
+                android:adjustViewBounds="true"
+                android:layout_gravity="start|top"/>
+        <LinearLayout
+                android:orientation="vertical"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent" android:gravity="bottom|end" android:layout_gravity="top|end"
+                android:padding="8dp">
+            <com.github.ybq.android.spinkit.SpinKitView
+                    android:id="@+id/spin_kit"
+                    style="@style/SpinKitView.Large.Circle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    app:SpinKit_Color="@color/colorBrandWhite"
+                    app:SpinKit_Style="Circle"/>
+            <TextView
+                    android:id="@+id/firmwareVersion1"
+                    android:text=""
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:textColor="@color/colorBrandWhite" android:textAlignment="textEnd"
+                    android:paddingTop="8dp"/>
+        </LinearLayout>
+    </FrameLayout>
+    <LinearLayout
+            android:orientation="vertical"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+        <com.mewhpm.mewsync.ui.recyclerview.impl.RecyclerViewStaticList
+                android:id="@+id/listOfStaticElements1"
+                android:name="com.mewhpm.mewsync.fragments.DeviceOverviewFragment"
+                android:layout_marginLeft="0dp"
+                android:layout_marginRight="0dp"
+                tools:context=".fragments.DeviceOverviewFragment"
+                tools:listitem="@layout/x01_recyclerview_pair_element"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"/>
+    </LinearLayout>
+</LinearLayout>

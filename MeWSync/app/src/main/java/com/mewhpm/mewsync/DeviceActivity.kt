@@ -10,6 +10,7 @@ import androidx.core.content.ContextCompat
 import androidx.core.view.GravityCompat
 import com.mewhpm.mewsync.dao.KnownDevicesDao
 import com.mewhpm.mewsync.dao.connectionSource
+import com.mewhpm.mewsync.fragments.DeviceOverviewFragment
 import com.mewhpm.mewsync.fragments.PasswordsRootFragment
 import com.mewhpm.mewsync.ui.fragmentpages.getFragmentBook
 import com.mewhpm.mewsync.utils.fixPaddingTopForNavigationView
@@ -24,10 +25,12 @@ import ru.ztrap.iconics.kt.wrapByIconics
 class DeviceActivity : AppCompatActivity() {
     companion object {
         const val TAB_PASSWORDS_TREE_ROOT = "passwords_tree"
+        const val TAB_DEVICE_OVERVIEW = "dev_ov"
         var currentDeviceMac = ""
     }
 
     private val passwordFragment = PasswordsRootFragment()
+    private val deviceOverviewFragment = DeviceOverviewFragment()
 
     private fun generateIcon(icon: GoogleMaterial.Icon, colorResId: Int, size: Int = 28) : Icon {
         return Icon.createWithBitmap(
@@ -39,9 +42,8 @@ class DeviceActivity : AppCompatActivity() {
 
     private fun onMenuClickSelector(menuItemResId : Int) {
         when (menuItemResId) {
-            R.id.menuItemPasswords -> {
-                this@DeviceActivity.getFragmentBook(R.id.fragment_holder_dev_1).showTopInGroup(TAB_PASSWORDS_TREE_ROOT) }
-            R.id.menuSync -> {}
+            R.id.menuItemPasswords -> this@DeviceActivity.getFragmentBook(R.id.fragment_holder_dev_1).showTopInGroup(TAB_PASSWORDS_TREE_ROOT)
+            R.id.menuSync -> this@DeviceActivity.getFragmentBook(R.id.fragment_holder_dev_1).showTopInGroup(TAB_DEVICE_OVERVIEW)
         }
     }
 
@@ -75,6 +77,7 @@ class DeviceActivity : AppCompatActivity() {
         getFragmentBook(R.id.fragment_holder_dev_1).groupTopFragmentRequest = { group ->
             when (group) {
                 TAB_PASSWORDS_TREE_ROOT -> passwordFragment
+                TAB_DEVICE_OVERVIEW -> deviceOverviewFragment
                 else -> throw IllegalArgumentException("Fragment group $group not exist")
             }
         }

@@ -1,120 +1,95 @@
 package com.mewhpm.mewsync.services
 
 import android.app.Service
-import android.bluetooth.*
 import android.content.Intent
 import android.os.IBinder
+import android.util.Base64
+import android.util.Log
+import com.mewhpm.mewsync.dao.KnownDevicesDao
+import com.mewhpm.mewsync.utils.Stm32HwUtils
+import com.polidea.rxandroidble2.RxBleClient
+import com.polidea.rxandroidble2.Timeout
+import io.reactivex.disposables.Disposable
+import org.jetbrains.anko.toast
+import java.io.ByteArrayOutputStream
 import java.util.*
+import java.util.concurrent.TimeUnit
 
 class BleService: Service() {
     companion object {
-        val serialUUID = UUID.fromString("6E400001-B5A3-F393-E0A9-E50E24DCCA9E")!!
-        val txUUID = UUID.fromString("6E400002-B5A3-F393-E0A9-E50E24DCCA9E")!!
-        val rxUUID = UUID.fromString("6E400003-B5A3-F393-E0A9-E50E24DCCA9E")!!
-        val clientUUID = UUID.fromString("00002902-0000-1000-8000-00805f9b34fb")!!
-
         const val EXTRA_ACTION = "action"
-        const val EXTRA_ACTION_CONNECT = 1
-        const val EXTRA_ACTION_DISCONNECT = 2
-
-        const val EXTRA_RESULT_CODE = "result"
-        const val EXTRA_RESULT_CODE_OK = 1
-        const val EXTRA_RESULT_CODE_ERROR = 2
-        const val EXTRA_RESULT_CODE_IN_PROGRESS = 3
-
-        const val BLE_INTENT_ERR_CODE = "errorCode"
-        const val BLE_INTENT_ERR_MESSAGE = "errorMessage"
+        const val EXTRA_ACTION_SEND_CMD = 1
 
         const val EXTRA_DATA_MAC = "mac"
-        const val EXTRA_DATA_NAME = "name"
-        const val EXTRA_DATA_TIMESTAMP = "timestamp"
+        const val EXTRA_DATA_CMD = "cmd"
+        const val EXTRA_DATA_DATA = "data_b64"
     }
 
-    inner class BleCallback: BluetoothGattCallback() {
-        override fun onConnectionStateChange(gatt: BluetoothGatt?, status: Int, newState: Int) {
-            super.onConnectionStateChange(gatt, status, newState)
-            when(newState) {
-                BluetoothGatt.STATE_CONNECTED -> {
-
-                }
-                BluetoothGatt.STATE_DISCONNECTED -> {
-
-                }
-            }
-        }
-
-        override fun onServicesDiscovered(gatt: BluetoothGatt?, status: Int) {
-            super.onServicesDiscovered(gatt, status)
-
-            _serialTx = gatt?.getService(serialUUID)?.getCharacteristic(txUUID)
-            _serialRx = gatt?.getService(serialUUID)?.getCharacteristic(rxUUID)
-
-            if (gatt?.setCharacteristicNotification(_serialRx, true) != true) {
-                sendErrorIntent(1000, "Couldn't enable the Characteristic Notification")
-                return
-            }
-
-            if (_serialRx?.getDescriptor(clientUUID) == null) {
-                sendErrorIntent(1001,"Couldn't get RX client descriptor!")
-                return
-            }
-
-            val desc = _serialRx?.getDescriptor(clientUUID)
-            desc?.value = BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE
-            if (!gatt.writeDescriptor(desc)) {
-                sendErrorIntent(1002, "Couldn't write RX descriptor!")
-                return
-            }
-
-            sendOkIntent(2001)
-        }
-    }
-
-    private var _serialTx: BluetoothGattCharacteristic? = null
-    private var _serialRx: BluetoothGattCharacteristic? = null
-    private var _gatt: BluetoothGatt? = null
-
-    private val _callback = BleCallback()
+    private var _rxBleClient : RxBleClient? = null
+    private var lastDisposable : Disposable? = null
 
     override fun onBind(intent: Intent?): IBinder? {
         return null
+    }
+
+    private fun rx(): RxBleClient {
+        if (_rxBleClient == null) _rxBleClient = RxBleClient.create(this.applicationContext)
+        return _rxBleClient!!
+    }
+
+    private fun writeToDevice(mac: String, packet: ByteArray) {
+        val device = rx().getBleDevice(mac)
+        if (lastDisposable != null && lastDisposable?.isDisposed == false) lastDisposable?.dispose()
+        lastDisposable = device.establishConnection(false, Timeout(15, TimeUnit.SECONDS))
+            .flatMap { rxBleConnection ->
+                Thread.sleep(1000)
+                rxBleConnection.createNewLongWriteBuilder()
+                        .setCharacteristicUuid(UUID.fromString("0000FFE1-0000-1000-8000-00805F9B34FB"))
+                        .setBytes(packet)
+                        .build()
+            }.subscribe(
+                { byteArray ->
+                    Log.d("writeToDevice", "written: ${byteArray.size}")
+                },
+                { throwable ->
+                    Log.e("writeToDevice", "error: ${throwable.message}")
+                    toast("error: ${throwable.message}")
+                }
+            )
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         if (intent == null) return START_STICKY
 
         when (intent.getIntExtra(EXTRA_ACTION, 0)) {
-            EXTRA_ACTION_CONNECT -> {
-                if (!intent.hasExtra(EXTRA_DATA_MAC)) return START_STICKY
+            EXTRA_ACTION_SEND_CMD -> {
+                val mac = intent.getStringExtra(EXTRA_DATA_MAC)
+                if (mac == null || KnownDevicesDao.isDeviceBroken(mac)) {
+                    Log.e("EXTRA_ACTION_SEND_CMD", "Bad MAC address")
+                    return START_STICKY
+                }
 
-                val device = BluetoothAdapter.getDefaultAdapter().getRemoteDevice(intent.getStringExtra(EXTRA_DATA_MAC))
-                _gatt = device.connectGatt(this, false, _callback)
-            }
-            EXTRA_ACTION_DISCONNECT -> {
-                _gatt?.disconnect()
-                _gatt?.close()
-                _gatt = null
-                _serialTx = null
-                _serialRx = null
-
-                sendOkIntent(2000)
+                val cmd = intent.getIntExtra(EXTRA_DATA_CMD, 0)
+                val data = intent.getStringExtra(EXTRA_DATA_DATA) ?: return START_STICKY
+                val packet = Stm32HwUtils.createPacket(cmd, data)
+                writeToDevice(mac, packet)
             }
         }
         return START_STICKY
     }
 
-    private fun sendOkIntent(code: Int = 0) {
-        val intentAnswer = Intent()
-        intentAnswer.putExtra(EXTRA_RESULT_CODE, EXTRA_RESULT_CODE_OK)
-        intentAnswer.putExtra(BLE_INTENT_ERR_CODE, code)
-        sendBroadcast(intentAnswer)
-    }
-
-    private fun sendErrorIntent(code: Int, msg: String) {
-        val intentAnswer = Intent()
-        intentAnswer.putExtra(EXTRA_RESULT_CODE, EXTRA_RESULT_CODE_ERROR)
-        intentAnswer.putExtra(BLE_INTENT_ERR_MESSAGE, msg)
-        intentAnswer.putExtra(BLE_INTENT_ERR_CODE, code)
-        sendBroadcast(intentAnswer)
-    }
+//    private fun sendOkIntent(code: Int = 0) {
+//        val intentAnswer = Intent()
+//        intentAnswer.putExtra(EXTRA_RESULT_CODE, EXTRA_RESULT_CODE_OK)
+//        intentAnswer.putExtra(BLE_INTENT_ERR_CODE, code)
+//        sendBroadcast(intentAnswer)
+//    }
+//
+//    private fun sendErrorIntent(code: Int, msg: String) {
+//        val intentAnswer = Intent()
+//        intentAnswer.putExtra(EXTRA_RESULT_CODE, EXTRA_RESULT_CODE_ERROR)
+//        intentAnswer.putExtra(BLE_INTENT_ERR_MESSAGE, msg)
+//        intentAnswer.putExtra(BLE_INTENT_ERR_CODE, code)
+//        sendBroadcast(intentAnswer)
+//    }
 }

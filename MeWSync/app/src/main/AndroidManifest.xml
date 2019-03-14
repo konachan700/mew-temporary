@@ -36,10 +36,10 @@
                 android:theme="@style/AppTheme.NoActionBar">
         </activity>
 
-        <!--service
+        <service
                 android:name=".services.BleService"
                 android:enabled="true"
-                android:exported="false"/-->
+                android:exported="false"/>
 
         <!-- MeW input method service -->
         <service android:name=".services.MewIMEService"

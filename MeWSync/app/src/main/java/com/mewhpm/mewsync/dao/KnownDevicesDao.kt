@@ -9,6 +9,9 @@ import com.mewhpm.mewsync.data.BleDevice
 class KnownDevicesDao private constructor (val connectionSource : ConnectionSource) {
     companion object {
         const val ZERO_MAC = "00:00:00:00:00:00"
+        private const val REGEXP_MAC = "^([0-9a-fA-F][0-9a-fA-F]:){5}([0-9a-fA-F][0-9a-fA-F])\$"
+
+        private val regex = Regex(REGEXP_MAC)
 
         private var instance: KnownDevicesDao? = null
         fun getInstance(_connectionSource : ConnectionSource) : KnownDevicesDao {
@@ -18,6 +21,10 @@ class KnownDevicesDao private constructor (val connectionSource : ConnectionSour
 
         fun isDeviceZero(mac: String) : Boolean {
             return ZERO_MAC.contentEquals(mac)
+        }
+
+        fun isDeviceBroken(mac: String) : Boolean {
+            return mac.toUpperCase().startsWith("00:00:00:00:") || mac.startsWith("FF:FF:FF:FF:") || !mac.matches(regex)
         }
     }
 
