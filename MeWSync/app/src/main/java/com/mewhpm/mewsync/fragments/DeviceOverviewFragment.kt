@@ -37,9 +37,9 @@ class DeviceOverviewFragment : androidx.fragment.app.Fragment() {
                 if (KnownDevicesDao.isDeviceBroken(DeviceActivity.currentDeviceMac)) return@StaticListItem
                 sendIntent(
                     Pair(BleService.EXTRA_ACTION, BleService.EXTRA_ACTION_SEND_CMD),
-                    Pair(BleService.EXTRA_DATA_CMD, 0xFF01),
+                    Pair(BleService.EXTRA_DATA_CMD, 0x4300),
                     Pair(BleService.EXTRA_DATA_MAC, DeviceActivity.currentDeviceMac),
-                    Pair(BleService.EXTRA_DATA_DATA, Base64.encodeToString(byteArrayOf(0x11, 0x05, 0x34, 0x41, 0x21, 0x76, 0x00, 0x53), Base64.DEFAULT))
+                    Pair(BleService.EXTRA_DATA_DATA, Base64.encodeToString(byteArrayOf(0x00, 0x00), Base64.DEFAULT))
                 )
             },
             StaticListItem("Sync passwords", "Sync passwords with MeW", GoogleMaterial.Icon.gmd_sync) {

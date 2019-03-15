@@ -110,7 +110,7 @@ void mew_comm_add_byte(uint32_t driver_id, uint8_t b) {
     }
 }
 
-static uint32_t __mew_pp_checksum(uint8_t * data, uint32_t len) {
+static uint32_t __mew_pp_checksum(uint8_t* data, uint32_t len) {
 	uint32_t i = 0;
 	uint32_t checksum = 0x437700FF;
 
@@ -131,7 +131,7 @@ static void __mew_pp_reset(void) {
     _mew_comm_driver_id       = 0;
 }
 
-void send_ok_packet(char* data, uint32_t size) {
+void send_ok_packet(uint8_t* data, uint32_t size) {
 	uint8_t ok_data[10];
 	uint32_t checksum = __mew_pp_checksum(data, size);
 

@@ -137,7 +137,7 @@ class BleService: Service() {
                 .subscribe(
                     { rxBleConnection ->
                         rxBleConnection
-                            .setupNotification(UUID_SERIAL, NotificationSetupMode.QUICK_SETUP)
+                            .setupNotification(UUID_SERIAL)
                             .doOnNext {  }
                             .flatMap { it }
                             .subscribe(
