@@ -14,8 +14,8 @@
 #define MEW_COMM_MAGIC_2                        0x77
 
 #define MEW_COMM_TIMEOUT_MS                     30
-#define MEW_COMM_HEADER_MAX_SIZE                16      // 2 byte magic + 2 byte length + 4 byte crc32 + 8 bytes reserved
-#define MEW_COMM_PAYLOAD_MAX_SIZE               1024
+#define MEW_COMM_HEADER_MAX_SIZE                10      // 2 byte magic + 2 bytes cmd + 2 byte length + 4 byte crc32
+#define MEW_COMM_PAYLOAD_MAX_SIZE               2048
 #define MEW_COMM_BUF_MAX_SIZE                   (MEW_COMM_PAYLOAD_MAX_SIZE + MEW_COMM_HEADER_MAX_SIZE)  
 
 #if MEW_COMM_PAYLOAD_MAX_SIZE % 4 != 0
@@ -24,6 +24,10 @@
 
 #define MEW_COMM_BYTES_TO_UINT32(b1,b2,b3,b4)   ((b1 << 24) + (b2 << 16) + (b3 << 8) + b4)
 #define MEW_COMM_BYTES_TO_UINT16(b1,b2)         ((b1 << 8) + b2)
+
+#define MEW_COMM_IS_MAGIC_INVALID(pb)			((pb[0] != MEW_COMM_MAGIC_1) || (pb[1] != MEW_COMM_MAGIC_2))
+#define MEW_COMM_GET_PL_SIZE(pb)				((pb[4] << 8) + pb[5])
+#define MEW_COMM_GET_PL_CRC32(pb)				((pb[6] << 24) + (pb[7] << 16) + (pb[8] << 8) + pb[9])
 
 #define MEW_COMM_ERR_DRIVER_COLLISION           0xE0
 #define MEW_COMM_ERR_BAD_PACKAGE_MAGIC          0xE1

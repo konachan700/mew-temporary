@@ -1,6 +1,10 @@
 #ifndef __MEW_STATE__
 #define __MEW_STATE__
 
+#ifndef NULL
+#define NULL 0
+#endif
+
 #define __MEW_FACTORY_TESTS__
 
 #define MEW_DRIVER_ID_DUART             0x01
