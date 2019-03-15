@@ -51,6 +51,9 @@ All functions need 1356 bytes available stack size on Cortex-M0 and 1.5 kB on Co
 
 */
 
+unsigned int mew_p256_ecdh_handler(void);
+unsigned int mew_p256_ecdh_get_session_pubkey(char* key);
+
 // Generic point multiplication
 // Calculates scalar * point.
 // If include_y_in_result == 0, result_point should be an array of size 32 bytes where the resulting x coordinate will be written.

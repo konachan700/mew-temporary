@@ -15,7 +15,7 @@ INDEPENDENT_HEADERS=
 #ARCH_FLAGS	= -mthumb -mcpu=cortex-m3 $(FP_FLAGS) -mfix-cortex-m3-ldrd -specs=nano.specs -specs=nosys.specs
 
 FP_FLAGS	= -mfloat-abi=hard -mfpu=fpv4-sp-d16
-ARCH_FLAGS 	= -mthumb -mcpu=cortex-m4 $(FP_FLAGS) 
+ARCH_FLAGS 	= -mthumb -mcpu=cortex-m4 $(FP_FLAGS)  -specs=nano.specs -specs=nosys.specs 
 
 
 ###############################################################################
@@ -42,6 +42,7 @@ SRC		= $(shell find . -name "*.c")
 ASMSRC		= $(shell find . -name "*.s")
 #OBJS		= $(addprefix $(OBJDIR)/, $(SRC:%.c=%.o))
 OBJS		= $(addprefix ./, $(SRC:%.c=%.o))
+ASMOBJS		= $(addprefix ./, $(ASMSRC:%.s=%.o))
 
 ifeq ($(strip $(OPENCM3_DIR)),)
 OPENCM3_DIR := /home/konata/devel/libopencm3
@@ -53,6 +54,9 @@ INCLUDE_DIR	= $(OPENCM3_DIR)/include
 LIB_DIR		= $(OPENCM3_DIR)/lib
 SCRIPT_DIR	= $(OPENCM3_DIR)/scripts
 
+###############################################################################
+# AS flags
+ASFLAGS		+= -mthumb -mcpu=cortex-m4 $(FP_FLAGS) 
 ###############################################################################
 # C flags
 CFLAGS		+= -O2 -g
@@ -75,8 +79,6 @@ CPPFLAGS	+= -I. -I$(INCLUDE_DIR) $(DEFS)
 LDFLAGS		+= --static -nostartfiles -Wl,--start-group -lc -lgcc -lnosys -Wl,--end-group -Wl,-Map=mew.map
 LDFLAGS		+= -L$(LIB_DIR)
 LDFLAGS		+= -T$(LDSCRIPT)
-LDFLAGS		+= -Wl,-Map=$(*).map
-LDFLAGS		+= -Wl,--gc-sections -specs=nosys.specs
 
 ###############################################################################
 # Used libraries
@@ -108,7 +110,7 @@ $(OBJDIR)/%.o: %.c
 	
 $(OBJDIR)/%.o: %.s
 	@printf "  AS      $<\n"
-	$(AS) -o $@ $<
+	$(AS) $(ASFLAGS) -o $@ $<
 
 $(SRC) : %.c : %.h $(INDEPENDENT_HEADERS)
 	@touch $@
@@ -135,9 +137,9 @@ $(LIST): $(ELF)
 	@printf "  OBJDUMP $(LIST)\n"
 	$(OBJDUMP) -S $(ELF) > $(LIST)
 
-$(ELF): $(OBJDIR) $(OBJS) $(LDSCRIPT) $(LIB_DIR)/lib$(LIBNAME).a
+$(ELF): $(OBJDIR) $(OBJS) $(ASMOBJS) $(LDSCRIPT) $(LIB_DIR)/lib$(LIBNAME).a
 	@printf "  LD      $(ELF)\n"
-	$(LD) $(LDFLAGS) $(ARCH_FLAGS) $(OBJS) $(LDLIBS) -o $(ELF)
+	$(LD) $(LDFLAGS) $(ARCH_FLAGS) $(OBJS) $(ASMOBJS) $(LDLIBS) -o $(ELF)
 
 rebuild: clean $(BIN)
 	@printf "  REBUILD ALL\n"

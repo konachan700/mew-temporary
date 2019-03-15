@@ -1,5 +1,6 @@
 #include "parser.h"
 #include "debug.h"
+#include "drivers/hw_crypt/P256-cortex-ecdh.h"
 
 static void __mew_pp_reset(void);
 static void __mew_comm_timeout_reset(void);
@@ -9,6 +10,7 @@ static uint8_t _mew_comm_buffer[MEW_COMM_BUF_MAX_SIZE];
 static volatile uint32_t _mew_comm_buffer_counter = 0;
 static volatile uint32_t _mew_comm_payload_length = 0;
 static volatile uint32_t _mew_comm_payload_crc32  = 0;
+static volatile uint32_t _mew_comm_command 		  = 0;
 
 static volatile uint32_t _mew_comm_driver_id = 0;
 static volatile uint32_t _mew_comm_last_time = 0;
@@ -78,7 +80,7 @@ void mew_comm_add_byte(uint32_t driver_id, uint8_t b) {
 			}
 			break;
 		case 4: // COMMAND
-
+			_mew_comm_command = MEW_COMM_GET_COMMAND(_mew_comm_buffer);
 			break;
 		case 6: // PAYLOAD SIZE
 			_mew_comm_payload_length = MEW_COMM_GET_PL_SIZE(_mew_comm_buffer);
@@ -129,7 +131,29 @@ static void __mew_pp_reset(void) {
     _mew_comm_driver_id       = 0;
 }
 
+void send_ok_packet(char* data, uint32_t size) {
+	uint8_t ok_data[10];
+	uint32_t checksum = __mew_pp_checksum(data, size);
+
+	ok_data[0] = 0x43;
+	ok_data[1] = 0x77;
+	ok_data[2] = MEW_SHL8(_mew_comm_command);
+	ok_data[3] = MEW_SHL0(_mew_comm_command);
+	ok_data[4] = MEW_SHL8(size << 8);
+	ok_data[5] = MEW_SHL0(size);
+	ok_data[6] = MEW_SHL0(checksum);
+	ok_data[7] = MEW_SHL8(checksum);
+	ok_data[8] = MEW_SHL16(checksum);
+	ok_data[9] = MEW_SHL24(checksum);
+
+	mew_bluetooth_transmit(ok_data, 10, 1);
+	mew_bluetooth_transmit(data, size, 0);
+}
+
 unsigned int mew_comm_handler(void) {
+	uint8_t data[255];
+	uint32_t data_len = 0;
+
     if (_mew_comm_last_error > 0) {
         mew_debug_print("ERROR:");
         mew_debug_print_hex((const char*)&_mew_comm_last_error, sizeof(uint32_t));
@@ -143,9 +167,16 @@ unsigned int mew_comm_handler(void) {
     }
 
     if (_mew_comm_payload_present == 1) {
+    	switch (_mew_comm_command) {
+    	case MEW_COMM_CMD_GET_PUBKEY:
+    		data_len = mew_p256_ecdh_get_session_pubkey((char*) data);
+    		send_ok_packet(data, data_len);
+    		break;
+    	}
+
         mew_debug_print("OK");
         mew_debug_print_hex((const char*)_mew_comm_payload, _mew_comm_payload_length);
-        
+
         __mew_pp_reset();
     }
     

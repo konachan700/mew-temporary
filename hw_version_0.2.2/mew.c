@@ -10,6 +10,7 @@
 #include "drivers/i2c/i2c.h"
 #include "drivers/flash/flash.h"
 #include "drivers/display/display.h"
+#include "drivers/hw_crypt/P256-cortex-ecdh.h"
 // application modules
 #include "app/packet_parser/parser.h"
 // ui modules
@@ -39,6 +40,16 @@ const mew_driver drivers[] = {
         &mew_hid_usb_init, 
         NULL,
     }, {
+		MEW_DRIVER_ID_RNG,
+		"Hardware random number generator",
+		&mew_rng_init,
+		NULL
+	}, {
+		MEW_DRIVER_ID_P256_ECDH,
+		"P-256 ECDH Keypair generator",
+		&mew_p256_ecdh_handler,
+		NULL
+	}, {
         MEW_DRIVER_ID_BLUETOOTH, 
         "BLE module HM-11",
         &mew_bluetooth_init, 
@@ -52,11 +63,6 @@ const mew_driver drivers[] = {
         MEW_DRIVER_ID_I2C,
         "STM32F4 I2C",
         &mew_i2c_init,
-        NULL
-    }, {
-        MEW_DRIVER_ID_RNG,
-        "Hardware random number generator",
-        &mew_rng_init,
         NULL
     }, {
         MEW_DRIVER_ID_DISPLAY,
