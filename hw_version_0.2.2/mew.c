@@ -86,14 +86,18 @@ const mew_driver drivers[] = {
 
 const mew_loop_handler loop_handlers[] = {
     {
-        MEW_LHANDLER_ID_PACKAGE_PARSER,
-        "Stream to packages parser",
-        &mew_comm_handler
+			MEW_LHANDLER_ID_PACKAGE_PARSER,
+			"Stream to packages parser",
+			&mew_comm_handler
     }, {
-        MEW_LHANDLER_ID_LVGL,
-        "LVGL handle",
-        &mew_lvgl_lhandler
+			MEW_LHANDLER_ID_LVGL,
+			"LVGL handle",
+			&mew_lvgl_lhandler
     }, {
+    		MEW_LHANDLER_ID_SPI_FLASH,
+			"SPI Flash async read/write handler",
+			&mew_spi_flash_handler
+	}, {
         0
     }
 };

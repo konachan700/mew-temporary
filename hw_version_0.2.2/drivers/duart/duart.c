@@ -21,20 +21,31 @@ unsigned int mew_init_duart(void) {
 }
 
 void mew_duart_print(const char* text) {
+	mew_duart_print_ex(text, 1);
+}
+
+void mew_duart_print_ex(const char* text, unsigned int newline) {
     unsigned int i = 0;
     if (_mew_duart_state == 0) {
         return;
     }
     while (1) {
         if (text[i] == 0) {
-            usart_send_blocking(MEW_DEBUG_USART, '\r');
-            usart_send_blocking(MEW_DEBUG_USART, '\n');
+        	if (newline == 1) {
+				usart_send_blocking(MEW_DEBUG_USART, '\r');
+				usart_send_blocking(MEW_DEBUG_USART, '\n');
+        	}
             return;
         }
         usart_send_blocking(MEW_DEBUG_USART, text[i]);
         i++;
     }
 } 
+
+void mew_duart_print_hex_ex(const char* text, const char* blob, unsigned int len) {
+	mew_duart_print_ex(text, 0);
+	mew_duart_print_hex(blob, len);
+}
 
 void mew_duart_print_hex(const char* blob, unsigned int len) {
     unsigned int i = 0, nl = 0;

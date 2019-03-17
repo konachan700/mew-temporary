@@ -23,6 +23,7 @@
 
 #define MEW_LHANDLER_ID_PACKAGE_PARSER  0xA0
 #define MEW_LHANDLER_ID_LVGL            0xA1
+#define MEW_LHANDLER_ID_SPI_FLASH       0xA2
 
 typedef struct {
     unsigned int id;
