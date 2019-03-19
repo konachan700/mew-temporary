@@ -39,6 +39,9 @@ android {
                     ]
         }
     }
+    dexOptions {
+        jumboMode true
+    }
 }
 
 dependencies {
@@ -69,6 +72,11 @@ dependencies {
     implementation 'com.google.protobuf:protobuf-lite:3.0.0'
     // BLE
     implementation "com.polidea.rxandroidble2:rxandroidble:1.8.1"
+    // CRYPTO
+    implementation 'com.madgag.spongycastle:core:1.54.0.0'
+    implementation 'com.madgag.spongycastle:prov:1.54.0.0'
+    implementation 'com.madgag.spongycastle:pkix:1.54.0.0'
+    implementation 'com.madgag.spongycastle:pg:1.54.0.0'
     // TESTS
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'androidx.test:runner:1.1.1'
@@ -77,6 +85,8 @@ dependencies {
     // POWERMOCK
     testImplementation "org.powermock:powermock-module-junit4:1.7.4"
     testImplementation "org.powermock:powermock-api-mockito2:1.7.4"
+    // COMMON CODECS
+    testImplementation 'commons-codec:commons-codec:1.12'
 }
 
 protobuf {

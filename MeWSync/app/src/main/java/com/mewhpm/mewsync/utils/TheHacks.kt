@@ -75,3 +75,19 @@ fun ImageButton.setGmdIcon(icon : IIcon, sizeDp : Int, colorResId : Int) {
 
 @ExperimentalUnsignedTypes
 fun ByteArray.toHexString() = asUByteArray().joinToString("") { it.toString(16).padStart(2, '0') }
+
+@ExperimentalUnsignedTypes
+infix fun UByte.eq(i : UInt) : Boolean = (toUInt() == i)
+
+@ExperimentalUnsignedTypes
+infix fun UByte.neq(i : UInt) : Boolean = (toUInt() != i)
+
+@ExperimentalUnsignedTypes
+fun UByteArray.extractInt16(i1: Int, i2: Int) : UInt = (get(i1).toUInt().shl(8) + get(i2).toUInt())
+
+@ExperimentalUnsignedTypes
+fun UByteArray.extractInt32(i1: Int, i2: Int, i3: Int, i4: Int) : ULong = (
+        get(i1).toULong().shl(24) +
+        get(i2).toULong().shl(16) +
+        get(i3).toULong().shl(8) +
+        get(i4).toULong())

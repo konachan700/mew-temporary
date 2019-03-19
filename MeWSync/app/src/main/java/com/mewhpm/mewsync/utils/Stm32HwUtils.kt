@@ -13,9 +13,8 @@ class Stm32HwUtils {
             return checksum
         }
 
-        fun createPacket(cmd: Int, dataBase64: String) : ByteArray {
+        fun createPacket(cmd: Int, data: ByteArray) : ByteArray {
             val dataArray = ByteArrayOutputStream()
-            val data = Base64.decode(dataBase64, Base64.DEFAULT)
             val len = data.size
             val checksum = checksum(data.toUByteArray())
 
@@ -37,6 +36,19 @@ class Stm32HwUtils {
             dataArray.write(data)
 
             return dataArray.toByteArray()
+        }
+
+        fun createPacket(cmd: UInt, data: ByteArray) : ByteArray {
+            return createPacket(cmd.toInt(), data)
+        }
+
+        fun createPacket(cmd: UInt, dataBase64: String) : ByteArray {
+            return createPacket(cmd.toInt(), dataBase64)
+        }
+
+        fun createPacket(cmd: Int, dataBase64: String) : ByteArray {
+            val data = Base64.decode(dataBase64, Base64.DEFAULT)
+            return createPacket(cmd, data)
         }
     }
 }

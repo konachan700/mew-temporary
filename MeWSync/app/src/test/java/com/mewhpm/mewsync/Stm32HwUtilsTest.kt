@@ -22,7 +22,7 @@ class Stm32HwUtilsTest {
 
     @ExperimentalUnsignedTypes
     @Test
-    fun stm32CRC32() {
+    fun checksum() {
         val crc = Stm32HwUtils.checksum(ubyteArrayOf(0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u))
         System.out.println("original:\t0x437700FF;\ngenerated:\t0x"+crc.toString(16).toUpperCase())
         Assert.assertEquals(0x437700FFu, crc)
