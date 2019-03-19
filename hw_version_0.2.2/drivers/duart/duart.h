@@ -17,6 +17,8 @@
 unsigned int mew_init_duart(void);
 
 void mew_duart_print(const char* text);
+void mew_duart_print_ex(const char* text, unsigned int newline);
 void mew_duart_print_hex(const char * blob, unsigned int len);
+void mew_duart_print_hex_ex(const char* text, const char* blob, unsigned int len);
 
 #endif

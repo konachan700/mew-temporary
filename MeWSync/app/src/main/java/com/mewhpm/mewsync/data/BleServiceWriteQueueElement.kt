@@ -7,7 +7,7 @@ data class BleServiceWriteQueueElement (
     val bytes: ByteArray,
     var deadTime: Long = GregorianCalendar.getInstance().also {
         it.time = Date()
-        it.add(Calendar.SECOND, 20)
+        it.add(Calendar.SECOND, 30)
     }.timeInMillis
 
 ) {

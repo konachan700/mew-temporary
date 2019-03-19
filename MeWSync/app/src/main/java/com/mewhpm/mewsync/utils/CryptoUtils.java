@@ -3,7 +3,9 @@ package com.mewhpm.mewsync.utils;
 import android.content.SharedPreferences;
 import android.security.keystore.KeyGenParameterSpec;
 import android.util.Base64;
+import android.util.Log;
 import com.mewhpm.mewsync.data.BleDevice;
+import kotlin.Pair;
 
 import javax.crypto.*;
 import javax.crypto.spec.IvParameterSpec;
@@ -13,10 +15,15 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.math.BigInteger;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
+import java.nio.LongBuffer;
 import java.nio.charset.StandardCharsets;
 import java.security.*;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.CertificateException;
+import java.security.interfaces.ECPublicKey;
+import java.security.spec.*;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
@@ -24,9 +31,15 @@ import java.util.Random;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import static android.security.keystore.KeyProperties.*;
+import static java.lang.Math.max;
+import static java.lang.Math.min;
 import static java.util.Calendar.YEAR;
 
 public class CryptoUtils {
+    static {
+        Security.insertProviderAt(new org.spongycastle.jce.provider.BouncyCastleProvider(), 1);
+    }
+
     public interface KeygenEvent {
         void onGenerated();
     }
@@ -286,5 +299,67 @@ public class CryptoUtils {
             final Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
             cipher.init(Cipher.ENCRYPT_MODE, secretKeySpec, new IvParameterSpec(iv));
             return cipher.doFinal(value);
+    }
+
+    public static KeyPair generateECDHP256Keypair() throws NoSuchAlgorithmException, InvalidAlgorithmParameterException {
+        final KeyPairGenerator kpg = KeyPairGenerator.getInstance("EC");
+        final ECGenParameterSpec genParams = new ECGenParameterSpec("secp256r1");
+        kpg.initialize(genParams);
+        final KeyPair kp = kpg.generateKeyPair();
+        return kp;
+    }
+
+//    public static byte[] swapLE32toBE32(byte[] b, int len) {
+//        final byte[] tmp = new byte[len];
+//        for (int i=0; i<len; i++) {
+//            tmp[i] = b[len - (i+1)];
+//        }
+//
+//
+//
+////        for (int i=0; i<len; i=i+4) {
+////            tmp[0] = b[i];
+////            tmp[1] = b[i+1];
+////            tmp[2] = b[i+2];
+////            tmp[3] = b[i+3];
+////
+////            b[i] =  tmp[3];
+////            b[i+1] = tmp[2];
+////            b[i+2] = tmp[1];
+////            b[i+3] = tmp[0];
+////        }
+//        return tmp;
+//    }
+
+    public static ECPublicKey getECDHP256PublicKeyFromBinary(byte[] bytes) throws NoSuchAlgorithmException, InvalidParameterSpecException, InvalidKeySpecException {
+        byte[] x = new byte[32];
+        byte[] y = new byte[32];
+
+        System.arraycopy(bytes, 1, x, 0, 32);
+        System.arraycopy(bytes, 32, y, 0, 32);
+
+        final KeyFactory kf = KeyFactory.getInstance("EC");
+        final AlgorithmParameters parameters = AlgorithmParameters.getInstance("EC");
+        parameters.init(new ECGenParameterSpec("prime256v1"));
+
+        final ECParameterSpec ecParameterSpec = parameters.getParameterSpec(ECParameterSpec.class);
+        final ECPublicKeySpec ecPublicKeySpec = new ECPublicKeySpec(
+                new ECPoint(
+                        new BigInteger(1, x), new BigInteger(1, y)), ecParameterSpec);
+        return (ECPublicKey) kf.generatePublic(ecPublicKeySpec);
+    }
+
+    public static byte[] getBytesFromECPublicKey(ECPublicKey key) {
+        final ECPoint point = key.getW();
+        final byte[] binaryKey = new byte[64];
+        for (int i=0; i<binaryKey.length; i++) binaryKey[i] = 0;
+
+        final byte[] x = point.getAffineX().toByteArray();
+        System.arraycopy(x, max(0, x.length - 32), binaryKey, 32 - min(x.length, 32), min(x.length, 32));
+
+        final byte[] y = point.getAffineY().toByteArray();
+        System.arraycopy(y, max(0, y.length - 32), binaryKey, 64 - min(y.length, 32), min(y.length, 32));
+
+        return binaryKey;
     }
 }

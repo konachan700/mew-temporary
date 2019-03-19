@@ -27,6 +27,10 @@ void mew_debug_print_hex(const char* message, unsigned int len) {
     mew_duart_print_hex(message, len);
 }
 
+void mew_debug_print_hex_ex(const char* text, const char* blob, unsigned int len) {
+    mew_duart_print_hex_ex(text, blob, len);
+}
+
 static void debug_blink(void) {
     
 }
