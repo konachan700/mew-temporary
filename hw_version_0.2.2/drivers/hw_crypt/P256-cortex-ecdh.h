@@ -51,8 +51,15 @@ All functions need 1356 bytes available stack size on Cortex-M0 and 1.5 kB on Co
 
 */
 
+uint32_t big2little32(uint32_t x);
+uint16_t big2little16(uint16_t x);
+
 unsigned int mew_p256_ecdh_handler(void);
+unsigned int mew_p256_ecdh_test(void);
+unsigned int mew_p256_ecdh_get_session_privkey(char* key);
 unsigned int mew_p256_ecdh_get_session_pubkey(char* key);
+unsigned int mew_p256_ecdh_set_session_sharedkey(char* key);
+unsigned int mew_p256_ecdh_get_session_sharedkey(char* key);
 
 // Generic point multiplication
 // Calculates scalar * point.

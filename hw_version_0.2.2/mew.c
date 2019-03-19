@@ -48,7 +48,7 @@ const mew_driver drivers[] = {
 		MEW_DRIVER_ID_P256_ECDH,
 		"P-256 ECDH Keypair generator",
 		&mew_p256_ecdh_handler,
-		NULL
+		&mew_p256_ecdh_test
 	}, {
         MEW_DRIVER_ID_BLUETOOTH, 
         "BLE module HM-11",

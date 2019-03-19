@@ -14,7 +14,7 @@
 #define MEW_COMM_MAGIC_1                        0x43
 #define MEW_COMM_MAGIC_2                        0x77
 
-#define MEW_COMM_TIMEOUT_MS                     30
+#define MEW_COMM_TIMEOUT_MS                     150
 #define MEW_COMM_HEADER_MAX_SIZE                10      // 2 byte magic + 2 bytes cmd + 2 byte length + 4 byte crc32
 #define MEW_COMM_PAYLOAD_MAX_SIZE               2048
 #define MEW_COMM_BUF_MAX_SIZE                   (MEW_COMM_PAYLOAD_MAX_SIZE + MEW_COMM_HEADER_MAX_SIZE)  
@@ -31,10 +31,10 @@
 #define MEW_COMM_GET_PL_SIZE(pb)				((pb[4] << 8) + pb[5])
 #define MEW_COMM_GET_PL_CRC32(pb)				((pb[6] << 24) + (pb[7] << 16) + (pb[8] << 8) + pb[9])
 
-#define MEW_SHL0(i)								(uint8_t)((i <<  0) & 0xFF)
-#define MEW_SHL8(i)								(uint8_t)((i <<  8) & 0xFF)
-#define MEW_SHL16(i)							(uint8_t)((i << 16) & 0xFF)
-#define MEW_SHL24(i)							(uint8_t)((i << 24) & 0xFF)
+#define MEW_SHL0(i)								(uint8_t)((i >>  0) & 0xFF)
+#define MEW_SHL8(i)								(uint8_t)((i >>  8) & 0xFF)
+#define MEW_SHL16(i)							(uint8_t)((i >> 16) & 0xFF)
+#define MEW_SHL24(i)							(uint8_t)((i >> 24) & 0xFF)
 
 #define MEW_COMM_ERR_DRIVER_COLLISION           0xE0
 #define MEW_COMM_ERR_BAD_PACKAGE_MAGIC          0xE1
@@ -44,7 +44,8 @@
 #define MEW_COMM_ERR_BISY                       0xE5
 #define MEW_COMM_ERR_TIMEOUT                    0xE6
 
-#define MEW_COMM_CMD_GET_PUBKEY					0x4300
+#define MEW_COMM_GET_DEVICE_SESSION_KEY			0x4300
+#define MEW_COMM_SEND_HOST_SESSION_KEY   		0x4301
 
 uint32_t mew_comm_is_payload_present(void);
 
