@@ -48,12 +48,8 @@ typedef struct {
 } mew_bt_at_command;
 
 unsigned int mew_bluetooth_init(void);
-
-void mew_bluetooth_transmit_string(char* string);
+unsigned int mew_bluetooth_handler(void);
 void mew_bluetooth_transmit(uint8_t* data, uint16_t size, uint8_t sync_mode);
-uint32_t mew_bluetooth_execute_at(const mew_bt_at_command *at);
-
-void mew_bluetooth_config(void);
 
 #endif /* BLUETOOTH_H */
 

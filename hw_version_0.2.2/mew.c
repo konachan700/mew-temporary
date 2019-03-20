@@ -90,6 +90,10 @@ const mew_loop_handler loop_handlers[] = {
 			"Stream to packages parser",
 			&mew_comm_handler
     }, {
+    		MEW_LHANDLER_ID_BLUETOOTH,
+			"Bluetooth at-terminal",
+			&mew_bluetooth_handler
+    }, {
     		MEW_LHANDLER_ID_UI,
 			"UI logic handle",
 			&mew_ui_lhandler
