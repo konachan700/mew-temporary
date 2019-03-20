@@ -8,8 +8,11 @@ import org.junit.Assert
 import org.junit.Assert.*
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.spongycastle.asn1.sec.SECNamedCurves
+import org.spongycastle.crypto.params.ECDomainParameters
 import org.spongycastle.jce.interfaces.ECPrivateKey
 import org.spongycastle.math.ec.custom.sec.SecP256R1Curve
+import org.spongycastle.util.BigIntegers
 import org.spongycastle.util.encoders.Hex
 import java.math.BigInteger
 import java.nio.charset.StandardCharsets
@@ -130,5 +133,44 @@ class CryptoInstrumentedTest {
 //        val key = CryptoUtils.getECDHP256PublicKeyFromBinary(bytes)
 //        System.out.println(key.encoded.toHexString())
 //        Assert.assertNotNull(key)
+    }
+
+
+
+    @Test
+    fun ecdh2() {
+        val pubkey = Hex.decode("E74E4A7070288F501BFF100D1918D73CA460437A47F5E4D1DB55E5B3252CD59B5ECD11A8ACAF68F910306EB8F671238E7E18E15C4A656454D4B2B49CE90D9672")
+        val privkeyLE = Hex.decode("DE7DBBA05691FBAEC1FE39C2EA4302F59A876B491949BA33E20E766140E4FE9F")
+
+        val pk = BigIntegers.fromUnsignedByteArray(privkeyLE)
+
+
+
+//        val privkeyBE = ByteArray(32)
+//        for (i in 0..31 step 4) {
+//            privkeyBE[i] = privkeyLE[31-i]
+////            privkeyBE[i+1] = privkeyLE[i + 2]
+////            privkeyBE[i+2] = privkeyLE[i + 1]
+////            privkeyBE[i+3] = privkeyLE[i + 0]
+//        }
+
+        Assert.assertEquals(pubkey.size, 64)
+        Assert.assertEquals(privkeyLE.size, 32)
+
+        val parameters = AlgorithmParameters.getInstance("EC")
+        parameters.init(ECGenParameterSpec("secp256r1"))
+        val ecParameterSpec = parameters.getParameterSpec(ECParameterSpec::class.java)
+        val ecPrivateKeySpec = ECPrivateKeySpec(pk, ecParameterSpec)
+        val privateKey = KeyFactory.getInstance("EC").generatePrivate(ecPrivateKeySpec) as java.security.interfaces.ECPrivateKey
+
+        val ecp = SECNamedCurves.getByName("secp256r1")
+        val domainParams = ECDomainParameters(ecp.curve, ecp.g, ecp.n, ecp.h, ecp.seed)
+        val Q = domainParams.g.multiply(privateKey.s)
+        System.err.println(Q.getEncoded(false).toHexString())
+        System.err.println("===")
+        System.err.println(pk.toByteArray().toHexString())
+        System.err.println("===")
+        System.err.println(pubkey.toHexString())
+
     }
 }
