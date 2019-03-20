@@ -42,6 +42,9 @@ typedef struct {
     
 } mew_unique_data;
 
+unsigned int mew_is_first_start(void);
+unsigned int mew_otp_write_temporary_data(void);
+
 unsigned int mew_otp_storage_init(void);
 
 #endif

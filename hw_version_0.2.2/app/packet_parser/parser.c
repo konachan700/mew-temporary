@@ -178,9 +178,24 @@ static void __mew_receive_pubkey(void) {
 	}
 
 	if (!P256_ecdh_shared_secret(shared_key, _mew_comm_payload, priv_key)) {
+		uint8_t pub_key[64];
+		data32 = (uint32_t*) pub_key;
+		mew_p256_ecdh_get_session_pubkey((char*)pub_key);
+		for (i=0; i<(64 / sizeof(uint32_t)); i++) {
+			data32[i] = big2little32(data32[i]);
+		}
+
 		mew_debug_print("Can't create a shared key! Bad data was received.");
-		mew_debug_print("Remote pubkey:");
-		mew_debug_print_hex((const char*)_mew_comm_payload, 64);
+		mew_debug_print("Local pubkey:");
+		mew_debug_print_hex((const char*)pub_key, 64);
+//		mew_debug_print("Remote pubkey:");
+//		mew_debug_print_hex((const char*)_mew_comm_payload, 64);
+
+
+//		data32 = (uint32_t*) priv_key;
+//		for (i=0; i<(32 / sizeof(uint32_t)); i++) {
+//			data32[i] = big2little32(data32[i]);
+//		}
 		mew_debug_print("Local privkey:");
 		mew_debug_print_hex((const char*)priv_key, 32);
 		return;

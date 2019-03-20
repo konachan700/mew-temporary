@@ -14,7 +14,7 @@ static void __mew_display_init(void);
 
 static void __mew_display_write_cmd(uint16_t cmd);
 static void __mew_display_write_cmd_with_data(uint16_t cmd, uint16_t* data, uint16_t size);
-static void __mew_display_flush(int32_t x1, int32_t y1, int32_t x2, int32_t y2, const lv_color_t * color_p);
+//static void __mew_display_flush(int32_t x1, int32_t y1, int32_t x2, int32_t y2, const lv_color_t * color_p);
 
 static volatile uint8_t _mew_dma_rx_state = 0;
 
@@ -193,7 +193,7 @@ unsigned int mew_display_init(void) {
 
     lv_disp_drv_t disp_drv;
     lv_disp_drv_init(&disp_drv);
-    disp_drv.disp_flush = __mew_display_flush;
+    disp_drv.disp_flush = mew_display_flush;
     lv_disp_drv_register(&disp_drv);
 
     lv_theme_t * th = lv_theme_material_init(250, &lv_font_dejavu_20);
@@ -202,7 +202,12 @@ unsigned int mew_display_init(void) {
     return 0;
 }
 
-static void __mew_display_flush(int32_t x1, int32_t y1, int32_t x2, int32_t y2, const lv_color_t * color_p) {
+void mew_display_flush_sync(int32_t x1, int32_t y1, int32_t x2, int32_t y2, const lv_color_t * color_p) {
+	mew_display_flush(x1, y1, x2, y2, color_p);
+	while (_mew_dma_rx_state == 1) __asm__("NOP");
+}
+
+void mew_display_flush(int32_t x1, int32_t y1, int32_t x2, int32_t y2, const lv_color_t * color_p) {
     while (_mew_dma_rx_state == 1) __asm__("NOP");
     
     __mew_spi_init_non_dma();

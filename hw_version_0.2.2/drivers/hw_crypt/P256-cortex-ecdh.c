@@ -39,6 +39,9 @@ unsigned int mew_p256_ecdh_handler(void) {
 	do {
 		createRandomPKey();
 	} while (!P256_ecdh_keygen(public_key, private_key));
+
+	mew_debug_print_hex((const char*)public_key, 64);
+	mew_debug_print_hex((const char*)private_key, 32);
 	return 0;
 }
 

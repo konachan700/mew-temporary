@@ -82,4 +82,7 @@
 unsigned int mew_display_init(void);
 unsigned int mew_touchscreen_init(void);
 
+void mew_display_flush(int32_t x1, int32_t y1, int32_t x2, int32_t y2, const lv_color_t * color_p);
+void mew_display_flush_sync(int32_t x1, int32_t y1, int32_t x2, int32_t y2, const lv_color_t * color_p);
+
 #endif

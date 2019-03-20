@@ -68,7 +68,7 @@ const mew_driver drivers[] = {
         MEW_DRIVER_ID_DISPLAY,
         "2.4' TFT SPI display",
         &mew_display_init,
-        &mew_ui_show_pinpad
+        NULL //&mew_ui_show_pinpad
     }, {
         MEW_DRIVER_ID_TOUCHSCREEN,
         "Resistive touchscreen with hardware controller",
@@ -90,6 +90,10 @@ const mew_loop_handler loop_handlers[] = {
 			"Stream to packages parser",
 			&mew_comm_handler
     }, {
+    		MEW_LHANDLER_ID_UI,
+			"UI logic handle",
+			&mew_ui_lhandler
+	}, {
 			MEW_LHANDLER_ID_LVGL,
 			"LVGL handle",
 			&mew_lvgl_lhandler
