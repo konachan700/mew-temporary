@@ -29,11 +29,19 @@ import kotlinx.android.synthetic.main.x01_known_devices_fragment.view.*
 import org.jetbrains.anko.okButton
 import org.jetbrains.anko.support.v4.alert
 import android.provider.Settings
+import android.util.Base64
+import androidx.core.content.ContextCompat
+import com.mewhpm.mewsync.SimpleScannerActivity
+import com.mewhpm.mewsync.utils.eq
+import org.jetbrains.anko.alert
+import org.jetbrains.anko.cancelButton
+import org.jetbrains.anko.support.v4.toast
 
 
 class DevicesFragment : Fragment() {
     companion object {
         private const val ACCESS_COARSE_LOCATION = 43
+        private const val ACCESS_CAMERA = 44
         private const val REQUEST_ENABLE_BT = 1
     }
 
@@ -71,6 +79,12 @@ class DevicesFragment : Fragment() {
                     showDiscoveryFragment()
                 } else {
                     msg("Permissions not granted!")
+                }
+            }
+            ACCESS_CAMERA -> {
+                if (grantResults.all { it == PackageManager.PERMISSION_GRANTED }) {
+                    val act2 = Intent(this@DevicesFragment.requireContext(), SimpleScannerActivity::class.java)
+                    this@DevicesFragment.activity!!.startActivityForResult(act2, 1)
                 }
             }
         }
@@ -234,34 +248,42 @@ class DevicesFragment : Fragment() {
 
         with (_view!!.addNewBleDevBtn1) {
             setImageIcon(Icon.createWithBitmap(
-                IconicsDrawable(requireContext())
-                    .icon(GoogleMaterial.Icon.gmd_bluetooth_searching).sizeDp(32).color(Color.WHITE).toBitmap()
-            ))
+                    IconicsDrawable(requireContext())
+                        .icon(GoogleMaterial.Icon.gmd_add).sizeDp(32).color(Color.WHITE).toBitmap()
+                    ))
             setOnClickListener {
-                when (_rxBleClient?.state) {
-                    RxBleClient.State.BLUETOOTH_NOT_ENABLED -> {
-                        msg("Bluetooth not enable! Please, enable it.") {
-                            val enableBtIntent = Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE)
-                            activity?.startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT)
-                        }
-                    }
-                    RxBleClient.State.BLUETOOTH_NOT_AVAILABLE -> msg("This device hasn't a BLE module")
-                    RxBleClient.State.LOCATION_SERVICES_NOT_ENABLED -> {
-                        msg("Location service is disabled. Please, enable it.") {
-                            val intent = Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS)
-                            startActivity(intent)
-                        }
-                    }
-                    RxBleClient.State.LOCATION_PERMISSION_NOT_GRANTED -> {
-                        requestPermissions(arrayOf(Manifest.permission.ACCESS_COARSE_LOCATION), ACCESS_COARSE_LOCATION)
-                    }
-                    RxBleClient.State.READY -> {
-                        showDiscoveryFragment()
-                    }
+                if (ContextCompat.checkSelfPermission(this@DevicesFragment.requireContext(), Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
+                    requestPermissions(arrayOf(Manifest.permission.CAMERA), ACCESS_CAMERA)
+                } else {
+                    val act2 = Intent(this@DevicesFragment.requireContext(), SimpleScannerActivity::class.java)
+                    this@DevicesFragment.activity!!.startActivityForResult(act2, 1)
                 }
+//                when (_rxBleClient?.state) {
+//                    RxBleClient.State.BLUETOOTH_NOT_ENABLED -> {
+//                        msg("Bluetooth not enable! Please, enable it.") {
+//                            val enableBtIntent = Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE)
+//                            activity?.startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT)
+//                        }
+//                    }
+//                    RxBleClient.State.BLUETOOTH_NOT_AVAILABLE -> msg("This device hasn't a BLE module")
+//                    RxBleClient.State.LOCATION_SERVICES_NOT_ENABLED -> {
+//                        msg("Location service is disabled. Please, enable it.") {
+//                            val intent = Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS)
+//                            startActivity(intent)
+//                        }
+//                    }
+//                    RxBleClient.State.LOCATION_PERMISSION_NOT_GRANTED -> {
+//                        requestPermissions(arrayOf(Manifest.permission.ACCESS_COARSE_LOCATION), ACCESS_COARSE_LOCATION)
+//                    }
+//                    RxBleClient.State.READY -> {
+//                        showDiscoveryFragment()
+//                    }
+//                }
             }
         }
         refreshFromDb()
         return _view
     }
+
+
 }

@@ -273,38 +273,38 @@ class BleService: Service() {
         try {
             when (cmd) {
                 CMD_GET_DEVICE_SESSION_KEY -> {
-                    val keypair = CryptoUtils.generateECDHP256Keypair()
-                    val keystore = BleServiceKeystore(
-                        mac, CryptoUtils.getECDHP256PublicKeyFromBinary(bytes.toByteArray()),
-                        keypair.public as ECPublicKey, keypair.private as ECPrivateKey
-                    )
-                    deviceSessionKeyMap[mac] = keystore
-
-                    val key = CryptoUtils.getBytesFromECPublicKey(keystore.myPublicKey)
-                    Log.e("--keystore", "key.x = ${keystore.myPublicKey.w.affineX.toByteArray().toHexString()}")
-                    Log.e("--keystore", "key.y = ${keystore.myPublicKey.w.affineY.toByteArray().toHexString()}")
-
-                    val packet = Stm32HwUtils.createPacket(CMD_SEND_MY_SESSION_KEY, key)
-
-                    if (connectToBleDevice(mac)) {
-                        val element = BleServiceWriteQueueElement(mac, packet)
-                        queue.putFirst(element)
-                    }
+//                    val keypair = CryptoUtils.generateECDHP256Keypair()
+//                    val keystore = BleServiceKeystore(
+//                        mac, CryptoUtils.getECDHP256PublicKeyFromBinary(bytes.toByteArray()),
+//                        keypair.public as ECPublicKey, keypair.private as ECPrivateKey
+//                    )
+//                    deviceSessionKeyMap[mac] = keystore
+//
+//                    val key = CryptoUtils.getBytesFromECPublicKey(keystore.myPublicKey)
+//                    Log.e("--keystore", "key.x = ${keystore.myPublicKey.w.affineX.toByteArray().toHexString()}")
+//                    Log.e("--keystore", "key.y = ${keystore.myPublicKey.w.affineY.toByteArray().toHexString()}")
+//
+//                    val packet = Stm32HwUtils.createPacket(CMD_SEND_MY_SESSION_KEY, key)
+//
+//                    if (connectToBleDevice(mac)) {
+//                        val element = BleServiceWriteQueueElement(mac, packet)
+//                        queue.putFirst(element)
+//                    }
                 }
                 CMD_SEND_MY_SESSION_KEY -> {
-                    if ((bytes.size == 2) && (bytes[0] eq 0u) && (bytes[1] eq 0u)) {
-                        deviceSessionKeyMap[mac]?.active = true
-                    } else {
-                        Log.e("### PARSER", "Key exchange fail.")
-                    }
+//                    if ((bytes.size == 2) && (bytes[0] eq 0u) && (bytes[1] eq 0u)) {
+//                        deviceSessionKeyMap[mac]?.active = true
+//                    } else {
+//                        Log.e("### PARSER", "Key exchange fail.")
+//                    }
                 }
                 else -> {
                     Log.e("### PARSER", "Unknown command 0x${cmd.toString(16)}.")
                 }
             }
-        } /*catch (t : Throwable) {
+        } catch (t : Throwable) {
             Log.e("### PARSER", "Error. ${t.message}")
-        } */finally {
+        } finally {
             _readedBytes.reset()
         }
     }

@@ -72,6 +72,8 @@ dependencies {
     implementation 'com.google.protobuf:protobuf-lite:3.0.0'
     // BLE
     implementation "com.polidea.rxandroidble2:rxandroidble:1.8.1"
+    // BARCODES
+    implementation 'me.dm7.barcodescanner:zxing:1.9.13'
     // CRYPTO
     implementation 'com.madgag.spongycastle:core:1.54.0.0'
     implementation 'com.madgag.spongycastle:prov:1.54.0.0'
