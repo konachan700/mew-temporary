@@ -25,7 +25,7 @@
 #define MEW_LHANDLER_ID_LVGL            0xA1
 #define MEW_LHANDLER_ID_SPI_FLASH       0xA2
 #define MEW_LHANDLER_ID_UI              0xA3
-#define MEW_LHANDLER_ID_BLUETOOTH       0xA4
+//#define MEW_LHANDLER_ID_BLUETOOTH       0xA4
 
 typedef struct {
     unsigned int id;

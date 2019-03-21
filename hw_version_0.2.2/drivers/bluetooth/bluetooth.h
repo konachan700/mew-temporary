@@ -31,24 +31,24 @@
 #define MEW_BLUETOOTH_DMA_DR				USART1_DR
 #define MEW_BLUETOOTH_DMA_NVIC_TX			NVIC_DMA2_STREAM7_IRQ
 
-#define MEW_BT_RECEIVE_BUFFER_SIZE                      256
+//#define MEW_BT_RECEIVE_BUFFER_SIZE                      256
+//
+//#define MEW_BT_MODE_AT                  1
+//#define MEW_BT_MODE_TRANSPARENT         2
+//
+//#define MEW_BT_CS_ERROR                 1
+//#define MEW_BT_CS_OK                    2
+//#define MEW_BT_CS_TIMEOUT               3
 
-#define MEW_BT_MODE_AT                  1
-#define MEW_BT_MODE_TRANSPARENT         2
-
-#define MEW_BT_CS_ERROR                 1
-#define MEW_BT_CS_OK                    2
-#define MEW_BT_CS_TIMEOUT               3
-
-typedef struct {
-    volatile uint32_t code;
-    volatile uint32_t state;
-    const char* command;
-    const char* wait_reply_pattern;
-} mew_bt_at_command;
+//typedef struct {
+//    volatile uint32_t code;
+//    volatile uint32_t state;
+//    const char* command;
+//    const char* wait_reply_pattern;
+//} mew_bt_at_command;
 
 unsigned int mew_bluetooth_init(void);
-unsigned int mew_bluetooth_handler(void);
+//unsigned int mew_bluetooth_handler(void);
 void mew_bluetooth_transmit(uint8_t* data, uint16_t size, uint8_t sync_mode);
 
 #endif /* BLUETOOTH_H */
