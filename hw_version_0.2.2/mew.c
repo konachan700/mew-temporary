@@ -26,7 +26,7 @@ const mew_driver drivers[] = {
         NULL,
     }, {
         MEW_DRIVER_ID_DUART, 
-        "STM32F4 Debug usart",
+        "\n\n-------- STM32F4 Debug usart started --------",
         &mew_init_duart, 
         NULL,
     }, {
@@ -89,7 +89,11 @@ const mew_loop_handler loop_handlers[] = {
 			MEW_LHANDLER_ID_PACKAGE_PARSER,
 			"Stream to packages parser",
 			&mew_comm_handler
-    }, {
+    }, /*{
+    		MEW_LHANDLER_ID_BLUETOOTH,
+			"Bluetooth at-terminal",
+			&mew_bluetooth_handler
+    },*/ {
     		MEW_LHANDLER_ID_UI,
 			"UI logic handle",
 			&mew_ui_lhandler
