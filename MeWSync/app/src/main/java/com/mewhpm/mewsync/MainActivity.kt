@@ -53,24 +53,9 @@ class MainActivity : AppCompatActivity() {
                     toast("No any data from activity!").show()
                     return
                 }
+
                 val datab64 = data.getStringExtra(SimpleScannerActivity.DATA_ID)
-                val dataBinary = Base64.decode(datab64, Base64.DEFAULT).toUByteArray()
-                if ((dataBinary[0] eq 0x43u) && (dataBinary[1] eq 0x77u)) {
-                    val mac = dataBinary.copyOfRange(2, 8).joinToString(":") { it.toString(16).padStart(2, '0') }
-                    val name = String(dataBinary.copyOfRange(56, dataBinary.size).toByteArray())
-                    this.alert (
-                        title = "Add new device",
-                        message = "Device with mac: \"$mac\" and name \"$name\" will be added now.") {
-                        okButton {
-
-
-                        }
-                        cancelButton {  }
-                    }.show()
-                } else {
-                    toast("Bad QR-code, invalid magic tag!").show()
-                    Log.d("QR DUMP", dataBinary.toByteArray().toHexString())
-                }
+                _knownDevicesFragment.qrCodeDataProcess(datab64)
             }
         } catch (e : Throwable) {
             toast("Bad QR-code!").show()

@@ -3,46 +3,45 @@ package com.mewhpm.mewsync;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Base64;
-import com.google.zxing.BarcodeFormat;
-import com.google.zxing.MultiFormatReader;
-import com.google.zxing.Result;
-import me.dm7.barcodescanner.zxing.ZXingScannerView;
+
+import me.dm7.barcodescanner.zbar.BarcodeFormat;
+import me.dm7.barcodescanner.zbar.Result;
+import me.dm7.barcodescanner.zbar.ZBarScannerView;
 
 import java.util.Collections;
 
-public class SimpleScannerActivity extends Activity implements ZXingScannerView.ResultHandler {
+public class SimpleScannerActivity extends Activity implements ZBarScannerView.ResultHandler {
     public static final String DATA_ID = "data";
-    private ZXingScannerView mScannerView;
+    private ZBarScannerView mScannerView;
 
     @Override
     public void onCreate(Bundle state) {
         super.onCreate(state);
-        mScannerView = new ZXingScannerView(this);   // Programmatically initialize the scanner view
+        mScannerView = new ZBarScannerView(this);
         mScannerView.setAspectTolerance(0.5f);
-        mScannerView.setFormats(Collections.singletonList(BarcodeFormat.QR_CODE));
-        setContentView(mScannerView);                // Set the scanner view as the content view
+        mScannerView.setFormats(Collections.singletonList(BarcodeFormat.QRCODE));
+        setContentView(mScannerView);
     }
 
     @Override
     public void onResume() {
         super.onResume();
-        mScannerView.setResultHandler(this); // Register ourselves as a handler for scan results.
-        mScannerView.setAutoFocus(true);
-        mScannerView.startCamera();          // Start camera on resume
+        mScannerView.setResultHandler(this);
+        mScannerView.startCamera();
     }
 
     @Override
     public void onPause() {
         super.onPause();
-        mScannerView.stopCamera();           // Stop camera on pause
+        mScannerView.stopCamera();
     }
 
     @Override
     public void handleResult(Result rawResult) {
         Intent intent = new Intent();
-        intent.putExtra(DATA_ID, Base64.encodeToString(rawResult.getRawBytes(), Base64.DEFAULT));
+        intent.putExtra(DATA_ID, rawResult.getContents());
         setResult(RESULT_OK, intent);
         finish();
     }
 }
+

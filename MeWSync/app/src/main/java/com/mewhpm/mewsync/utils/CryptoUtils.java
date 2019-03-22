@@ -1,7 +1,10 @@
 package com.mewhpm.mewsync.utils;
 
+import android.annotation.SuppressLint;
 import android.content.SharedPreferences;
 import android.security.keystore.KeyGenParameterSpec;
+import android.security.keystore.KeyProperties;
+import android.security.keystore.KeyProtection;
 import android.util.Base64;
 import android.util.Log;
 import com.mewhpm.mewsync.data.BleDevice;
@@ -36,16 +39,21 @@ import static java.lang.Math.min;
 import static java.util.Calendar.YEAR;
 
 public class CryptoUtils {
+
+    public static final String MEW_IV = "mew_iv";
+    public static final String MEW_KEY_256 = "mew_key256";
+
     static {
         Security.insertProviderAt(new org.spongycastle.jce.provider.BouncyCastleProvider(), 1);
     }
+
+    private static KeyStore keyStore;
 
     public interface KeygenEvent {
         void onGenerated();
     }
 
     private static class AsyncKeyGenerator implements Runnable {
-        private final KeyStore keyStore;
         {
             try {
                 keyStore = KeyStore.getInstance(ANDROID_KEYSTORE);
@@ -266,6 +274,17 @@ public class CryptoUtils {
         editor.apply();
     }
 
+    @SuppressLint("ApplySharedPref")
+    public static void pinCodeRemove(BleDevice device, SharedPreferences sp) {
+        sp.edit()
+                .remove(generatePrefName(device))
+                .commit();
+    }
+
+    public static boolean isPinCodePresent(String mac, SharedPreferences sp) {
+        return sp.contains(generatePrefName(mac));
+    }
+
     public static byte[] aes256Decrypt(byte[] value, String password) throws BadPaddingException, InvalidKeyException,
             NoSuchAlgorithmException, IllegalBlockSizeException, NoSuchPaddingException, InvalidAlgorithmParameterException {
         final byte[] hash = sha512(password.getBytes());
@@ -309,57 +328,101 @@ public class CryptoUtils {
         return kp;
     }
 
-//    public static byte[] swapLE32toBE32(byte[] b, int len) {
-//        final byte[] tmp = new byte[len];
-//        for (int i=0; i<len; i++) {
-//            tmp[i] = b[len - (i+1)];
-//        }
+    private static String saveAesKeyToKeystoreGenName(String name, String mac) {
+        return name + "_" + mac.replace(':','X');
+    }
+
+    @SuppressLint("ApplySharedPref")
+    public static void saveAesKeyAndIVToKeystore(byte[] rawKey, byte[] rawIv, String mac, SharedPreferences sharedPreferences)
+            throws NoSuchAlgorithmException, KeyStoreException, NoSuchPaddingException,
+            UnrecoverableEntryException, InvalidKeyException, NoSuchProviderException, IOException {
+        final String base64EncryptedIV = Base64.encodeToString(encryptRSA(rawIv), Base64.DEFAULT);
+        final String base64EncryptedKey = Base64.encodeToString(encryptRSA(rawKey), Base64.DEFAULT);
+        sharedPreferences
+                .edit()
+                .putString(saveAesKeyToKeystoreGenName(MEW_IV, mac), base64EncryptedIV)
+                .putString(saveAesKeyToKeystoreGenName(MEW_KEY_256, mac), base64EncryptedKey)
+                .commit();
+    }
+
+    private static byte[] aes256DevCrypt(String mac, SharedPreferences sp, byte[] value, int dir) throws NoSuchPaddingException,
+            InvalidKeyException, NoSuchAlgorithmException, KeyStoreException, NoSuchProviderException, UnrecoverableEntryException,
+            IOException, InvalidAlgorithmParameterException, BadPaddingException, IllegalBlockSizeException {
+        if (sp.contains(saveAesKeyToKeystoreGenName(MEW_IV, mac)) &&
+                sp.contains(saveAesKeyToKeystoreGenName(MEW_KEY_256, mac))) {
+            final String ivB64 = sp.getString(saveAesKeyToKeystoreGenName(MEW_IV, mac), null);
+            final String keyB64 = sp.getString(saveAesKeyToKeystoreGenName(MEW_KEY_256, mac), null);
+            if (ivB64 == null || keyB64 == null) throw new IllegalStateException("Device not found");
+
+            final byte[] ivEnc = Base64.decode(ivB64, Base64.DEFAULT);
+            final byte[] keyEnc = Base64.decode(keyB64, Base64.DEFAULT);
+            if (ivEnc == null || keyEnc == null) throw new IllegalStateException("Device not found");
+
+            final byte[] iv = decryptRSA(ivEnc);
+            final byte[] key = decryptRSA(keyEnc);
+
+            return (dir == 0) ? aes256Decrypt(value, key, iv) : aes256Encrypt(value, key, iv);
+        } else {
+            throw new IllegalStateException("Device not found");
+        }
+    }
+
+    public static boolean isAes256DevKeyPresent(String mac, SharedPreferences sp) {
+        return (sp.contains(saveAesKeyToKeystoreGenName(MEW_IV, mac)) &&
+                sp.contains(saveAesKeyToKeystoreGenName(MEW_KEY_256, mac)));
+    }
+
+    public static void aes256DevKeyRemove(String mac, SharedPreferences sp) {
+        sp.edit()
+                .remove(saveAesKeyToKeystoreGenName(MEW_IV, mac))
+                .remove(saveAesKeyToKeystoreGenName(MEW_KEY_256, mac))
+                .apply();
+    }
+
+    public static byte[] aes256DevEncrypt(String mac, SharedPreferences sp, byte[] value) throws NoSuchPaddingException,
+            InvalidKeyException, NoSuchAlgorithmException, KeyStoreException, NoSuchProviderException, UnrecoverableEntryException,
+            IOException, InvalidAlgorithmParameterException, BadPaddingException, IllegalBlockSizeException {
+        return aes256DevCrypt(mac, sp, value, 1);
+    }
+
+    public static byte[] aes256DevDecrypt(String mac, SharedPreferences sp, byte[] value) throws NoSuchPaddingException,
+            InvalidKeyException, NoSuchAlgorithmException, KeyStoreException, NoSuchProviderException, UnrecoverableEntryException,
+            IOException, InvalidAlgorithmParameterException, BadPaddingException, IllegalBlockSizeException {
+        return aes256DevCrypt(mac, sp, value, 0);
+    }
+
+
+
+
+//    public static ECPublicKey getECDHP256PublicKeyFromBinary(byte[] bytes) throws NoSuchAlgorithmException, InvalidParameterSpecException, InvalidKeySpecException {
+//        byte[] x = new byte[32];
+//        byte[] y = new byte[32];
 //
+//        System.arraycopy(bytes, 1, x, 0, 32);
+//        System.arraycopy(bytes, 32, y, 0, 32);
 //
+//        final KeyFactory kf = KeyFactory.getInstance("EC");
+//        final AlgorithmParameters parameters = AlgorithmParameters.getInstance("EC");
+//        parameters.init(new ECGenParameterSpec("prime256v1"));
 //
-////        for (int i=0; i<len; i=i+4) {
-////            tmp[0] = b[i];
-////            tmp[1] = b[i+1];
-////            tmp[2] = b[i+2];
-////            tmp[3] = b[i+3];
-////
-////            b[i] =  tmp[3];
-////            b[i+1] = tmp[2];
-////            b[i+2] = tmp[1];
-////            b[i+3] = tmp[0];
-////        }
-//        return tmp;
+//        final ECParameterSpec ecParameterSpec = parameters.getParameterSpec(ECParameterSpec.class);
+//        final ECPublicKeySpec ecPublicKeySpec = new ECPublicKeySpec(
+//                new ECPoint(
+//                        new BigInteger(1, x), new BigInteger(1, y)), ecParameterSpec);
+//        return (ECPublicKey) kf.generatePublic(ecPublicKeySpec);
 //    }
-
-    public static ECPublicKey getECDHP256PublicKeyFromBinary(byte[] bytes) throws NoSuchAlgorithmException, InvalidParameterSpecException, InvalidKeySpecException {
-        byte[] x = new byte[32];
-        byte[] y = new byte[32];
-
-        System.arraycopy(bytes, 1, x, 0, 32);
-        System.arraycopy(bytes, 32, y, 0, 32);
-
-        final KeyFactory kf = KeyFactory.getInstance("EC");
-        final AlgorithmParameters parameters = AlgorithmParameters.getInstance("EC");
-        parameters.init(new ECGenParameterSpec("prime256v1"));
-
-        final ECParameterSpec ecParameterSpec = parameters.getParameterSpec(ECParameterSpec.class);
-        final ECPublicKeySpec ecPublicKeySpec = new ECPublicKeySpec(
-                new ECPoint(
-                        new BigInteger(1, x), new BigInteger(1, y)), ecParameterSpec);
-        return (ECPublicKey) kf.generatePublic(ecPublicKeySpec);
-    }
-
-    public static byte[] getBytesFromECPublicKey(ECPublicKey key) {
-        final ECPoint point = key.getW();
-        final byte[] binaryKey = new byte[64];
-        for (int i=0; i<binaryKey.length; i++) binaryKey[i] = 0;
-
-        final byte[] x = point.getAffineX().toByteArray();
-        System.arraycopy(x, max(0, x.length - 32), binaryKey, 32 - min(x.length, 32), min(x.length, 32));
-
-        final byte[] y = point.getAffineY().toByteArray();
-        System.arraycopy(y, max(0, y.length - 32), binaryKey, 64 - min(y.length, 32), min(y.length, 32));
-
-        return binaryKey;
-    }
+//
+//    public static byte[] getBytesFromECPublicKey(ECPublicKey key) {
+//        final ECPoint point = key.getW();
+//        final byte[] binaryKey = new byte[64];
+//        for (int i=0; i<binaryKey.length; i++) binaryKey[i] = 0;
+//
+//        final byte[] x = point.getAffineX().toByteArray();
+//        System.arraycopy(x, max(0, x.length - 32), binaryKey, 32 - min(x.length, 32), min(x.length, 32));
+//
+//        final byte[] y = point.getAffineY().toByteArray();
+//        System.arraycopy(y, max(0, y.length - 32), binaryKey, 64 - min(y.length, 32), min(y.length, 32));
+//
+//        return binaryKey;
+//    }
 }
