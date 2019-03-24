@@ -23,17 +23,29 @@ import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.LinkedBlockingDeque
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicBoolean
+import java.util.concurrent.atomic.AtomicInteger
 import java.util.concurrent.atomic.AtomicLong
 
 @ExperimentalUnsignedTypes
 class BleService: Service() {
     companion object {
         const val EXTRA_ACTION = "action"
-        const val EXTRA_ACTION_SEND_CMD = 1
+        const val EXTRA_ACTION_CONNECT = 0x01
+        const val EXTRA_ACTION_FIRE_TEMP_KEYS = 0x02
 
         const val EXTRA_DATA_MAC = "mac"
         const val EXTRA_DATA_CMD = "cmd"
         const val EXTRA_DATA_DATA = "data_b64"
+
+        const val BROADCAST_TYPE = "BleService_bcast_type"
+        const val BROADCAST_TYPE_OK = 0xFF
+
+        const val BROADCAST_STATUS_CODE = "BleService_bcast_status"
+        const val BROADCAST_DEV_CONNECTED = 0x01
+        const val BROADCAST_DEV_DISCONNECTED = 0x02
+        const val BROADCAST_DEV_NOT_READY = 0x03
+
+        const val BROADCAST_DEV_MAC = "BleService_bcast_dev_mac"
 
         private val UUID_SERIAL = UUID.fromString("0000FFE1-0000-1000-8000-00805F9B34FB")
 
@@ -50,38 +62,166 @@ class BleService: Service() {
                 throw error
             }
         }
+
+        fun isDevConected(mac: String): Boolean {
+            if (!deviceSessionKeyMap.contains(mac)) return false
+            if (deviceSessionKeyMap[mac] == null) return false
+            return deviceSessionKeyMap[mac]!!.active
+        }
     }
 
     private val queue = LinkedBlockingDeque<BleServiceWriteQueueElement>()
     inner class LinkedBlockingDequeWorker : Runnable {
+        private fun connectToBleDevice(mac: String): Boolean {
+            if (_devMap.containsKey(mac)) {
+                return when (_devMap[mac]!!.connectedDevice.connectionState) {
+                    RxBleConnection.RxBleConnectionState.CONNECTED -> true
+                    else -> {
+                        _devMap.remove(mac)
+                        connectToBleDevice(mac)
+                    }
+                }
+            }
+
+            synchronized(this) {
+                try {
+                    if (_rxBleClient == null) {
+                        _rxBleClient = RxBleClient.create(this@BleService.applicationContext)
+                    }
+
+                    val connectedDevice = _rxBleClient!!.getBleDevice(mac)
+                    val connectedDeviceStateDisposable = connectedDevice!!.observeConnectionStateChanges().subscribe(
+                        {
+                            when (it) {
+                                RxBleConnection.RxBleConnectionState.CONNECTED -> {
+                                    _devMap[mac]?.isReady = true
+                                    sendStatusIntent(BROADCAST_DEV_CONNECTED, mac)
+                                }
+                                RxBleConnection.RxBleConnectionState.DISCONNECTED -> {
+                                    disconnect(mac)
+                                    sendStatusIntent(BROADCAST_DEV_DISCONNECTED, mac)
+                                }
+                                else -> {
+                                    _devMap[mac]?.isReady = false
+                                    sendStatusIntent(BROADCAST_DEV_NOT_READY, mac)
+                                }
+                            }
+                            Log.d("!!! ConnState", "connection state changed to ${it.name}")
+                        },
+                        { throwable ->
+                            Log.e("!!! ConnState", "connect state error: ${throwable.message}")
+
+                        }
+                    )
+                    val connectedDeviceDisposable = connectedDevice!!
+                        .establishConnection(false)
+                        .delay(1, TimeUnit.SECONDS)
+                        .subscribe(
+                            { rxBleConnection ->
+                                rxBleConnection
+                                    .setupNotification(UUID_SERIAL)
+                                    .doOnNext { }
+                                    .flatMap { it }
+                                    .subscribe(
+                                        { bytes ->
+                                            if (_readedBytesTTL.get() < Date().time) {
+                                                _readedBytes.reset()
+                                            }
+
+                                            _readedBytes.write(bytes)
+                                            _readedBytesTTL.set(Date().time + DATA_TTL_MSEC)
+
+                                            parser(_readedBytes.toByteArray().toUByteArray(), mac)
+                                        },
+                                        { t: Throwable? ->
+                                            Log.e("!!! READ CHR", "read error: ${t?.message}")
+                                            t?.printStackTrace()
+                                        }
+                                    )
+                                _devMap[mac]!!.connection = rxBleConnection
+                            },
+                            { t ->
+                                Log.e("connect state", "error while reading data from device: ${t.message}")
+                            }
+                        )
+
+                    val element = BleServiceDeviceInfo(
+                        connectedDevice,
+                        connectedDeviceStateDisposable,
+                        connectedDeviceDisposable,
+                        mac
+                    )
+                    _devMap[mac] = element
+
+                    return true
+                } catch (t : Throwable) {
+                    Log.e("connect state", "error while connecting to device: ${t.message}")
+                }
+                return false
+            }
+        }
+
         override fun run() {
             while (true) {
                 try {
-                    val queueElement = queue.pollLast(9999, TimeUnit.DAYS) ?: continue
-                    if (queueElement.deadTime < Date().time) {
-                        Log.d("queueElement", "Queue element dead time. MAC: ${queueElement.mac}; DATA: ${queueElement.bytes.toHexString()};")
-                        continue
-                    }
+                    val queueElement = queue.pollLast(1000, TimeUnit.DAYS) ?: continue
 
-                    if ((!_devMap.containsKey(queueElement.mac)) || _devMap[queueElement.mac]?.isReady != true) {
-                        queue.putFirst(queueElement)
-                        Thread.yield()
-                        continue
-                    }
-
-                    val conn = _devMap[queueElement.mac]!!.connection ?: continue
-                    val unused = conn.createNewLongWriteBuilder()
-                        .setCharacteristicUuid(UUID_SERIAL)
-                        .setBytes(queueElement.bytes)
-                        .build()
-                        .subscribe(
-                            { byteArray ->
-                                Log.d("writeToDevice", "written: ${byteArray.size}")
-                            },
-                            { throwable ->
-                                Log.e("writeToDevice", "error: ${throwable.message}")
+                    if (connectToBleDevice(queueElement.mac)) {
+                        val time = Date().time + 60000
+                        while (_devMap[queueElement.mac]?.isReady != true) {
+                            if (time < Date().time) {
+                                Log.d("queueElement", "Can't connect to device with MAC: ${queueElement.mac};")
+                                queue.putFirst(queueElement)
+                                continue
                             }
-                        )
+                            Thread.yield()
+                        }
+                    } else {
+                        Log.d("queueElement", "Can't connect to device with MAC: ${queueElement.mac};")
+                        queue.putFirst(queueElement)
+                        continue
+                    }
+
+                    if ((!_devMap.containsKey(queueElement.mac)) ||
+                        (_devMap[queueElement.mac]?.isReady != true) ||
+                        (_devMap[queueElement.mac]?.connection == null)) {
+
+                        if (queueElement.deadTime < Date().time) {
+                            Log.d("queueElement", "Queue element dead time. MAC: ${queueElement.mac}; DATA: ${queueElement.bytes.toHexString()};")
+                            continue
+                        }
+
+                        queue.putFirst(queueElement)
+                        continue
+                    }
+
+                    val err = AtomicBoolean(false)
+                    val wrCount = AtomicInteger(0)
+                    try {
+                        val conn = _devMap[queueElement.mac]!!.connection
+                        val unused = conn!!.createNewLongWriteBuilder()
+                            .setCharacteristicUuid(UUID_SERIAL)
+                            .setBytes(queueElement.bytes)
+                            .build()
+                            .subscribe(
+                                { byteArray ->
+                                    Log.d("writeToDevice", "written: ${byteArray.size}")
+                                    wrCount.getAndAdd(byteArray.size)
+                                },
+                                { throwable ->
+                                    Log.e("writeToDevice", "error: ${throwable.message}")
+                                    err.set(true)
+                                }
+                            )
+                        while (wrCount.get() < queueElement.bytes.size) {
+                            if (err.get()) break
+                            Thread.yield()
+                        }
+                        if (!unused.isDisposed) unused.dispose()
+                    } catch (t : Throwable) {
+                        Log.e("Worker", "error detected: ${t.message}")
+                        continue
+                    }
                 } catch (e: InterruptedException) {
                     return
                 } catch (t : Throwable) {
@@ -111,84 +251,12 @@ class BleService: Service() {
         deviceSessionKeyMap.remove(mac)
     }
 
-    private fun connectToBleDevice(mac: String): Boolean {
-        try {
-            if (_devMap.containsKey(mac)) {
-                return when (_devMap[mac]!!.connectedDevice.connectionState) {
-                    RxBleConnection.RxBleConnectionState.CONNECTED -> true
-                    else -> {
-                        _devMap.remove(mac)
-                        connectToBleDevice(mac)
-                    }
-                }
-            }
-
-            if (_rxBleClient == null) {
-                _rxBleClient = RxBleClient.create(this.applicationContext)
-            }
-
-            val connectedDevice = _rxBleClient!!.getBleDevice(mac)
-            val connectedDeviceStateDisposable = connectedDevice!!.observeConnectionStateChanges().subscribe(
-                {
-                    when (it) {
-                        RxBleConnection.RxBleConnectionState.CONNECTED -> {
-                            _devMap[mac]?.isReady = true
-
-                        }
-                        RxBleConnection.RxBleConnectionState.DISCONNECTED -> {
-                            disconnect(mac)
-                        }
-                        else -> {
-                            _devMap[mac]?.isReady = false
-                        }
-                    }
-                    Log.d("!!! ConnState", "connection state changed to ${it.name}")
-                },
-                { throwable ->
-                    Log.e("!!! ConnState", "connect state error: ${throwable.message}")
-
-                }
-            )
-            val connectedDeviceDisposable = connectedDevice!!
-                .establishConnection(false)
-                .delay(1, TimeUnit.SECONDS)
-                .subscribe(
-                    { rxBleConnection ->
-                        rxBleConnection
-                            .setupNotification(UUID_SERIAL)
-                            .doOnNext {  }
-                            .flatMap { it }
-                            .subscribe(
-                                { bytes ->
-                                    if (_readedBytesTTL.get() < Date().time) {
-                                        _readedBytes.reset()
-                                    }
-
-                                    _readedBytes.write(bytes)
-                                    _readedBytesTTL.set(Date().time + DATA_TTL_MSEC)
-
-                                    parser(_readedBytes.toByteArray().toUByteArray(), mac)
-                                },
-                                { t: Throwable? ->
-                                    Log.e("!!! READ CHR", "read error: ${t?.message}")
-                                    t?.printStackTrace()
-                                }
-                            )
-                        _devMap[mac]!!.connection = rxBleConnection
-                    },
-                    { t ->
-                        Log.e("connect state", "error while reading data from device: ${t.message}")
-                    }
-                )
-
-            val element = BleServiceDeviceInfo(connectedDevice, connectedDeviceStateDisposable, connectedDeviceDisposable, mac)
-            _devMap[mac] = element
-
-            return true
-        } catch (t : Throwable) {
-            Log.e("connect state", "error while connecting to device: ${t.message}")
-        }
-        return false
+    private fun sendStatusIntent(code: Int, mac: String) {
+        val intentAnswer = Intent()
+        intentAnswer.putExtra(BROADCAST_TYPE, BROADCAST_TYPE_OK)
+        intentAnswer.putExtra(BROADCAST_DEV_MAC, mac)
+        intentAnswer.putExtra(BROADCAST_STATUS_CODE, code)
+        sendBroadcast(intentAnswer)
     }
 
     override fun onBind(intent: Intent?): IBinder? {
@@ -212,22 +280,25 @@ class BleService: Service() {
         }
 
         when (intent.getIntExtra(EXTRA_ACTION, 0)) {
-            EXTRA_ACTION_SEND_CMD -> {
+            EXTRA_ACTION_CONNECT -> {
                 val mac = intent.getStringExtra(EXTRA_DATA_MAC)
                 if (mac == null || KnownDevicesDao.isDeviceBroken(mac)) {
                     Log.e("EXTRA_ACTION_SEND_CMD", "Bad MAC address")
                     return START_STICKY
                 }
 
-                val cmd = intent.getIntExtra(EXTRA_DATA_CMD, 0)
-                val data = intent.getStringExtra(EXTRA_DATA_DATA) ?: return START_STICKY
-                val packet = Stm32HwUtils.createPacket(cmd, data)
 
-                Log.d("!!! onStartCommand", "connectToBleDevice")
-                if (connectToBleDevice(mac)) {
-                    val element = BleServiceWriteQueueElement(mac, packet)
-                    queue.putFirst(element)
-                }
+                //connectToBleDevice(mac)
+
+//                val cmd = intent.getIntExtra(EXTRA_DATA_CMD, 0)
+//                val data = intent.getStringExtra(EXTRA_DATA_DATA) ?: return START_STICKY
+//                val packet = Stm32HwUtils.createPacket(cmd, data)
+//
+//                Log.d("!!! onStartCommand", "connectToBleDevice")
+//                if (connectToBleDevice(mac)) {
+//                    val element = BleServiceWriteQueueElement(mac, packet)
+//                    queue.putFirst(element)
+//                }
             }
         }
         return START_STICKY
@@ -311,8 +382,8 @@ class BleService: Service() {
 
 //    private fun sendOkIntent(code: Int = 0) {
 //        val intentAnswer = Intent()
-//        intentAnswer.putExtra(EXTRA_RESULT_CODE, EXTRA_RESULT_CODE_OK)
-//        intentAnswer.putExtra(BLE_INTENT_ERR_CODE, code)
+//        intentAnswer.putExtra(BROADCAST_TYPE, BROADCAST_TYPE_OK)
+//        intentAnswer.putExtra(BROADCAST_STATUS_CODE, code)
 //        sendBroadcast(intentAnswer)
 //    }
 //

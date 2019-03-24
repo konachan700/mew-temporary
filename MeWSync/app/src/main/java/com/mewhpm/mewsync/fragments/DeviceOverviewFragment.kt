@@ -28,6 +28,7 @@ class DeviceOverviewFragment : androidx.fragment.app.Fragment() {
     private var _view: View? = null
     private val _receiver = DeviceOverviewFragmentBroadcastReceiver()
 
+    @ExperimentalUnsignedTypes
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         super.setHasOptionsMenu(false)
         _view = inflater.inflate(R.layout.x03_sync_with_mew, container, false)
@@ -35,12 +36,12 @@ class DeviceOverviewFragment : androidx.fragment.app.Fragment() {
         _view!!.listOfStaticElements1.addItems(
             StaticListItem("MeW keyboard", "Emulate real usb keyboard", GoogleMaterial.Icon.gmd_keyboard) {
                 if (KnownDevicesDao.isDeviceBroken(DeviceActivity.currentDeviceMac)) return@StaticListItem
-                sendIntent(
-                    Pair(BleService.EXTRA_ACTION, BleService.EXTRA_ACTION_SEND_CMD),
-                    Pair(BleService.EXTRA_DATA_CMD, 0x4300),
-                    Pair(BleService.EXTRA_DATA_MAC, DeviceActivity.currentDeviceMac),
-                    Pair(BleService.EXTRA_DATA_DATA, Base64.encodeToString(byteArrayOf(0x00, 0x00), Base64.DEFAULT))
-                )
+//                sendIntent(
+////                    Pair(BleService.EXTRA_ACTION, BleService.EXTRA_ACTION_SEND_CMD),
+//                    Pair(BleService.EXTRA_DATA_CMD, 0x4300),
+//                    Pair(BleService.EXTRA_DATA_MAC, DeviceActivity.currentDeviceMac),
+//                    Pair(BleService.EXTRA_DATA_DATA, Base64.encodeToString(byteArrayOf(0x00, 0x00), Base64.DEFAULT))
+//                )
             },
             StaticListItem("Sync passwords", "Sync passwords with MeW", GoogleMaterial.Icon.gmd_sync) {
 
