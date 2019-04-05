@@ -6,6 +6,7 @@ import android.os.Bundle
 import android.preference.PreferenceManager
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
+import com.mewhpm.mewsync.dao.DeviceDao
 import com.mewhpm.mewsync.dao.KnownDevicesDao
 import com.mewhpm.mewsync.dao.connectionSource
 import com.mewhpm.mewsync.data.BleDevice
@@ -50,6 +51,7 @@ class InitialActivity : AppCompatActivity() {
             this@InitialActivity.runOnUiThread {
                 val defaultDevice = KnownDevicesDao.getInstance(applicationContext.connectionSource).getDefault()
                 if (defaultDevice == null) {
+                    DeviceDao.init(this.connectionSource, PreferenceManager.getDefaultSharedPreferences(applicationContext))
                     val act = Intent(applicationContext, MainActivity::class.java)
                     finish()
                     startActivityForResult(act, 0)

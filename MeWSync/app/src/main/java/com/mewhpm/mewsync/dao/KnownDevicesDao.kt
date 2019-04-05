@@ -24,7 +24,7 @@ class KnownDevicesDao private constructor (val connectionSource : ConnectionSour
         }
 
         fun isDeviceBroken(mac: String) : Boolean {
-            return mac.toUpperCase().startsWith("00:00:00:00:") || mac.startsWith("FF:FF:FF:FF:") || !mac.matches(regex)
+            return mac.toUpperCase().startsWith("00:00:00:00:") || mac.toUpperCase().startsWith("FF:FF:FF:FF:") || !mac.matches(regex)
         }
     }
 
